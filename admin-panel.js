@@ -59,6 +59,11 @@ function setupAdminPanel() {
     document.getElementById('previewUpdateBtn')?.addEventListener('click', updateNews);
     document.getElementById('footerDownloadBtn')?.addEventListener('click', downloadDigest);
     document.getElementById('copyShareLink')?.addEventListener('click', copyShareLink);
+    
+    // Спонсорская поддержка
+    document.getElementById('donate50Btn')?.addEventListener('click', () => showDonationModal(50));
+    document.getElementById('donate100Btn')?.addEventListener('click', () => showDonationModal(100));
+    document.getElementById('donate200Btn')?.addEventListener('click', () => showDonationModal(200));
 }
 
 // Открыть админ-панель
@@ -179,12 +184,13 @@ function handleManualNewsSubmit(e) {
     e.preventDefault();
     
     const title = document.getElementById('manualTitle').value.trim();
+    const description = document.getElementById('manualDescription').value.trim();
     const url = document.getElementById('manualUrl').value.trim();
     const category = document.getElementById('manualCategory').value;
     const source = document.getElementById('manualSource').value.trim();
     
     // Валидация
-    if (!title || !url || !category || !source) {
+    if (!title || !description || !url || !category || !source) {
         showNotification('❌ Заполните все поля!', 'danger');
         return;
     }
@@ -207,6 +213,8 @@ function handleManualNewsSubmit(e) {
         source: source,
         category: category,
         formattedDate: newsParser.formatDate(new Date()),
+        description: description,
+        shortDescription: newsParser.truncateWords(description, window.APP_CONFIG.display.maxDescriptionWords),
         isManual: true
     };
     
@@ -270,11 +278,11 @@ function generateTelegramText() {
         return;
     }
     
-    let text = '📰 *НОВОСТНОЙ ДАЙДЖЕСТ*\\n';
+    let text = '📰 НОВОСТНОЙ ДАЙДЖЕСТ\\n';
     text += '════════════════════════\\n\\n';
     
     // Новости мира
-    text += '🌍 *НОВОСТИ МИРА:*\\n';
+    text += '🌍 НОВОСТИ МИРА:\\n';
     newsData.world.items.slice(0, window.APP_CONFIG.telegram.newsPerCategory).forEach((item, index) => {
         const title = newsParser.truncateText(item.title, window.APP_CONFIG.telegram.maxTitleLength);
         text += `${index + 1}. ${title}\\n`;
@@ -284,7 +292,7 @@ function generateTelegramText() {
     text += '\\n';
     
     // Новости России
-    text += '🇷🇺 *НОВОСТИ РОССИИ:*\\n';
+    text += '🇷🇺 НОВОСТИ РОССИИ:\\n';
     newsData.russia.items.slice(0, window.APP_CONFIG.telegram.newsPerCategory).forEach((item, index) => {
         const title = newsParser.truncateText(item.title, window.APP_CONFIG.telegram.maxTitleLength);
         text += `${index + 1}. ${title}\\n`;
@@ -294,7 +302,7 @@ function generateTelegramText() {
     text += '\\n';
     
     // Новости СВО
-    text += '⚔️ *СПЕЦИАЛЬНАЯ ВОЕННАЯ ОПЕРАЦИЯ:*\\n';
+    text += '⚔️ СПЕЦИАЛЬНАЯ ВОЕННАЯ ОПЕРАЦИЯ:\\n';
     newsData.svo.items.slice(0, window.APP_CONFIG.telegram.newsPerCategory).forEach((item, index) => {
         const title = newsParser.truncateText(item.title, window.APP_CONFIG.telegram.maxTitleLength);
         text += `${index + 1}. ${title}\\n`;
@@ -303,7 +311,7 @@ function generateTelegramText() {
     
     text += '\\n════════════════════════\\n';
     text += `🔗 Подробнее: ${window.APP_CONFIG.telegram.siteUrl}\\n`;
-    text += '📡 Новости из официальных RSS-лент';
+    text += '📡 Новости из официальных источников';
     
     document.getElementById('telegramText').value = text;
 }
@@ -335,7 +343,7 @@ function previewTelegramMessage() {
                     <i class="fab fa-telegram-plane"></i>
                 </div>
                 <div>
-                    <div style="font-weight: bold; font-size: 1.1rem;">News Aggregator Bot</div>
+                    <div style="font-weight: bold; font-size: 1.1rem;">ЧБ Новостной Агрегатор</div>
                     <div style="opacity: 0.7; font-size: 0.9rem;">${new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</div>
                 </div>
             </div>
@@ -449,6 +457,66 @@ function exportData() {
     URL.revokeObjectURL(url);
     
     showNotification('✅ Данные экспортированы!', 'success');
+}
+
+// ==================== СПОНСОРСКАЯ ПОДДЕРЖКА ====================
+
+// Показать модалку с оплатой
+function showDonationModal(amount) {
+    const modalContent = `
+        <div class="modal-header">
+            <h5 class="modal-title"><i class="fas fa-donate"></i> Поддержать проект (${amount} руб)</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <div class="donation-options">
+                <div class="donation-option" onclick="processDonation(${amount}, 'sberbank')">
+                    <i class="fab fa-cc-mastercard"></i>
+                    <div>
+                        <h6>Сбербанк</h6>
+                        <p>Перевод по номеру телефона</p>
+                    </div>
+                </div>
+                <div class="donation-option" onclick="processDonation(${amount}, 'qiwi')">
+                    <i class="fab fa-cc-visa"></i>
+                    <div>
+                        <h6>QIWI</h6>
+                        <p>Кошелек QIWI</p>
+                    </div>
+                </div>
+                <div class="donation-option" onclick="processDonation(${amount}, 'yoomoney')">
+                    <i class="fab fa-cc-paypal"></i>
+                    <div>
+                        <h6>ЮMoney</h6>
+                        <p>Кошелек ЮMoney</p>
+                    </div>
+                </div>
+            </div>
+            <div class="donation-info">
+                <p><i class="fas fa-info-circle"></i> После оплаты отправьте скриншот в телеграм-бота для подтверждения</p>
+                <p><i class="fab fa-telegram"></i> Бот: @news_donate_bot</p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+        </div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('donationModal'));
+    document.getElementById('donationModalContent').innerHTML = modalContent;
+    modal.show();
+}
+
+// Обработка оплаты
+function processDonation(amount, system) {
+    const systemNames = {
+        sberbank: 'Сбербанк',
+        qiwi: 'QIWI',
+        yoomoney: 'ЮMoney'
+    };
+    
+    showNotification(`✅ Поддержка через ${systemNames[system]} (${amount} руб)`, 'success');
+    showNotification('Отправьте скриншот в @news_donate_bot для подтверждения', 'info');
 }
 
 // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================

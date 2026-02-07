@@ -21,7 +21,7 @@ const UPDATE_CONFIG = {
     cacheDuration: 60,
     
     // Таймаут запроса к RSS (в миллисекундах)
-    requestTimeout: 10000
+    requestTimeout: 15000
 };
 
 // Настройки отображения
@@ -30,7 +30,7 @@ const DISPLAY_CONFIG = {
     previewNewsCount: 6,
     
     // Количество новостей в каждой категории
-    categoryNewsCount: 10,
+    categoryNewsCount: 12,
     
     // Показывать время публикации
     showTime: true,
@@ -41,7 +41,10 @@ const DISPLAY_CONFIG = {
         month: 'short',
         hour: '2-digit',
         minute: '2-digit'
-    }
+    },
+    
+    // Максимальное количество слов в описании
+    maxDescriptionWords: 100
 };
 
 // Настройки Telegram

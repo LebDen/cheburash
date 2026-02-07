@@ -3,7 +3,7 @@
 // ==================== ИНИЦИАЛИЗАЦИЯ ====================
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 RSS News Aggregator инициализирован');
+    console.log('🚀 ЧБ Новостной Агрегатор инициализирован');
     
     // Скрываем прелоадер
     hidePreloader();
@@ -19,6 +19,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Настройка модальных окон
     setupModals();
+    
+    // Инициализация таймера
+    setupCountdown();
     
     // Загрузка новостей
     await loadNews();
@@ -129,6 +132,55 @@ function setupModals() {
     });
 }
 
+// ==================== ТАЙМЕР ДО СЛЕДУЮЩЕГО ВЫПУСКА ====================
+
+function setupCountdown() {
+    const countdownTimer = document.getElementById('countdownTimer');
+    const countdownStatus = document.getElementById('countdownStatus');
+    const countdownHours = document.getElementById('countdownHours');
+    const countdownMinutes = document.getElementById('countdownMinutes');
+    const countdownSeconds = document.getElementById('countdownSeconds');
+    
+    function updateCountdown() {
+        const now = new Date();
+        const target = new Date();
+        
+        // Устанавливаем время 21:00 по МСК (UTC+3)
+        target.setHours(21, 0, 0, 0);
+        
+        // Если время уже прошло, устанавливаем на завтра
+        if (now > target) {
+            target.setDate(target.getDate() + 1);
+        }
+        
+        const diff = target - now;
+        
+        if (diff <= 0) {
+            // Если время пришло
+            countdownHours.textContent = '00';
+            countdownMinutes.textContent = '00';
+            countdownSeconds.textContent = '00';
+            countdownStatus.querySelector('.status-title').textContent = 'Время публикации!';
+            countdownStatus.querySelector('.status-subtitle').textContent = 'Дайджест опубликован!';
+            return;
+        }
+        
+        // Вычисляем оставшееся время
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        // Обновляем таймер
+        countdownHours.textContent = hours.toString().padStart(2, '0');
+        countdownMinutes.textContent = minutes.toString().padStart(2, '0');
+        countdownSeconds.textContent = seconds.toString().padStart(2, '0');
+    }
+    
+    // Обновляем таймер каждую секунду
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+}
+
 // ==================== ЗАГРУЗКА НОВОСТЕЙ ====================
 
 async function loadNews() {
@@ -184,16 +236,13 @@ async function updateNews() {
 function displayNews(data) {
     if (!data) return;
     
-    // Отображаем в дайджесте
+    // Отображаем в информировании
     displayCategory('world', data.world);
     displayCategory('russia', data.russia);
     displayCategory('svo', data.svo);
     
     // Отображаем в превью на главной
     displayPreviewNews(data);
-    
-    // Обновляем статистику
-    updateStats(data);
 }
 
 // Отображение категории
@@ -273,8 +322,9 @@ function createNewsCard(item) {
             <div class="news-card-source">
                 <i class="fas fa-newspaper"></i> ${escapeHtml(item.source)}
             </div>
+            <p class="news-card-description">${escapeHtml(item.shortDescription)}</p>
             <a href="${item.link}" class="news-card-link" target="_blank">
-                <i class="fas fa-external-link-alt"></i> Читать на сайте источника
+                <i class="fas fa-external-link-alt"></i> Подробнее
             </a>
         </div>
     `;
@@ -294,8 +344,9 @@ function createNewsListItem(item) {
             <span class="news-item-time">${item.formattedDate || newsParser.formatDate(item.pubDate)}</span>
         </div>
         <div class="news-item-title">${escapeHtml(item.title)}</div>
+        <div class="news-item-description">${escapeHtml(item.shortDescription)}</div>
         <a href="${item.link}" class="news-item-link" target="_blank">
-            <i class="fas fa-external-link-alt"></i> Открыть
+            <i class="fas fa-external-link-alt"></i> Подробнее
         </a>
     `;
     
@@ -310,32 +361,7 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// ==================== СТАТИСТИКА ====================
-
-function updateStats(data) {
-    // Счётчики в херо
-    document.getElementById('worldCount').textContent = data.world.items.length;
-    document.getElementById('russiaCount').textContent = data.russia.items.length;
-    document.getElementById('svoCount').textContent = data.svo.items.length;
-    
-    // Общая статистика
-    const totalNews = data.totalNews || (data.world.items.length + data.russia.items.length + data.svo.items.length);
-    const totalSources = data.totalSources || 0;
-    
-    document.getElementById('totalNewsCount').textContent = `${totalNews} ${getNewsText(totalNews)}`;
-    document.getElementById('sourcesCount').textContent = `${totalSources} ${getSourcesText(totalSources)}`;
-    
-    // Футер
-    document.getElementById('footerNewsCount').textContent = totalNews;
-}
-
 // Склонение слов
-function getNewsText(count) {
-    if (count === 1) return 'новость';
-    if (count > 1 && count < 5) return 'новости';
-    return 'новостей';
-}
-
 function getSourcesText(count) {
     if (count === 1) return 'источник';
     if (count > 1 && count < 5) return 'источника';
@@ -348,7 +374,6 @@ function updateLastUpdateTime() {
     const lastUpdate = localStorage.getItem('lastUpdate');
     
     if (!lastUpdate) {
-        document.getElementById('lastUpdate').textContent = 'Не обновлялось';
         document.getElementById('footerLastUpdate').textContent = '-';
         return;
     }
@@ -375,7 +400,6 @@ function updateLastUpdateTime() {
         });
     }
     
-    document.getElementById('lastUpdate').textContent = timeText;
     document.getElementById('footerLastUpdate').textContent = timeText;
 }
 
@@ -394,7 +418,7 @@ function downloadDigest() {
     let txtContent = '';
     txtContent += '╔════════════════════════════════════════════════════════╗\n';
     txtContent += '║        ЕЖЕДНЕВНЫЙ НОВОСТНОЙ ДАЙДЖЕСТ                   ║\n';
-    txtContent += '║        Новости из официальных RSS-лент                  ║\n';
+    txtContent += '║        Новости из официальных источников                ║\n';
     txtContent += '╚════════════════════════════════════════════════════════╝\n\n';
     
     txtContent += `📅 Дата формирования: ${now.toLocaleDateString('ru-RU', {
@@ -413,6 +437,7 @@ function downloadDigest() {
         const date = item.formattedDate || newsParser.formatDate(item.pubDate);
         
         txtContent += `${index + 1}. ${item.title}\n`;
+        txtContent += `${item.shortDescription}\n`;
         txtContent += `   Источник: ${item.source} | Время: ${date}\n`;
         txtContent += `   Ссылка: ${item.link}\n\n`;
     });
@@ -425,6 +450,7 @@ function downloadDigest() {
         const date = item.formattedDate || newsParser.formatDate(item.pubDate);
         
         txtContent += `${index + 1}. ${item.title}\n`;
+        txtContent += `${item.shortDescription}\n`;
         txtContent += `   Источник: ${item.source} | Время: ${date}\n`;
         txtContent += `   Ссылка: ${item.link}\n\n`;
     });
@@ -437,12 +463,13 @@ function downloadDigest() {
         const date = item.formattedDate || newsParser.formatDate(item.pubDate);
         
         txtContent += `${index + 1}. ${item.title}\n`;
+        txtContent += `${item.shortDescription}\n`;
         txtContent += `   Источник: ${item.source} | Время: ${date}\n`;
         txtContent += `   Ссылка: ${item.link}\n\n`;
     });
     
     txtContent += '════════════════════════════════════════════════════════\n';
-    txtContent += 'ℹ️ Все новости взяты из официальных RSS-лент.\n';
+    txtContent += 'ℹ️ Все новости взяты из официальных источников.\n';
     txtContent += 'Права на полные тексты принадлежат авторам.\n';
     txtContent += '════════════════════════════════════════════════════════\n';
     
@@ -468,14 +495,5 @@ function checkAutoUpdate() {
     if (autoUpdate && !newsParser.isCacheValid()) {
         console.log('Автообновление запущено');
         updateNews();
-    }
-}
-
-// ==================== ПЛАВНАЯ ПРОКРУТКА К СЕКЦИИ ====================
-
-function scrollToSection(sectionId) {
-    const section = document.getElementById(sectionId);
-    if (section) {
-        section.scrollIntoView({ behavior: 'smooth' });
     }
 }

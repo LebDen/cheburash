@@ -11,12 +11,12 @@ class RSSNewsParser {
         this.feeds = {
             world: [
                 {
-                    name: 'РИА Новости',
+                    name: 'РИА Новости (Мир)',
                     url: 'https://ria.ru/export/rss2/archive/index.xml',
                     category: 'world'
                 },
                 {
-                    name: 'ТАСС',
+                    name: 'ТАСС (Мировые новости)',
                     url: 'https://tass.ru/rss/v2.xml',
                     category: 'world'
                 }
@@ -45,7 +45,7 @@ class RSSNewsParser {
                     category: 'svo'
                 },
                 {
-                    name: 'РИА Новости',
+                    name: 'РИА Новости (СВО)',
                     url: 'https://ria.ru/export/rss2/archive/index.xml',
                     category: 'svo'
                 },
@@ -83,6 +83,25 @@ class RSSNewsParser {
         return text.substring(0, maxLength - 3) + '...';
     }
 
+    // Обрезка текста до указанного количества слов
+    truncateWords(text, wordCount) {
+        if (!text) return '';
+        const words = text.split(/\s+/);
+        if (words.length <= wordCount) return text;
+        return words.slice(0, wordCount).join(' ') + '...';
+    }
+
+    // Удаление дубликатов новостей
+    removeDuplicates(newsItems) {
+        const seen = new Set();
+        return newsItems.filter(item => {
+            const key = item.link;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+    }
+
     // Парсинг одной ленты
     async parseFeed(feed) {
         try {
@@ -104,7 +123,8 @@ class RSSNewsParser {
                     description: this.stripHtml(item.description || ''),
                     source: feed.name,
                     category: feed.category,
-                    formattedDate: this.formatDate(item.pubDate)
+                    formattedDate: this.formatDate(item.pubDate),
+                    shortDescription: this.truncateWords(this.stripHtml(item.description || ''), window.APP_CONFIG.display.maxDescriptionWords)
                 }))
             };
         } catch (error) {
@@ -137,15 +157,18 @@ class RSSNewsParser {
             }
         });
 
+        // Удаляем дубликаты
+        const uniqueItems = this.removeDuplicates(allItems);
+
         // Сортируем по дате (свежие первыми)
-        allItems.sort((a, b) => {
+        uniqueItems.sort((a, b) => {
             return new Date(b.pubDate) - new Date(a.pubDate);
         });
 
         // Берём последние N новостей
         const limit = window.APP_CONFIG.display.categoryNewsCount;
         return {
-            items: allItems.slice(0, limit),
+            items: uniqueItems.slice(0, limit),
             sources: Array.from(sources)
         };
     }
