@@ -1,4 +1,4 @@
-// ==================== RSS-ПАРСЕР ====================
+// ==================== RSS-ПАРСЕР С РАСПРЕДЕЛЕНИЕМ ПО КЛЮЧЕВЫМ СЛОВАМ ====================
 
 class RSSNewsParser {
     constructor() {
@@ -7,62 +7,96 @@ class RSSNewsParser {
                 item: ['pubDate', 'link', 'guid', 'description']
             }
         });
-        
-        this.feeds = {
-            world: [
-                {
-                    name: 'РИА Новости (Мир)',
-                    url: 'https://ria.ru/export/rss2/archive/index.xml',
-                    category: 'world'
-                },
-                {
-                    name: 'ТАСС (Мировые новости)',
-                    url: 'https://tass.ru/rss/v2.xml',
-                    category: 'world'
-                }
+
+        // ВСЕ ИСТОЧНИКИ БЕЗ РАЗДЕЛЕНИЯ НА КАТЕГОРИИ
+        // Теперь все ленты парсятся вместе и распределяются по ключевым словам
+        this.allFeeds = [
+            // РИА Новости
+            { name: 'РИА Новости', url: 'https://ria.ru/export/rss2/archive/index.xml' },
+            // ТАСС
+            { name: 'ТАСС', url: 'https://tass.ru/rss/v2.xml' },
+            // Минобороны РФ
+            { name: 'Минобороны РФ', url: 'https://function.mil.ru/rss/news.htm' },
+            // Российская газета
+            { name: 'Российская газета', url: 'https://rg.ru/xml/index.xml' },
+            // Звезда
+            { name: 'Звезда', url: 'https://tvzvezda.ru/rss.xml' }
+        ];
+
+        // КЛЮЧЕВЫЕ СЛОВА ДЛЯ КАЖДОЙ КАТЕГОРИИ
+        this.keywords = {
+            svo: [
+                'сво', 'спецоперация', 'специальная военная операция', 'зона сво', 'донбасс', 'донецк', 'днр', 'луганск', 'лнр',
+                'запорожье', 'запорожская область', 'херсон', 'херсонская область', 'купянск', 'изюм', 'бахмут', 'артёмовск',
+                'авдеевка', 'маринка', 'красный лиман', 'соледар', 'северск', 'крменная', 'дебальцево', 'горловка', 'макеевка',
+                'новоазовск', 'линия соприкосновения', 'передовая', 'окоп', 'траншея', 'вс рф', 'министерство обороны рф', 'шойгу',
+                'герасимов', 'военкомат', 'мобилизация', 'контрактник', 'добровольцы', 'чвк', 'вагнер', 'штурмовик', 'разведка',
+                'диверсия', 'обстрел', 'артобстрел', 'миномёт', 'гаубица', 'град', 'смерч', 'ураган', 'искандер', 'калибр',
+                'дрон', 'бпла', 'шахед', 'герань', 'ланцет', 'пво', 'с-400', 'панцирь', 'реб', 'разминирование', 'сапёр',
+                'эвакуация мирных жителей', 'гуманитарный коридор', 'гумконвой', 'военнопленные', 'обмен пленными', 'груз-200',
+                'потери', 'безвозвратные потери', 'раненые', 'госпиталь', 'медэвакуация', 'тыл', 'снабжение', 'военная техника',
+                'танк', 'бмп', 'бтр', 'армата', 'курганец', 'бумеранг', 'военная база', 'полигон', 'учения', 'призыв', 'отсрочка',
+                'бронепоезд', 'железнодорожные войска', 'фортификационные сооружения', 'укрепрайон', 'логистика', 'воинская часть',
+                'командир батальона', 'полка', 'дивизии', 'бригады', 'штаб', 'разведбат', 'десант', 'вдв', 'морпехи', 'флот',
+                'черноморский флот', 'северный флот', 'тоф', 'балтфлот', 'авиация', 'штурмовик су-25', 'су-34', 'су-35', 'миг-31',
+                'ту-95', 'ту-160', 'беспилотник', 'разведывательный дрон', 'корректировка огня', 'артиллерийская подготовка',
+                'штурм населённого пункта', 'зачистка', 'блокпост', 'кпп', 'пропускной режим', 'военная комендатура',
+                'военная администрация', 'референдум', 'присоединение', 'новые регионы', 'новые субъекты рф', 'воссоединение',
+                'денацификация', 'демилитаризация'
             ],
             russia: [
-                {
-                    name: 'ТАСС',
-                    url: 'https://tass.ru/rss/v2.xml',
-                    category: 'russia'
-                },
-                {
-                    name: 'РИА Новости',
-                    url: 'https://ria.ru/export/rss2/archive/index.xml',
-                    category: 'russia'
-                },
-                {
-                    name: 'Российская газета',
-                    url: 'https://rg.ru/xml/index.xml',
-                    category: 'russia'
-                }
+                'россия', 'рф', 'российская федерация', 'российский', 'россияне', 'россиянин', 'россиянка', 'федеральный округ',
+                'субъект рф', 'москва', 'мо', 'подмосковье', 'санкт-петербург', 'спб', 'питер', 'ленинградская область', 'новосибирск',
+                'екатеринбург', 'казань', 'самара', 'челябинск', 'ростов-на-дону', 'уфа', 'волгоград', 'пермь', 'красноярск',
+                'воронеж', 'саратов', 'краснодар', 'тюмень', 'иркутск', 'хабаровск', 'владивосток', 'нижний новгород', 'омск',
+                'кемерово', 'киров', 'ярославль', 'татарстан', 'башкортостан', 'дагестан', 'чечня', 'ингушетия', 'северная осетия',
+                'кабардино-балкария', 'карачаево-черкесия', 'адыгея', 'калмыкия', 'тува', 'алтай', 'хакасия', 'якутия', 'саха',
+                'крым', 'севастополь', 'калининградская область', 'дальний восток', 'сибирь', 'урал', 'поволжье', 'цфо', 'сзфо',
+                'юфо', 'скфо', 'пфо', 'уфо', 'сфо', 'дфо', 'кремль', 'администрация президента рф', 'правительство рф', 'госдума',
+                'совет федерации', 'цик россии', 'избирком', 'центризбирком', 'цб рф', 'банк россии', 'мосбиржа', 'спб биржа',
+                'рубль', 'рублёвый', 'мрот', 'пенсия пфр', 'материнский капитал', 'маткапитал', 'омс', 'полис омс', 'егэ', 'огэ',
+                'рособрнадзор', 'роструд', 'роспотребнадзор', 'росздравнадзор', 'минздрав рф', 'минобрнауки рф', 'минтранс рф',
+                'минстрой рф', 'минэнерго рф', 'минсельхоз рф', 'фнс россии', 'пфр', 'фсс', 'фмс', 'мвд россии', 'ск россии',
+                'фсб россии', 'фсин', 'росгвардия', 'гибдд', 'жкх', 'капремонт', 'фонд капремонта', 'мусорная реформа',
+                'региональный оператор', 'ржд', 'ростелеком', 'почта россии', 'сбербанк', 'втб', 'газпром', 'роснефть', 'лукойл',
+                'новатэк', 'сбер', 'аэрофлот', 'мир (карта)', 'нацпроекты', 'майские указы', 'госпрограмма рф', 'фз', 'федеральный закон',
+                'ук рф', 'коап рф', 'конституция рф', 'президент рф', 'премьер-министр рф', 'губернатор', 'мэр москвы', 'мэр петербурга',
+                'глава республики', 'глава региона', 'облдума', 'заксобрание'
             ],
-            svo: [
-                {
-                    name: 'Минобороны РФ',
-                    url: 'https://function.mil.ru/rss/news.htm',
-                    category: 'svo'
-                },
-                {
-                    name: 'РИА Новости (СВО)',
-                    url: 'https://ria.ru/export/rss2/archive/index.xml',
-                    category: 'svo'
-                },
-                {
-                    name: 'Звезда',
-                    url: 'https://tvzvezda.ru/rss.xml',
-                    category: 'svo'
-                }
+            world: [
+                'сша', 'америка', 'вашингтон', 'белый дом', 'конгресс', 'байден', 'трамп', 'китай', 'пекин', 'си цзиньпин', 'ес',
+                'евросоюз', 'еврокомиссия', 'брюссель', 'германия', 'франция', 'великобритания', 'британия', 'лондон', 'борис джонсон',
+                'сунак', 'канада', 'япония', 'токио', 'индия', 'нью-дель', 'бразилия', 'буэнос-айрес', 'аргентина', 'мексика', 'турция',
+                'эрдоган', 'израиль', 'тель-авив', 'нетаньяху', 'палестина', 'газа', 'западный берег', 'иран', 'тегеран',
+                'саудовская аравия', 'эр-рияд', 'египет', 'каир', 'юар', 'нигерия', 'австралия', 'оон', 'un', 'генассамблея',
+                'совбез оон', 'гуттериш', 'нато', 'nato', 'альянс', 'саммит нато', 'вто', 'мвф', 'всемирный банк', 'фрг', 'доллар',
+                'евро', 'юань', 'иена', 'фунт стерлингов', 'биткоин', 'криптовалюта', 'климат', 'cop', 'глобальное потепление',
+                'парижское соглашение', 'углеродный след', 'мигранты', 'беженцы', 'эмиграция', 'иммиграция', 'граница',
+                'пограничный контроль', 'теракт', 'терроризм', 'игил', 'аль-каида', 'хамас', 'хезболла', 'война', 'конфликт',
+                'мирные переговоры', 'санкции', 'эмбарго', 'экспорт', 'импорт', 'дефицит', 'инфляция', 'рецессия', 'безработица',
+                'ввп мира', 'фондовый рынок', 'уолл-стрит', 'dow jones', 's&p 500', 'nasdaq', 'франкфуртская биржа', 'токийская биржа',
+                'катастрофа', 'землетрясение', 'цунами', 'ураган', 'тайфун', 'наводнение', 'засуха', 'лесной пожар', 'эпидемия',
+                'пандемия', 'воз', 'коронавирус', 'оспа обезьян', 'вакцина', 'технология', 'искусственный интеллект', 'ai', 'чипы',
+                'полупроводники', 'телекоммуникации', '5g', 'космос', 'наза', 'spacex', 'илон маск', 'юнеско', 'юникэф', 'красный крест',
+                'амнистия интернешнл', 'правозащитники', 'выборы за рубежом', 'президентские выборы', 'парламентские выборы',
+                'референдум за рубежом', 'протесты за рубежом', 'забастовка', 'социальные волнения'
             ]
         };
+
+        // Кэш для ускорения повторных запросов
+        this.cache = new Map();
     }
 
     // Форматирование даты
     formatDate(dateString) {
         try {
             const date = new Date(dateString);
-            return date.toLocaleDateString('ru-RU', window.APP_CONFIG.display.dateFormat);
+            return date.toLocaleDateString('ru-RU', {
+                day: '2-digit',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
         } catch (error) {
             return 'Неизвестно';
         }
@@ -83,126 +117,176 @@ class RSSNewsParser {
         return text.substring(0, maxLength - 3) + '...';
     }
 
-    // Обрезка текста до указанного количества слов
-    truncateWords(text, wordCount) {
+    // Обрезка текста до 100 слов
+    truncateWords(text, wordCount = 100) {
         if (!text) return '';
-        const words = text.split(/\s+/);
-        if (words.length <= wordCount) return text;
+        const cleanText = this.stripHtml(text);
+        const words = cleanText.split(/\s+/).filter(word => word.length > 0);
+        if (words.length <= wordCount) return cleanText;
         return words.slice(0, wordCount).join(' ') + '...';
     }
 
-    // Удаление дубликатов новостей
+    // Удаление дубликатов по ссылке
     removeDuplicates(newsItems) {
         const seen = new Set();
         return newsItems.filter(item => {
-            const key = item.link;
+            const key = item.link?.trim() || item.title;
             if (seen.has(key)) return false;
             seen.add(key);
             return true;
         });
     }
 
+    // РАСПРЕДЕЛЕНИЕ НОВОСТЕЙ ПО КАТЕГОРИЯМ НА ОСНОВЕ КЛЮЧЕВЫХ СЛОВ
+    categorizeNewsItem(item) {
+        // Объединяем заголовок и описание для анализа
+        const text = (item.title + ' ' + item.description).toLowerCase();
+
+        // Проверяем СВО (высший приоритет)
+        for (const keyword of this.keywords.svo) {
+            if (text.includes(keyword)) {
+                return 'svo';
+            }
+        }
+
+        // Проверяем Россию
+        for (const keyword of this.keywords.russia) {
+            if (text.includes(keyword)) {
+                return 'russia';
+            }
+        }
+
+        // Проверяем Мир
+        for (const keyword of this.keywords.world) {
+            if (text.includes(keyword)) {
+                return 'world';
+            }
+        }
+
+        // Если не подошло ни под одну категорию - относим к миру
+        return 'world';
+    }
+
     // Парсинг одной ленты
     async parseFeed(feed) {
+        const cacheKey = `${feed.url}_${Math.floor(Date.now() / 300000)}`;
+        if (this.cache.has(cacheKey)) {
+            return this.cache.get(cacheKey);
+        }
+
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), window.APP_CONFIG.update.requestTimeout);
+            const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}`;
 
-            const response = await fetch(feed.url, { signal: controller.signal });
-            clearTimeout(timeoutId);
+            const response = await fetch(proxyUrl, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
 
-            const text = await response.text();
-            const result = await this.parser.parseString(text);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-            return {
+            const data = await response.json();
+            if (data.status !== 'ok') throw new Error(`RSS parsing error: ${data.message || 'Unknown error'}`);
+
+            const items = data.items.map(item => ({
+                title: this.truncateText(item.title || 'Без заголовка', 200),
+                link: item.link || '#',
+                pubDate: item.pubDate || new Date().toISOString(),
+                description: item.description || '',
                 source: feed.name,
-                items: result.items.map(item => ({
-                    title: this.truncateText(item.title || 'Без заголовка', 200),
-                    link: item.link || '#',
-                    pubDate: item.pubDate || new Date().toISOString(),
-                    description: this.stripHtml(item.description || ''),
-                    source: feed.name,
-                    category: feed.category,
-                    formattedDate: this.formatDate(item.pubDate),
-                    shortDescription: this.truncateWords(this.stripHtml(item.description || ''), window.APP_CONFIG.display.maxDescriptionWords)
-                }))
-            };
+                formattedDate: this.formatDate(item.pubDate),
+                shortDescription: this.truncateWords(item.description || '', 100)
+            }));
+
+            const result = { source: feed.name, items };
+            this.cache.set(cacheKey, result);
+            return result;
+
         } catch (error) {
             console.error(`Ошибка парсинга ${feed.name}:`, error);
             return { source: feed.name, items: [] };
         }
     }
 
-    // Парсинг категории
-    async parseCategory(category) {
-        const feeds = this.feeds[category] || [];
-        
-        if (feeds.length === 0) {
-            return { items: [], sources: [] };
-        }
-
-        // Парсим все ленты параллельно
-        const results = await Promise.all(
-            feeds.map(feed => this.parseFeed(feed))
-        );
-
-        // Объединяем новости
-        const allItems = [];
-        const sources = new Set();
-
-        results.forEach(result => {
-            if (result.items.length > 0) {
-                allItems.push(...result.items);
-                sources.add(result.source);
-            }
-        });
-
-        // Удаляем дубликаты
-        const uniqueItems = this.removeDuplicates(allItems);
-
-        // Сортируем по дате (свежие первыми)
-        uniqueItems.sort((a, b) => {
-            return new Date(b.pubDate) - new Date(a.pubDate);
-        });
-
-        // Берём последние N новостей
-        const limit = window.APP_CONFIG.display.categoryNewsCount;
-        return {
-            items: uniqueItems.slice(0, limit),
-            sources: Array.from(sources)
-        };
-    }
-
-    // Парсинг всех категорий
+    // ПАРСИНГ ВСЕХ НОВОСТЕЙ И РАСПРЕДЕЛЕНИЕ ПО КАТЕГОРИЯМ
     async parseAll() {
         showLoading(true);
-        
+
         try {
-            const [world, russia, svo] = await Promise.all([
-                this.parseCategory('world'),
-                this.parseCategory('russia'),
-                this.parseCategory('svo')
-            ]);
+            // Парсим все ленты параллельно
+            const results = await Promise.allSettled(
+                this.allFeeds.map(feed =>
+                    Promise.race([
+                        this.parseFeed(feed),
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
+                    ])
+                )
+            );
+
+            // Объединяем все новости
+            const allItems = [];
+            const allSources = new Set();
+
+            results.forEach((result, index) => {
+                if (result.status === 'fulfilled' && result.value.items.length > 0) {
+                    allItems.push(...result.value.items);
+                    allSources.add(this.allFeeds[index].name);
+                }
+            });
+
+            // Удаляем дубликаты
+            const uniqueItems = this.removeDuplicates(allItems);
+
+            // РАСПРЕДЕЛЯЕМ НОВОСТИ ПО КАТЕГОРИЯМ
+            const categories = { world: [], russia: [], svo: [] };
+            const categorySources = { world: new Set(), russia: new Set(), svo: new Set() };
+
+            uniqueItems.forEach(item => {
+                const category = this.categorizeNewsItem(item);
+                categories[category].push(item);
+                categorySources[category].add(item.source);
+            });
+
+            // Сортируем по дате (свежие первыми) и ограничиваем количество
+            Object.keys(categories).forEach(cat => {
+                categories[cat].sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+                categories[cat] = categories[cat].slice(0, 15); // Берём 15 новостей
+            });
 
             const result = {
-                world,
-                russia,
-                svo,
+                world: {
+                    items: categories.world,
+                    sources: Array.from(categorySources.world)
+                },
+                russia: {
+                    items: categories.russia,
+                    sources: Array.from(categorySources.russia)
+                },
+                svo: {
+                    items: categories.svo,
+                    sources: Array.from(categorySources.svo)
+                },
                 timestamp: new Date().toISOString(),
-                totalNews: world.items.length + russia.items.length + svo.items.length,
-                totalSources: new Set([
-                    ...world.sources,
-                    ...russia.sources,
-                    ...svo.sources
-                ]).size
+                totalNews: categories.world.length + categories.russia.length + categories.svo.length,
+                totalSources: allSources.size
             };
 
             // Сохраняем в кэш
             this.saveToCache(result);
 
+            // Статистика в консоли
+            console.log('✅ Парсинг завершён успешно:');
+            console.log(`   🌍 Мир: ${categories.world.length} новостей из ${categorySources.world.size} источников`);
+            console.log(`   🇷🇺 Россия: ${categories.russia.length} новостей из ${categorySources.russia.size} источников`);
+            console.log(`   ⚔️ СВО: ${categories.svo.length} новостей из ${categorySources.svo.size} источников`);
+            console.log(`   💎 Всего: ${result.totalNews} новостей`);
+
+            // Визуальная индикация в интерфейсе
+            this.updateCategoryBadges(result);
+
             return result;
+
         } catch (error) {
-            console.error('Ошибка парсинга:', error);
+            console.error('❌ Критическая ошибка парсинга:', error);
             showNotification('❌ Ошибка при загрузке новостей. Проверьте интернет-соединение.', 'danger');
             return null;
         } finally {
@@ -210,12 +294,34 @@ class RSSNewsParser {
         }
     }
 
+    // Обновление бейджей с количеством источников в интерфейсе
+    updateCategoryBadges(data) {
+        if (data.world.sources.length > 0) {
+            document.getElementById('worldSourcesCount').textContent =
+                `${data.world.sources.length} ${this.getSourcesText(data.world.sources.length)}`;
+        }
+        if (data.russia.sources.length > 0) {
+            document.getElementById('russiaSourcesCount').textContent =
+                `${data.russia.sources.length} ${this.getSourcesText(data.russia.sources.length)}`;
+        }
+        if (data.svo.sources.length > 0) {
+            document.getElementById('svoSourcesCount').textContent =
+                `${data.svo.sources.length} ${this.getSourcesText(data.svo.sources.length)}`;
+        }
+    }
+
+    getSourcesText(count) {
+        if (count === 1) return 'источник';
+        if (count > 1 && count < 5) return 'источника';
+        return 'источников';
+    }
+
     // Сохранение в кэш
     saveToCache(data) {
         try {
             localStorage.setItem('newsData', JSON.stringify(data));
             localStorage.setItem('lastUpdate', new Date().toISOString());
-            console.log('Данные сохранены в кэш');
+            console.log('💾 Данные сохранены в кэш');
         } catch (error) {
             console.error('Ошибка сохранения в кэш:', error);
         }
@@ -226,21 +332,16 @@ class RSSNewsParser {
         try {
             const cachedData = localStorage.getItem('newsData');
             const lastUpdate = localStorage.getItem('lastUpdate');
-
-            if (!cachedData || !lastUpdate) {
-                return null;
-            }
+            if (!cachedData || !lastUpdate) return null;
 
             const data = JSON.parse(cachedData);
-            const cacheAge = (Date.now() - new Date(lastUpdate).getTime()) / (1000 * 60); // в минутах
-
-            // Проверяем, не устарел ли кэш
-            if (cacheAge > window.APP_CONFIG.update.cacheDuration) {
-                console.log('Кэш устарел');
+            const cacheAge = (Date.now() - new Date(lastUpdate).getTime()) / (1000 * 60);
+            if (cacheAge > 60) {
+                console.log('🕒 Кэш устарел');
                 return null;
             }
 
-            console.log('Загружено из кэша');
+            console.log(`✅ Загружено из кэша (${Math.floor(cacheAge)} мин назад)`);
             return data;
         } catch (error) {
             console.error('Ошибка загрузки из кэша:', error);
@@ -248,13 +349,11 @@ class RSSNewsParser {
         }
     }
 
-    // Проверка валидности кэша
     isCacheValid() {
         const lastUpdate = localStorage.getItem('lastUpdate');
         if (!lastUpdate) return false;
-
         const cacheAge = (Date.now() - new Date(lastUpdate).getTime()) / (1000 * 60);
-        return cacheAge <= window.APP_CONFIG.update.cacheDuration;
+        return cacheAge <= 60;
     }
 }
 
@@ -263,7 +362,6 @@ const newsParser = new RSSNewsParser();
 
 // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
 
-// Показать/скрыть индикатор загрузки
 function showLoading(show) {
     const loadingElements = document.querySelectorAll('.loading');
     loadingElements.forEach(el => {
@@ -271,9 +369,7 @@ function showLoading(show) {
     });
 }
 
-// Показать уведомление
 function showNotification(message, type = 'info') {
-    // Удаляем старые уведомления
     const oldNotifications = document.querySelectorAll('.app-notification');
     oldNotifications.forEach(el => el.remove());
 
@@ -294,8 +390,6 @@ function showNotification(message, type = 'info') {
     `;
 
     document.body.appendChild(notification);
-
-    // Удаляем через 5 секунд
     setTimeout(() => {
         notification.classList.remove('show');
         notification.classList.add('fade');
@@ -303,93 +397,22 @@ function showNotification(message, type = 'info') {
     }, 5000);
 }
 
-// Обновить категорию
-async function refreshCategory(category) {
-    showLoading(true);
-    
-    try {
-        const result = await newsParser.parseCategory(category);
-        
-        if (result) {
-            // Обновляем только эту категорию в кэше
-            const cachedData = newsParser.loadFromCache() || {
-                world: { items: [], sources: [] },
-                russia: { items: [], sources: [] },
-                svo: { items: [], sources: [] }
-            };
-            
-            cachedData[category] = result;
-            newsParser.saveToCache(cachedData);
-            
-            displayNews(cachedData);
-            showNotification(`✅ ${getCategoryName(category)} успешно обновлены!`, 'success');
-        }
-    } catch (error) {
-        console.error(`Ошибка обновления ${category}:`, error);
-        showNotification(`❌ Ошибка при обновлении ${getCategoryName(category)}`, 'danger');
-    } finally {
-        showLoading(false);
-    }
-}
+// УДАЛЕНА ФУНКЦИЯ refreshCategory - обновление только общее
+// Все кнопки обновления категорий удалены из интерфейса
 
-// Получить название категории
 function getCategoryName(category) {
     const names = {
-        world: 'Мировые новости',
+        world: 'Новости мира',
         russia: 'Новости России',
         svo: 'Новости СВО'
     };
     return names[category] || category;
 }
 
-// Скопировать ссылку на страницу
 function copyPageLink() {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url).then(() => {
-        showNotification('✅ Ссылка скопирована в буфер обмена!', 'success');
-    }).catch(err => {
-        console.error('Ошибка копирования:', err);
+    navigator.clipboard.writeText(window.location.href).then(() => {
+        showNotification('✅ Ссылка скопирована!', 'success');
+    }).catch(() => {
         showNotification('❌ Не удалось скопировать ссылку', 'danger');
     });
-}
-
-// Поделиться в соцсетях
-function shareToTelegram() {
-    const url = encodeURIComponent(window.location.href);
-    const text = encodeURIComponent('Смотрите новости здесь:');
-    window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank');
-}
-
-function shareToWhatsApp() {
-    const url = encodeURIComponent(window.location.href);
-    const text = encodeURIComponent('Смотрите новости здесь:');
-    window.open(`https://wa.me/?text=${text}%20${url}`, '_blank');
-}
-
-function shareToVK() {
-    const url = encodeURIComponent(window.location.href);
-    window.open(`https://vk.com/share.php?url=${url}`, '_blank');
-}
-
-// Показать юридическую информацию
-function showLegalInfo() {
-    alert(`Юридическая информация:
-
-Данный агрегатор публикует только заголовки новостей и ссылки на официальные источники.
-
-Все права на полные тексты, фотографии и видео принадлежат их авторам.
-
-Публикация заголовков в информационных целях с указанием источника разрешена в соответствии со ст. 1274 ГК РФ.`);
-}
-
-// Показать политику конфиденциальности
-function showPrivacyPolicy() {
-    alert(`Политика конфиденциальности:
-
-1. Мы не собираем персональные данные пользователей.
-2. Все данные хранятся только в вашем браузере (localStorage).
-3. Мы не используем cookies для отслеживания.
-4. Мы не передаём данные третьим лицам.
-
-Данный сайт является статическим и не имеет серверной части.`);
 }

@@ -1,54 +1,68 @@
 // ==================== ОСНОВНАЯ ЛОГИКА ПРИЛОЖЕНИЯ ====================
 
-// ==================== ИНИЦИАЛИЗАЦИЯ ====================
-
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 ЧБ Новостной Агрегатор инициализирован');
-    
-    // Скрываем прелоадер
-    hidePreloader();
-    
-    // Настройка темы
+    console.log('🚀 ЧБ Новостной Агрегатор 2026 инициализирован');
+
+    // Мобильное меню
+    setupMobileMenu();
+
+    // Тема
     setupTheme();
-    
-    // Настройка навигации
+
+    // Навигация (десктоп)
     setupNavigation();
-    
-    // Настройка кнопок
+
+    // Кнопки
     setupButtons();
-    
-    // Настройка модальных окон
-    setupModals();
-    
-    // Инициализация таймера
+
+    // Таймер
     setupCountdown();
-    
+
     // Загрузка новостей
     await loadNews();
-    
-    // Проверка автообновления
-    checkAutoUpdate();
 });
 
-// ==================== ПРЕЛОАДЕР ====================
+// ==================== МОБИЛЬНОЕ МЕНЮ ====================
 
-function hidePreloader() {
-    const preloader = document.getElementById('preloader');
-    if (!preloader) return;
-    
-    // Имитируем прогресс загрузки
-    let progress = 0;
-    const interval = setInterval(() => {
-        progress += 5;
-        document.getElementById('preloaderProgress').style.width = `${progress}%`;
-        
-        if (progress >= 100) {
-            clearInterval(interval);
-            setTimeout(() => {
-                preloader.classList.add('hidden');
-            }, 300);
+function setupMobileMenu() {
+    const toggleBtn = document.getElementById('mobileMenuToggle');
+    const closeBtn = document.getElementById('mobileMenuClose');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileLinks = document.querySelectorAll('.mobile-nav-link');
+
+    // Открыть меню
+    toggleBtn?.addEventListener('click', () => {
+        mobileMenu.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Запретить прокрутку
+    });
+
+    // Закрыть меню
+    closeBtn?.addEventListener('click', () => {
+        mobileMenu.classList.remove('active');
+        document.body.style.overflow = ''; // Разрешить прокрутку
+    });
+
+    // Закрыть меню при клике на ссылку
+    mobileLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            mobileMenu.classList.remove('active');
+            document.body.style.overflow = '';
+
+            // Обновить активные состояния
+            mobileLinks.forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+        });
+    });
+
+    // Закрыть меню при клике вне
+    document.addEventListener('click', (e) => {
+        if (mobileMenu.classList.contains('active') &&
+            !mobileMenu.contains(e.target) &&
+            !toggleBtn.contains(e.target)) {
+            mobileMenu.classList.remove('active');
+            document.body.style.overflow = '';
         }
-    }, 50);
+    });
 }
 
 // ==================== ТЕМА ====================
@@ -56,51 +70,51 @@ function hidePreloader() {
 function setupTheme() {
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.body.setAttribute('data-theme', savedTheme);
-    
-    // Обновляем иконку кнопки
     updateThemeButtonIcon(savedTheme);
-    
-    // Обработчик кнопки
+
+    // Кнопки переключения темы
     document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
+    document.getElementById('mobileThemeToggle')?.addEventListener('click', toggleTheme);
 }
 
 function toggleTheme() {
     const currentTheme = document.body.getAttribute('data-theme');
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    
+
     document.body.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
-    
+
     updateThemeButtonIcon(newTheme);
-    
     showNotification(newTheme === 'dark' ? '🌙 Тёмная тема включена' : '☀️ Светлая тема включена', 'info');
 }
 
 function updateThemeButtonIcon(theme) {
-    const button = document.getElementById('themeToggle');
-    if (!button) return;
-    
-    button.innerHTML = theme === 'dark' 
-        ? '<i class="fas fa-sun"></i>'
-        : '<i class="fas fa-moon"></i>';
+    const buttons = document.querySelectorAll('#themeToggle, #mobileThemeToggle');
+    buttons.forEach(button => {
+        if (button) {
+            button.innerHTML = theme === 'dark'
+                ? '<i class="fas fa-sun"></i>'
+                : '<i class="fas fa-moon"></i>';
+        }
+    });
 }
 
-// ==================== НАВИГАЦИЯ ====================
+// ==================== НАВИГАЦИЯ (ДЕСКТОП) ====================
 
 function setupNavigation() {
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', (e) => {
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
             e.preventDefault();
-            const targetId = link.getAttribute('href').substring(1);
-            
+            const targetId = tab.getAttribute('href').substring(1);
+
             // Обновляем активные состояния
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-            
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
             // Показываем целевую секцию
             document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
             document.getElementById(targetId)?.classList.add('active');
-            
+
             // Прокручиваем наверх
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
@@ -110,73 +124,48 @@ function setupNavigation() {
 // ==================== КНОПКИ ====================
 
 function setupButtons() {
-    // Обновить новости
     document.getElementById('updateNewsBtn')?.addEventListener('click', updateNews);
-    
-    // Скачать дайджест
     document.getElementById('downloadDigestBtn')?.addEventListener('click', downloadDigest);
     document.getElementById('footerDownloadBtn')?.addEventListener('click', downloadDigest);
-    
-    // Поделиться
-    document.getElementById('shareBtn')?.addEventListener('click', () => {
-        new bootstrap.Modal(document.getElementById('shareModal')).show();
-    });
+    document.getElementById('previewUpdateBtn')?.addEventListener('click', updateNews);
 }
 
-// ==================== МОДАЛЬНЫЕ ОКНА ====================
-
-function setupModals() {
-    // Модалка шеринга
-    document.getElementById('shareModal')?.addEventListener('shown.bs.modal', () => {
-        document.getElementById('shareLink').value = window.location.href;
-    });
-}
-
-// ==================== ТАЙМЕР ДО СЛЕДУЮЩЕГО ВЫПУСКА ====================
+// ==================== ТАЙМЕР ====================
 
 function setupCountdown() {
-    const countdownTimer = document.getElementById('countdownTimer');
-    const countdownStatus = document.getElementById('countdownStatus');
     const countdownHours = document.getElementById('countdownHours');
     const countdownMinutes = document.getElementById('countdownMinutes');
     const countdownSeconds = document.getElementById('countdownSeconds');
-    
+
     function updateCountdown() {
         const now = new Date();
         const target = new Date();
-        
+
         // Устанавливаем время 21:00 по МСК (UTC+3)
         target.setHours(21, 0, 0, 0);
-        
-        // Если время уже прошло, устанавливаем на завтра
+
         if (now > target) {
             target.setDate(target.getDate() + 1);
         }
-        
+
         const diff = target - now;
-        
+
         if (diff <= 0) {
-            // Если время пришло
             countdownHours.textContent = '00';
             countdownMinutes.textContent = '00';
             countdownSeconds.textContent = '00';
-            countdownStatus.querySelector('.status-title').textContent = 'Время публикации!';
-            countdownStatus.querySelector('.status-subtitle').textContent = 'Дайджест опубликован!';
             return;
         }
-        
-        // Вычисляем оставшееся время
+
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        
-        // Обновляем таймер
+
         countdownHours.textContent = hours.toString().padStart(2, '0');
         countdownMinutes.textContent = minutes.toString().padStart(2, '0');
         countdownSeconds.textContent = seconds.toString().padStart(2, '0');
     }
-    
-    // Обновляем таймер каждую секунду
+
     updateCountdown();
     setInterval(updateCountdown, 1000);
 }
@@ -184,47 +173,42 @@ function setupCountdown() {
 // ==================== ЗАГРУЗКА НОВОСТЕЙ ====================
 
 async function loadNews() {
-    // Проверяем кэш
     const cachedData = newsParser.loadFromCache();
-    
+
     if (cachedData && newsParser.isCacheValid()) {
-        console.log('Загружаем из кэша');
+        console.log('✅ Загружаем новости из кэша');
         displayNews(cachedData);
         updateLastUpdateTime();
         return;
     }
-    
-    // Загружаем свежие новости
-    console.log('Загружаем свежие новости');
+
+    console.log('🔄 Загружаем свежие новости...');
     await updateNews();
 }
 
-// Обновление новостей
 async function updateNews() {
     const updateBtn = document.getElementById('updateNewsBtn');
     const originalHTML = updateBtn?.innerHTML;
-    
-    // Блокируем кнопку
+
     if (updateBtn) {
         updateBtn.disabled = true;
         updateBtn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Обновление...';
     }
-    
+
     showNotification('📡 Загрузка свежих новостей...', 'info');
-    
+
     try {
         const result = await newsParser.parseAll();
-        
+
         if (result) {
             displayNews(result);
             updateLastUpdateTime();
-            showNotification('✅ Новости успешно обновлены!', 'success');
+            showNotification(`✅ Новости обновлены! Всего: ${result.totalNews} новостей`, 'success');
         }
     } catch (error) {
         console.error('Ошибка обновления:', error);
         showNotification('❌ Ошибка при обновлении новостей', 'danger');
     } finally {
-        // Разблокируем кнопку
         if (updateBtn) {
             updateBtn.disabled = false;
             updateBtn.innerHTML = originalHTML;
@@ -232,85 +216,75 @@ async function updateNews() {
     }
 }
 
-// Отображение новостей
 function displayNews(data) {
     if (!data) return;
-    
-    // Отображаем в информировании
+
     displayCategory('world', data.world);
     displayCategory('russia', data.russia);
     displayCategory('svo', data.svo);
-    
-    // Отображаем в превью на главной
     displayPreviewNews(data);
 }
 
-// Отображение категории
 function displayCategory(category, data) {
     const listEl = document.getElementById(`${category}NewsList`);
     const emptyEl = document.getElementById(`${category}NoContent`);
     const sourcesEl = document.getElementById(`${category}SourcesCount`);
-    
+
     if (!listEl || !emptyEl) return;
-    
+
     if (!data || data.items.length === 0) {
         emptyEl.classList.add('show');
         listEl.innerHTML = '';
         if (sourcesEl) sourcesEl.textContent = '0 источников';
         return;
     }
-    
+
     emptyEl.classList.remove('show');
     listEl.innerHTML = '';
-    
+
     data.items.forEach(item => {
         listEl.appendChild(createNewsListItem(item));
     });
-    
-    // Обновляем счётчик источников
+
     if (sourcesEl) {
         sourcesEl.textContent = `${data.sources.length} ${getSourcesText(data.sources.length)}`;
     }
 }
 
-// Отображение превью на главной
 function displayPreviewNews(data) {
     const gridEl = document.getElementById('previewNewsGrid');
     const emptyEl = document.getElementById('previewNoContent');
-    const loadingEl = document.getElementById('previewLoading');
-    
+
     if (!gridEl || !emptyEl) return;
-    
+
     const allNews = [
         ...data.world.items,
         ...data.russia.items,
         ...data.svo.items
     ];
-    
+
     if (allNews.length === 0) {
         emptyEl.classList.add('show');
         gridEl.innerHTML = '';
         return;
     }
-    
+
     emptyEl.classList.remove('show');
     gridEl.innerHTML = '';
-    
-    // Берём последние N новостей
-    const previewCount = window.APP_CONFIG.display.previewNewsCount;
+
+    const previewCount = 6;
     const previewNews = allNews.slice(0, previewCount);
-    
+
     previewNews.forEach(item => {
         gridEl.appendChild(createNewsCard(item));
     });
 }
 
-// Создание карточки новости
 function createNewsCard(item) {
     const card = document.createElement('div');
     card.className = 'news-card';
     card.onclick = () => window.open(item.link, '_blank');
-    
+
     card.innerHTML = `
         <div class="news-card-header">
             <div class="news-card-title">${escapeHtml(item.title)}</div>
@@ -324,20 +298,20 @@ function createNewsCard(item) {
             </div>
             <p class="news-card-description">${escapeHtml(item.shortDescription)}</p>
             <a href="${item.link}" class="news-card-link" target="_blank">
-                <i class="fas fa-external-link-alt"></i> Подробнее
+                <i class="fas fa-arrow-right"></i>
+                <span>Читать</span>
             </a>
         </div>
     `;
-    
+
     return card;
 }
 
-// Создание элемента списка
 function createNewsListItem(item) {
     const li = document.createElement('div');
     li.className = 'news-item';
     li.onclick = () => window.open(item.link, '_blank');
-    
+
     li.innerHTML = `
         <div class="news-item-header">
             <span class="news-item-source">${escapeHtml(item.source)}</span>
@@ -346,14 +320,14 @@ function createNewsListItem(item) {
         <div class="news-item-title">${escapeHtml(item.title)}</div>
         <div class="news-item-description">${escapeHtml(item.shortDescription)}</div>
         <a href="${item.link}" class="news-item-link" target="_blank">
-            <i class="fas fa-external-link-alt"></i> Подробнее
+            <i class="fas fa-arrow-right"></i>
+            <span>Читать</span>
         </a>
     `;
-    
+
     return li;
 }
 
-// Экранирование HTML
 function escapeHtml(text) {
     if (!text) return '';
     const div = document.createElement('div');
@@ -361,7 +335,6 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Склонение слов
 function getSourcesText(count) {
     if (count === 1) return 'источник';
     if (count > 1 && count < 5) return 'источника';
@@ -372,18 +345,18 @@ function getSourcesText(count) {
 
 function updateLastUpdateTime() {
     const lastUpdate = localStorage.getItem('lastUpdate');
-    
+
     if (!lastUpdate) {
         document.getElementById('footerLastUpdate').textContent = '-';
         return;
     }
-    
+
     const date = new Date(lastUpdate);
     const now = new Date();
     const diffMinutes = Math.floor((now - date) / (1000 * 60));
-    
+
     let timeText = '';
-    
+
     if (diffMinutes < 1) {
         timeText = 'только что';
     } else if (diffMinutes < 60) {
@@ -399,7 +372,7 @@ function updateLastUpdateTime() {
             minute: '2-digit'
         });
     }
-    
+
     document.getElementById('footerLastUpdate').textContent = timeText;
 }
 
@@ -407,20 +380,20 @@ function updateLastUpdateTime() {
 
 function downloadDigest() {
     const newsData = newsParser.loadFromCache();
-    
+
     if (!newsData) {
         showNotification('❌ Нет данных для скачивания. Сначала обновите новости.', 'danger');
         return;
     }
-    
+
     const now = new Date();
-    
+
     let txtContent = '';
     txtContent += '╔════════════════════════════════════════════════════════╗\n';
     txtContent += '║        ЕЖЕДНЕВНЫЙ НОВОСТНОЙ ДАЙДЖЕСТ                   ║\n';
     txtContent += '║        Новости из официальных источников                ║\n';
     txtContent += '╚════════════════════════════════════════════════════════╝\n\n';
-    
+
     txtContent += `📅 Дата формирования: ${now.toLocaleDateString('ru-RU', {
         year: 'numeric',
         month: 'long',
@@ -428,52 +401,47 @@ function downloadDigest() {
         hour: '2-digit',
         minute: '2-digit'
     })}\n\n`;
-    
+
     txtContent += '════════════════════════════════════════════════════════\n';
     txtContent += '🌍 НОВОСТИ МИРА\n';
     txtContent += '════════════════════════════════════════════════════════\n\n';
-    
+
     newsData.world.items.forEach((item, index) => {
         const date = item.formattedDate || newsParser.formatDate(item.pubDate);
-        
         txtContent += `${index + 1}. ${item.title}\n`;
         txtContent += `${item.shortDescription}\n`;
         txtContent += `   Источник: ${item.source} | Время: ${date}\n`;
         txtContent += `   Ссылка: ${item.link}\n\n`;
     });
-    
+
     txtContent += '════════════════════════════════════════════════════════\n';
     txtContent += '🇷🇺 НОВОСТИ РОССИИ\n';
     txtContent += '════════════════════════════════════════════════════════\n\n';
-    
+
     newsData.russia.items.forEach((item, index) => {
         const date = item.formattedDate || newsParser.formatDate(item.pubDate);
-        
         txtContent += `${index + 1}. ${item.title}\n`;
         txtContent += `${item.shortDescription}\n`;
         txtContent += `   Источник: ${item.source} | Время: ${date}\n`;
         txtContent += `   Ссылка: ${item.link}\n\n`;
     });
-    
+
     txtContent += '════════════════════════════════════════════════════════\n';
     txtContent += '⚔️ СПЕЦИАЛЬНАЯ ВОЕННАЯ ОПЕРАЦИЯ (СВО)\n';
     txtContent += '════════════════════════════════════════════════════════\n\n';
-    
+
     newsData.svo.items.forEach((item, index) => {
         const date = item.formattedDate || newsParser.formatDate(item.pubDate);
-        
         txtContent += `${index + 1}. ${item.title}\n`;
         txtContent += `${item.shortDescription}\n`;
         txtContent += `   Источник: ${item.source} | Время: ${date}\n`;
         txtContent += `   Ссылка: ${item.link}\n\n`;
     });
-    
+
     txtContent += '════════════════════════════════════════════════════════\n';
-    txtContent += 'ℹ️ Все новости взяты из официальных источников.\n';
-    txtContent += 'Права на полные тексты принадлежат авторам.\n';
+    txtContent += 'ℹ️ Новости из официальных источников\n';
     txtContent += '════════════════════════════════════════════════════════\n';
-    
-    // Создаём и скачиваем файл
+
     const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -483,17 +451,6 @@ function downloadDigest() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
     showNotification('✅ Дайджест успешно скачан!', 'success');
-}
-
-// ==================== АВТООБНОВЛЕНИЕ ====================
-
-function checkAutoUpdate() {
-    const autoUpdate = localStorage.getItem('autoUpdate') === 'true';
-    
-    if (autoUpdate && !newsParser.isCacheValid()) {
-        console.log('Автообновление запущено');
-        updateNews();
-    }
 }
