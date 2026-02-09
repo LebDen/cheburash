@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="ЧБ - Новостной агрегатор. Официальные источники.">
     <title>ЧБ | Новостной агрегатор</title>
+    <!-- Favicon (замените на свой) -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
@@ -14,8 +16,9 @@
     <!-- Preloader -->
     <div class="preloader" id="preloader">
         <div class="preloader-content">
-            <div class="preloader-icon">
-                <i class="fas fa-rss"></i>
+            <div class="preloader-logo">
+                <!-- Логотип (замените на свой) -->
+                <div class="logo-placeholder">ЧБ</div>
             </div>
             <h3>Загрузка новостного агрегатора...</h3>
             <div class="preloader-progress">
@@ -30,8 +33,11 @@
     <header class="header">
         <div class="header-container">
             <div class="logo">
-                <i class="fas fa-rss"></i>
-                <span>ЧБ</span>
+                <!-- Логотип (замените на свой) -->
+                <div class="logo-img">
+                    <div class="logo-text">ЧБ</div>
+                </div>
+                <span class="logo-title">Новостной Агрегатор</span>
             </div>
             <nav class="nav-menu">
                 <a href="#today" class="nav-link active" data-section="today">
@@ -59,19 +65,16 @@
     <section class="hero">
         <div class="hero-content">
             <div class="hero-logo">
-                <i class="fas fa-rss"></i>
+                <div class="logo-text">ЧБ</div>
             </div>
-            <h1 class="hero-title">ЧБ Новостной Агрегатор</h1>
-            <p class="hero-subtitle">Новости из официальных источников: Мир, Россия, СВО</p>
+            <h1 class="hero-title">Новостной Агрегатор</h1>
+            <p class="hero-subtitle">Актуальная информация из официальных источников</p>
             <div class="hero-actions">
                 <button class="btn btn-primary btn-lg" id="updateNewsBtn">
                     <i class="fas fa-sync-alt"></i> Обновить новости
                 </button>
                 <button class="btn btn-success btn-lg" id="downloadDigestBtn">
                     <i class="fas fa-download"></i> Скачать дайджест
-                </button>
-                <button class="btn btn-info btn-lg" id="shareBtn">
-                    <i class="fas fa-share-alt"></i> Поделиться
                 </button>
             </div>
 
@@ -118,7 +121,7 @@
                 <div class="section-header">
                     <h2><i class="fas fa-home"></i> Главная</h2>
                 </div>
-                
+
                 <div class="quick-actions">
                     <div class="quick-action-card" onclick="document.getElementById('updateNewsBtn').click()">
                         <div class="quick-action-icon"><i class="fas fa-sync-alt"></i></div>
@@ -141,17 +144,10 @@
                             <p>Ручное добавление новости</p>
                         </div>
                     </div>
-                    <div class="quick-action-card" onclick="copyPageLink()">
-                        <div class="quick-action-icon"><i class="fas fa-share"></i></div>
-                        <div class="quick-action-text">
-                            <h5>Поделиться</h5>
-                            <p>Ссылка на этот агрегатор</p>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="category-preview">
-                    <h4><i class="fas fa-globe-americas"></i> 🌍 Последние мировые новости</h4>
+                    <h4><i class="fas fa-globe-americas"></i> 🌍 Последние новости мира</h4>
                     <div class="loading" id="previewLoading">
                         <div class="spinner"></div>
                         <p>Загрузка...</p>
@@ -172,8 +168,8 @@
                 <div class="section-header">
                     <h2><i class="fas fa-bullhorn"></i> Информирование</h2>
                     <p class="section-subtitle">
-                        <i class="fas fa-info-circle"></i> 
-                        Новости из официальных источников. Все права принадлежат авторам.
+                        <i class="fas fa-info-circle"></i>
+                        Новости из официальных источников
                     </p>
                 </div>
 
@@ -193,7 +189,7 @@
                     </div>
                     <div class="loading" id="worldLoading">
                         <div class="spinner"></div>
-                        <p>Загрузка мировых новостей...</p>
+                        <p>Загрузка новостей мира...</p>
                     </div>
                     <div class="news-list" id="worldNewsList"></div>
                     <div class="no-content" id="worldNoContent">
@@ -238,7 +234,7 @@
                     <div class="digest-section-header">
                         <div class="digest-title">
                             <i class="fas fa-fighter-jet"></i>
-                            <h3>⚔️ Специальная военная операция</h3>
+                            <h3>⚔️ Новости СВО</h3>
                         </div>
                         <div class="digest-actions">
                             <span class="source-badge" id="svoSourcesCount">0 источников</span>
@@ -267,7 +263,7 @@
                 <div class="section-header">
                     <h2><i class="fas fa-link"></i> Источники новостей</h2>
                     <p class="section-subtitle">
-                        <i class="fas fa-check-circle"></i> Все источники - официальные и легальные
+                        <i class="fas fa-check-circle"></i> Все источники - официальные
                     </p>
                 </div>
 
@@ -353,81 +349,34 @@
                         </a>
                     </div>
                 </div>
-
-                <div class="legal-notice">
-                    <h4><i class="fas fa-balance-scale"></i> Юридическая информация</h4>
-                    <p>
-                        <strong>Важно:</strong> Данный агрегатор публикует только заголовки новостей и ссылки на официальные источники. 
-                        Полные тексты новостей, фотографии и видео принадлежат их авторам и публикуются на сайтах источников.
-                    </p>
-                    <p>
-                        <strong>Цитирование:</strong> Публикация заголовков и кратких анонсов в информационных целях с указанием источника 
-                        разрешена в соответствии со статьей 1274 Гражданского кодекса РФ.
-                    </p>
-                </div>
             </section>
 
-            <!-- Section: Спонсорская поддержка -->
-            <section class="sponsors-section">
-                <div class="sponsors-container">
-                    <div class="sponsors-header">
-                        <h2><i class="fas fa-heart"></i> Спонсорская поддержка</h2>
-                        <p class="sponsors-subtitle">
-                            <i class="fas fa-info-circle"></i> 
-                            Поддержите проект и помогите в развитии
+            <!-- Section: Поддержка (новый блок) -->
+            <section class="support-section">
+                <div class="support-container">
+                    <div class="support-content">
+                        <h2><i class="fas fa-heart"></i> Лучшая поддержка — подписка на авторский Telegram-канал</h2>
+                        <p class="support-desc">
+                            Подписавшись на наш канал, вы получите эксклюзивные материалы, оперативные обновления
+                            и возможность влиять на развитие проекта. Ваша поддержка помогает нам расти!
                         </p>
-                    </div>
-                    
-                    <div class="sponsors-content">
-                        <div class="sponsor-card">
-                            <div class="sponsor-icon">
-                                <i class="fas fa-coins"></i>
+                        <a href="https://t.me/your_channel" class="support-btn" target="_blank">
+                            <i class="fab fa-telegram-plane"></i> Перейти в Telegram-канал
+                        </a>
+                        <div class="support-benefits">
+                            <div class="benefit-item">
+                                <i class="fas fa-bolt"></i>
+                                <span>Мгновенные уведомления о важных новостях</span>
                             </div>
-                            <h3>50 рублей</h3>
-                            <p class="sponsor-desc">
-                                Стандартная поддержка проекта. 
-                                Благодарность в разделе "Поддержка"
-                            </p>
-                            <button class="btn btn-success sponsor-btn" id="donate50Btn">
-                                <i class="fas fa-donate"></i> Поддержать 50 руб
-                            </button>
-                        </div>
-                        
-                        <div class="sponsor-card">
-                            <div class="sponsor-icon">
-                                <i class="fas fa-gem"></i>
+                            <div class="benefit-item">
+                                <i class="fas fa-star"></i>
+                                <span>Эксклюзивный контент и аналитика</span>
                             </div>
-                            <h3>100 рублей</h3>
-                            <p class="sponsor-desc">
-                                Расширенная поддержка с упоминанием в дайджесте
-                            </p>
-                            <button class="btn btn-warning sponsor-btn" id="donate100Btn">
-                                <i class="fas fa-donate"></i> Поддержать 100 руб
-                            </button>
-                        </div>
-                        
-                        <div class="sponsor-card">
-                            <div class="sponsor-icon">
-                                <i class="fas fa-crown"></i>
+                            <div class="benefit-item">
+                                <i class="fas fa-comments"></i>
+                                <span>Прямое общение с автором</span>
                             </div>
-                            <h3>200 рублей</h3>
-                            <p class="sponsor-desc">
-                                Премиум поддержка с упоминанием в каждом выпуске
-                            </p>
-                            <button class="btn btn-primary sponsor-btn" id="donate200Btn">
-                                <i class="fas fa-donate"></i> Поддержать 200 руб
-                            </button>
                         </div>
-                    </div>
-                    
-                    <div class="sponsors-info">
-                        <p>
-                            <i class="fas fa-credit-card"></i> 
-                            Все платежи проходят через безопасный платежный шлюз.
-                            <br>
-                            <i class="fas fa-shield-alt"></i> 
-                            Ваши данные защищены и не передаются третьим лицам.
-                        </p>
                     </div>
                 </div>
             </section>
@@ -440,7 +389,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        <i class="fas fa-user-shield"></i> 
+                        <i class="fas fa-user-shield"></i>
                         <span id="adminModalTitle">Админ-панель</span>
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -460,11 +409,11 @@
                             <i class="fas fa-cog"></i> Настройки
                         </button>
                     </div>
-                    
+
                     <!-- Login Tab -->
                     <div class="tab-content active" id="loginTab">
                         <div class="text-center mb-4">
-                            <i class="fas fa-user-shield" style="font-size: 3rem; color: #6366f1;"></i>
+                            <i class="fas fa-user-shield" style="font-size: 3rem;"></i>
                             <h4 class="mt-3">Вход в админ-панель</h4>
                             <p class="text-muted">Введите пароль для доступа к расширенным функциям</p>
                         </div>
@@ -483,14 +432,14 @@
                             <i class="fas fa-sign-in-alt"></i> Войти
                         </button>
                         <div class="text-center mt-3">
-                            <small class="text-muted">Подсказка: пароль по умолчанию - admin123 (рекомендуется сменить)</small>
+                            <small class="text-muted">Подсказка: пароль по умолчанию - admin123</small>
                         </div>
                     </div>
 
                     <!-- Manual Add Tab -->
                     <div class="tab-content" id="manualTab">
                         <div class="text-center mb-4">
-                            <i class="fas fa-plus-circle" style="font-size: 3rem; color: #10b981;"></i>
+                            <i class="fas fa-plus-circle" style="font-size: 3rem;"></i>
                             <h4 class="mt-3">Ручное добавление новости</h4>
                             <p class="text-muted">Добавьте новость вручную в любую категорию</p>
                         </div>
@@ -522,9 +471,9 @@
                                 </label>
                                 <select class="form-select" id="manualCategory" required>
                                     <option value="">Выберите категорию</option>
-                                    <option value="world">🌍 Мир</option>
-                                    <option value="russia">🇷🇺 Россия</option>
-                                    <option value="svo">⚔️ СВО</option>
+                                    <option value="world">🌍 Новости мира</option>
+                                    <option value="russia">🇷🇺 Новости России</option>
+                                    <option value="svo">⚔️ Новости СВО</option>
                                 </select>
                             </div>
                             <div class="mb-3">
@@ -532,7 +481,7 @@
                                     <i class="fas fa-building"></i> Источник <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" class="form-control" id="manualSource" placeholder="РИА Новости, ТАСС и т.д." required>
-                                <small class="form-text text-muted">Название новостного агентства или сайта</small>
+                                <small class="form-text text-muted">Название новостного агентства</small>
                             </div>
                             <button class="btn btn-success w-100 btn-lg" type="submit">
                                 <i class="fas fa-plus"></i> Добавить новость
@@ -544,9 +493,9 @@
                     <div class="tab-content" id="telegramTab">
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle"></i>
-                            <strong>Инструкция:</strong> Скопируйте сгенерированный текст и отправьте его в ваш Telegram-канал или боту.
+                            <strong>Инструкция:</strong> Скопируйте сгенерированный текст и отправьте его в ваш Telegram-канал.
                         </div>
-                        
+
                         <div class="mb-3">
                             <label class="form-label">
                                 <i class="fas fa-file-alt"></i> Текст для публикации в Telegram
@@ -555,7 +504,7 @@
                                 <textarea class="form-control" id="telegramText" rows="12" readonly></textarea>
                             </div>
                         </div>
-                        
+
                         <div class="d-grid gap-2">
                             <button class="btn btn-primary" id="copyTelegramTextBtn">
                                 <i class="fas fa-copy"></i> Копировать текст
@@ -567,24 +516,27 @@
                                 <i class="fas fa-eye"></i> Предпросмотр
                             </button>
                         </div>
-                        
-                        <div class="mt-3 p-3 bg-light rounded">
-                            <h6><i class="fas fa-lightbulb"></i> Советы по публикации:</h6>
-                            <ul class="mb-0" style="font-size: 0.9rem;">
-                                <li>Текст оптимизирован для Telegram (с эмодзи и форматированием)</li>
-                                <li>Можно редактировать перед публикацией</li>
-                                <li>Рекомендуется добавить хэштеги: #новости #россия #сво</li>
-                            </ul>
-                        </div>
                     </div>
 
                     <!-- Settings Tab -->
                     <div class="tab-content" id="settingsTab">
                         <div class="text-center mb-4">
-                            <i class="fas fa-cog" style="font-size: 3rem; color: #6366f1;"></i>
+                            <i class="fas fa-cog" style="font-size: 3rem;"></i>
                             <h4 class="mt-3">Настройки агрегатора</h4>
                         </div>
-                        
+
+                        <div class="mb-4">
+                            <h5><i class="fas fa-image"></i> Логотип</h5>
+                            <div class="mb-3">
+                                <label class="form-label">URL изображения логотипа</label>
+                                <input type="url" class="form-control" id="logoUrl" placeholder="https://example.com/logo.png">
+                                <small class="form-text text-muted">Оставьте пустым для текстового логотипа "ЧБ"</small>
+                            </div>
+                            <button class="btn btn-primary" id="saveLogoBtn">
+                                <i class="fas fa-save"></i> Сохранить логотип
+                            </button>
+                        </div>
+
                         <div class="mb-4">
                             <h5><i class="fas fa-shield-alt"></i> Безопасность</h5>
                             <div class="mb-3">
@@ -601,7 +553,7 @@
                                 <i class="fas fa-key"></i> Изменить пароль
                             </button>
                         </div>
-                        
+
                         <div class="mb-4">
                             <h5><i class="fas fa-cog"></i> Общие настройки</h5>
                             <div class="form-check form-switch mb-3">
@@ -620,18 +572,15 @@
                                 <i class="fas fa-save"></i> Сохранить настройки
                             </button>
                         </div>
-                        
+
                         <div class="mb-4">
                             <h5><i class="fas fa-database"></i> Данные</h5>
                             <div class="alert alert-warning">
                                 <i class="fas fa-exclamation-triangle"></i>
-                                <strong>Внимание!</strong> Очистка данных удалит все сохранённые новости и настройки.
+                                <strong>Внимание!</strong> Очистка данных удалит все сохранённые новости.
                             </div>
                             <button class="btn btn-danger" id="clearCacheBtn">
                                 <i class="fas fa-trash"></i> Очистить кэш
-                            </button>
-                            <button class="btn btn-secondary" id="exportDataBtn">
-                                <i class="fas fa-file-export"></i> Экспортировать данные
                             </button>
                         </div>
                     </div>
@@ -660,15 +609,6 @@
         </div>
     </div>
 
-    <!-- Donation Modal -->
-    <div class="modal fade" id="donationModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" id="donationModalContent">
-                <!-- Content will be injected by JavaScript -->
-            </div>
-        </div>
-    </div>
-
     <!-- Share Modal -->
     <div class="modal fade" id="shareModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
@@ -687,20 +627,6 @@
                             </button>
                         </div>
                     </div>
-                    <div class="text-center">
-                        <p class="text-muted mb-3">Или поделитесь в соцсетях:</p>
-                        <div class="share-buttons">
-                            <button class="share-btn telegram" onclick="shareToTelegram()">
-                                <i class="fab fa-telegram"></i> Telegram
-                            </button>
-                            <button class="share-btn whatsapp" onclick="shareToWhatsApp()">
-                                <i class="fab fa-whatsapp"></i> WhatsApp
-                            </button>
-                            <button class="share-btn vk" onclick="shareToVK()">
-                                <i class="fab fa-vk"></i> VK
-                            </button>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -712,17 +638,12 @@
             <div class="footer-grid">
                 <div class="footer-section">
                     <div class="footer-logo">
-                        <i class="fas fa-rss"></i>
-                        <span>ЧБ</span>
+                        <div class="logo-text">ЧБ</div>
+                        <span>Новостной Агрегатор</span>
                     </div>
                     <p class="footer-desc">
-                        Новостной агрегатор из официальных источников. 
-                        Бесплатно, без рекламы, с открытым исходным кодом.
+                        Актуальная информация из официальных источников.
                     </p>
-                    <div class="footer-social">
-                        <a href="#" class="social-link"><i class="fab fa-github"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-telegram"></i></a>
-                    </div>
                 </div>
                 <div class="footer-section">
                     <h4><i class="fas fa-link"></i> Источники</h4>
@@ -739,8 +660,6 @@
                     <ul class="footer-links">
                         <li><a href="#sources">О проекте</a></li>
                         <li><a href="#" data-bs-toggle="modal" data-bs-target="#adminModal">Админ-панель</a></li>
-                        <li><a href="#" onclick="showLegalInfo()">Юридическая информация</a></li>
-                        <li><a href="#" onclick="showPrivacyPolicy()">Политика конфиденциальности</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
@@ -749,20 +668,14 @@
                         <i class="fas fa-file-alt"></i> Текущий дайджест (.txt)
                     </button>
                     <p class="footer-update">
-                        <i class="fas fa-sync-alt"></i> 
+                        <i class="fas fa-sync-alt"></i>
                         Последнее обновление: <span id="footerLastUpdate">-</span>
                     </p>
                 </div>
             </div>
             <div class="footer-bottom">
                 <p>
-                    &copy; 2026 ЧБ Новостной Агрегатор. Все права на полные тексты новостей принадлежат авторам. 
-                    Публикуются только заголовки и ссылки на официальные источники.
-                </p>
-                <p class="footer-legal">
-                    <small>
-                        Данный агрегатор работает в соответствии со ст. 1274 ГК РФ (свободное использование произведения в информационных целях).
-                    </small>
+                    &copy; 2026 ЧБ Новостной Агрегатор
                 </p>
             </div>
         </div>
@@ -770,10 +683,10 @@
 
     <!-- Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- RSS Parser (CDN) -->
     <script src="https://cdn.jsdelivr.net/npm/rss-parser@3.13.0/dist/rss-parser.min.js"></script>
-    
+
     <!-- Main Scripts -->
     <script src="config.js"></script>
     <script src="rss-parser.js"></script>
