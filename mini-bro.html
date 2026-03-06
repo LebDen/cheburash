@@ -1431,7 +1431,7 @@
         }
 
         function inviteFriend() {
-            const url = `https://t.me/share/url?url=${encodeURIComponent('https://t.me/yourbot/app')}&text=${encodeURIComponent('Играй со мной!')}`;
+            const url = `https://t.me/share/url?url=${encodeURIComponent('https://t.me/cheburashNEWS')}&text=${encodeURIComponent('Играй со мной!')}`;
             tg.openTelegramLink(url);
             setTimeout(() => { state.bones += 500; showToast('+500 🦴', 'success'); updateResUI(); saveGame(); }, 2000);
         }
