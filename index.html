@@ -3,353 +3,439 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#050505">
-    <title>ЧБ | Neural Interface</title>
+    <meta name="theme-color" content="#0a0f0a">
+    <title>ЧБ | ТАКТИЧЕСКИЙ ТЕРМИНАЛ</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;500;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* === CORE & ANIMATIONS === */
+        /* === TACTICAL CORE === */
         :root {
-            --bg-deep: #050505;
-            --glass-bg: rgba(20, 20, 25, 0.6);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --glass-highlight: rgba(255, 255, 255, 0.15);
-            --neon-blue: #00f3ff;
-            --neon-purple: #bc13fe;
-            --neon-green: #0aff60;
-            --text-main: #ffffff;
-            --text-dim: #8b9bb4;
-            --font-main: 'Inter', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
-        }
-
-        [data-theme="light"] {
-            --bg-deep: #f0f2f5;
-            --glass-bg: rgba(255, 255, 255, 0.75);
-            --glass-border: rgba(0, 0, 0, 0.05);
-            --text-main: #1a1a1a;
-            --text-dim: #666;
+            --bg-primary: #0a0f0a;
+            --bg-secondary: #111a11;
+            --bg-panel: #0d140d;
+            --terminal-green: #22c55e;
+            --terminal-dim: #166534;
+            --terminal-alert: #ef4444;
+            --terminal-warn: #f59e0b;
+            --terminal-info: #3b82f6;
+            --border-color: #1f291f;
+            --grid-line: rgba(34, 197, 94, 0.1);
+            --font-mono: 'JetBrains Mono', 'Share Tech Mono', monospace;
+            --scan-line: rgba(34, 197, 94, 0.03);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body {
-            font-family: var(--font-main);
-            background-color: var(--bg-deep);
-            color: var(--text-main);
+            font-family: var(--font-mono);
+            background: var(--bg-primary);
+            color: var(--terminal-green);
             min-height: 100vh;
             overflow-x: hidden;
-            position: relative;
+            font-size: 13px;
+            line-height: 1.6;
         }
 
-        /* Animated Background Mesh */
-        .ambient-light {
-            position: fixed; top: -20%; left: -20%; width: 140%; height: 140%;
-            background: radial-gradient(circle at 50% 50%, rgba(0, 243, 255, 0.08), transparent 60%),
-                        radial-gradient(circle at 80% 20%, rgba(188, 19, 254, 0.08), transparent 50%);
+        /* CRT Scan Line Effect */
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, var(--scan-line) 3px);
+            pointer-events: none; z-index: 9999; opacity: 0.5;
+        }
+
+        /* Grid Background */
+        .tactical-grid {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 40px 40px;
             z-index: -1;
-            animation: breathe 10s infinite alternate;
-            pointer-events: none;
-        }
-        @keyframes breathe { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.1); opacity: 1; } }
-
-        /* === GLASS COMPONENTS === */
-        .glass-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         }
 
         /* === HEADER === */
-        header {
-            padding: 24px 20px 10px;
-            display: flex; justify-content: space-between; align-items: flex-start;
-        }
-        .user-status { display: flex; flex-direction: column; gap: 4px; }
-        .greeting { font-size: 13px; color: var(--neon-blue); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 1px; }
-        .username { font-size: 22px; font-weight: 800; background: linear-gradient(90deg, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        .theme-btn {
-            width: 44px; height: 44px; border-radius: 16px;
-            background: var(--glass-bg); border: 1px solid var(--glass-border);
-            color: var(--text-main); display: flex; align-items: center; justify-content: center;
-            font-size: 18px; cursor: pointer; transition: 0.3s;
-        }
-        .theme-btn:active { transform: scale(0.9); background: var(--glass-highlight); }
-
-        /* === LIVE STATUS BAR === */
-        .status-bar {
-            margin: 10px 20px; padding: 12px 16px;
+        .tactical-header {
+            border-bottom: 2px solid var(--terminal-green);
+            padding: 12px 16px;
             display: flex; justify-content: space-between; align-items: center;
-            font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);
-        }
-        .live-indicator { display: flex; align-items: center; gap: 6px; color: var(--neon-green); }
-        .dot { width: 6px; height: 6px; background: currentColor; border-radius: 50%; box-shadow: 0 0 8px currentColor; animation: blink 2s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
-        /* === GAMES GRID === */
-        .section-label {
-            padding: 0 24px; margin-top: 24px; margin-bottom: 12px;
-            font-size: 12px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .section-label i { color: var(--neon-purple); }
-
-        .games-grid {
-            display: grid; grid-template-columns: 1fr; gap: 16px; padding: 0 20px;
+            background: var(--bg-secondary);
         }
         
-        .game-card {
-            display: flex; align-items: center; padding: 20px;
-            text-decoration: none; color: var(--text-main);
-            position: relative; overflow: hidden; transition: transform 0.2s;
-        }
-        .game-card:active { transform: scale(0.98); }
-        
-        /* Glow effect on hover/active */
-        .game-card::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(90deg, rgba(255,255,255,0.05), transparent);
-            opacity: 0; transition: 0.3s;
-        }
-        .game-card:active::before { opacity: 1; }
-
-        .game-icon-box {
-            width: 60px; height: 60px; border-radius: 18px;
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .logo-box {
+            width: 40px; height: 40px; border: 2px solid var(--terminal-green);
             display: flex; align-items: center; justify-content: center;
-            font-size: 28px; color: white; margin-right: 16px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            z-index: 1;
+            font-weight: 800; font-size: 18px; background: var(--bg-primary);
         }
-        .dog-gradient { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); }
-        .pet-gradient { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
-
-        .game-meta { z-index: 1; flex: 1; }
-        .game-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-        .game-subtitle { font-size: 12px; color: var(--text-dim); font-family: var(--font-mono); }
+        .header-info { display: flex; flex-direction: column; }
+        .header-title { font-weight: 700; font-size: 14px; letter-spacing: 2px; }
+        .header-subtitle { font-size: 10px; opacity: 0.7; }
         
-        .launch-btn {
-            z-index: 1; width: 40px; height: 40px; border-radius: 50%;
-            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
-            color: white; display: flex; align-items: center; justify-content: center;
-            transition: 0.3s;
+        .status-badge {
+            border: 1px solid var(--terminal-green);
+            padding: 4px 10px; font-size: 10px;
+            display: flex; align-items: center; gap: 6px;
         }
-        .game-card:active .launch-btn { background: var(--text-main); color: var(--bg-deep); }
+        .status-dot {
+            width: 6px; height: 6px; background: var(--terminal-green);
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-        /* === NEWS TERMINAL === */
-        .news-terminal {
-            margin: 24px 20px; padding: 0; overflow: hidden;
-            display: flex; flex-direction: column;
+        /* === INFO BAR === */
+        .info-bar {
+            display: flex; justify-content: space-between;
+            padding: 8px 16px; border-bottom: 1px solid var(--border-color);
+            font-size: 10px; opacity: 0.8;
+            background: var(--bg-panel);
         }
-        .terminal-header {
-            padding: 16px; border-bottom: 1px solid var(--glass-border);
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(0,0,0,0.2);
-        }
-        .terminal-title { font-family: var(--font-mono); font-size: 12px; color: var(--neon-blue); }
-        .terminal-count { font-family: var(--font-mono); font-size: 10px; background: var(--glass-highlight); padding: 2px 6px; border-radius: 4px; }
 
-        .news-list { padding: 0; }
-        .news-item {
-            padding: 16px; border-bottom: 1px solid var(--glass-border);
-            font-size: 14px; line-height: 1.5; position: relative;
-            transition: background 0.2s;
+        /* === MAIN CONTAINER === */
+        .main-container { padding: 16px; }
+
+        /* === PANELS === */
+        .tactical-panel {
+            border: 1px solid var(--border-color);
+            background: var(--bg-panel);
+            margin-bottom: 16px;
+            position: relative;
         }
-        .news-item:last-child { border-bottom: none; }
-        .news-item:active { background: rgba(255,255,255,0.03); }
         
-        .news-source {
-            font-family: var(--font-mono); font-size: 10px;
-            padding: 2px 6px; border-radius: 4px; margin-bottom: 6px; display: inline-block;
+        .panel-header {
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 14px;
+            font-size: 11px;
             font-weight: 700;
+            letter-spacing: 1px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(34, 197, 94, 0.05);
         }
-        .src-world { background: rgba(0, 243, 255, 0.15); color: var(--neon-blue); }
-        .src-rf { background: rgba(255, 69, 58, 0.15); color: #ff453a; }
-        .src-svo { background: rgba(255, 159, 10, 0.15); color: var(--neon-green); }
+        .panel-header i { margin-right: 8px; }
+
+        .panel-content { padding: 14px; }
+
+        /* === GAMES SECTION === */
+        .game-slot {
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            margin-bottom: 10px;
+            display: flex; align-items: center; gap: 14px;
+            text-decoration: none;
+            color: var(--terminal-green);
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .game-slot:last-child { margin-bottom: 0; }
+        .game-slot:hover, .game-slot:active {
+            border-color: var(--terminal-green);
+            background: rgba(34, 197, 94, 0.05);
+        }
+        
+        .game-slot::before {
+            content: ''; position: absolute; top: 0; left: 0;
+            width: 3px; height: 100%;
+            background: var(--terminal-dim);
+        }
+        .game-slot:hover::before { background: var(--terminal-green); }
+
+        .game-icon {
+            width: 48px; height: 48px; border: 1px solid var(--terminal-green);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; flex-shrink: 0;
+        }
+        
+        .game-info { flex: 1; }
+        .game-name { font-weight: 700; font-size: 13px; margin-bottom: 3px; }
+        .game-code { font-size: 9px; opacity: 0.6; letter-spacing: 1px; }
+        
+        .game-status {
+            font-size: 9px; border: 1px solid var(--terminal-green);
+            padding: 3px 8px; opacity: 0.8;
+        }
+
+        /* === NEWS FEED === */
+        .news-feed { max-height: 300px; overflow-y: auto; }
+        
+        .news-entry {
+            padding: 12px 0;
+            border-bottom: 1px dashed var(--border-color);
+            font-size: 12px;
+        }
+        .news-entry:last-child { border-bottom: none; }
+        
+        .news-meta {
+            display: flex; gap: 10px; margin-bottom: 6px; font-size: 9px;
+        }
+        .news-tag {
+            border: 1px solid; padding: 2px 6px; font-weight: 700;
+        }
+        .tag-world { border-color: var(--terminal-info); color: var(--terminal-info); }
+        .tag-russia { border-color: var(--terminal-alert); color: var(--terminal-alert); }
+        .tag-svo { border-color: var(--terminal-warn); color: var(--terminal-warn); }
+        
+        .news-text { opacity: 0.9; line-height: 1.5; }
+        .news-time { opacity: 0.5; font-size: 9px; margin-top: 6px; }
 
         /* === ACTION BUTTON === */
-        .action-area { padding: 0 20px 30px; }
-        .btn-download {
-            width: 100%; padding: 18px; border-radius: 20px;
-            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
-            border: none; color: white; font-size: 16px; font-weight: 700;
+        .tactical-btn {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid var(--terminal-green);
+            background: transparent;
+            color: var(--terminal-green);
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 2px;
+            cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 10px;
-            box-shadow: 0 10px 30px rgba(0, 243, 255, 0.2);
-            cursor: pointer; position: relative; overflow: hidden;
+            transition: all 0.2s;
+            text-transform: uppercase;
         }
-        .btn-download::after {
-            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            transition: 0.5s;
+        .tactical-btn:hover, .tactical-btn:active {
+            background: var(--terminal-green);
+            color: var(--bg-primary);
         }
-        .btn-download:active::after { left: 100%; }
 
         /* === FOOTER === */
-        footer { text-align: center; padding-bottom: 30px; opacity: 0.5; font-size: 11px; font-family: var(--font-mono); }
-        .tg-link { color: var(--text-main); text-decoration: none; border-bottom: 1px dashed var(--text-dim); }
+        .tactical-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 16px;
+            text-align: center;
+            font-size: 9px;
+            opacity: 0.6;
+            margin-top: 20px;
+        }
+        .footer-link {
+            color: var(--terminal-green);
+            text-decoration: none;
+            border-bottom: 1px dashed var(--terminal-green);
+            display: inline-block;
+            margin-top: 8px;
+        }
 
+        /* === SCROLLBAR === */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--terminal-dim); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--terminal-green); }
+
+        /* === UTILS === */
+        .text-alert { color: var(--terminal-alert); }
+        .text-warn { color: var(--terminal-warn); }
+        .text-info { color: var(--terminal-info); }
+        .blink { animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* === DECORATIVE CORNERS === */
+        .corner {
+            position: absolute; width: 8px; height: 8px;
+            border: 2px solid var(--terminal-green);
+        }
+        .corner-tl { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+        .corner-tr { top: -1px; right: -1px; border-left: none; border-bottom: none; }
+        .corner-bl { bottom: -1px; left: -1px; border-right: none; border-top: none; }
+        .corner-br { bottom: -1px; right: -1px; border-left: none; border-top: none; }
     </style>
 </head>
 <body>
+    <div class="tactical-grid"></div>
 
-    <div class="ambient-light"></div>
-
-    <header>
-        <div class="user-status">
-            <span class="greeting" id="greetingText">Загрузка...</span>
-            <span class="username">Оператор ЧБ</span>
+    <!-- HEADER -->
+    <header class="tactical-header">
+        <div class="header-left">
+            <div class="logo-box">ЧБ</div>
+            <div class="header-info">
+                <span class="header-title">ТАКТИЧЕСКИЙ ТЕРМИНАЛ</span>
+                <span class="header-subtitle">СИСТЕМА УПРАВЛЕНИЯ v2.6</span>
+            </div>
         </div>
-        <button class="theme-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+        <div class="status-badge">
+            <div class="status-dot"></div>
+            <span>ONLINE</span>
+        </div>
     </header>
 
-    <div class="status-bar glass-panel">
-        <div class="live-indicator"><div class="dot"></div> ONLINE</div>
-        <div id="clock">00:00:00</div>
+    <!-- INFO BAR -->
+    <div class="info-bar">
+        <span><i class="fas fa-user"></i> ОПЕРАТОР: <span id="operatorName">АНОНИМ</span></span>
+        <span><i class="fas fa-clock"></i> <span id="systemTime">--:--:--</span></span>
+        <span><i class="fas fa-signal"></i> КАНАЛ: СТАБИЛЕН</span>
     </div>
 
-    <div class="section-label"><i class="fas fa-gamepad"></i> Доступные миссии</div>
-    
-    <div class="games-grid">
-        <!-- GAME 1 -->
-        <a href="ВАША_ССЫЛКА_НА_СОБАКУ" class="game-card glass-panel" id="linkDog">
-            <div class="game-icon-box dog-gradient"><i class="fas fa-dog"></i></div>
-            <div class="game-meta">
-                <div class="game-title">Служебная Собака</div>
-                <div class="game-subtitle">ПОГОНЯ ULTIMATE</div>
+    <!-- MAIN CONTENT -->
+    <main class="main-container">
+
+        <!-- GAMES PANEL -->
+        <div class="tactical-panel">
+            <div class="corner corner-tl"></div>
+            <div class="corner corner-tr"></div>
+            <div class="corner corner-bl"></div>
+            <div class="corner corner-br"></div>
+            
+            <div class="panel-header">
+                <span><i class="fas fa-gamepad"></i> ИГРОВЫЕ МОДУЛИ</span>
+                <span class="text-info">2 АКТИВНЫ</span>
             </div>
-            <div class="launch-btn"><i class="fas fa-chevron-right"></i></div>
-        </a>
+            <div class="panel-content">
+                <!-- GAME 1 -->
+                <a href="ВАША_ССЫЛКА_НА_СОБАКУ" class="game-slot" id="gameDog">
+                    <div class="game-icon"><i class="fas fa-dog"></i></div>
+                    <div class="game-info">
+                        <div class="game-name">СЛУЖЕБНАЯ СОБАКА</div>
+                        <div class="game-code">КОД: ПОГОНЯ_ULTIMATE</div>
+                    </div>
+                    <div class="game-status">ГОТОВ</div>
+                </a>
 
-        <!-- GAME 2 -->
-        <a href="ВАША_ССЫЛКА_НА_PET" class="game-card glass-panel" id="linkPet">
-            <div class="game-icon-box pet-gradient"><i class="fas fa-paw"></i></div>
-            <div class="game-meta">
-                <div class="game-title">Virtual PET</div>
-                <div class="game-subtitle">СИМУЛЯТОР 2.0</div>
+                <!-- GAME 2 -->
+                <a href="ВАША_ССЫЛКА_НА_PET" class="game-slot" id="gamePet">
+                    <div class="game-icon"><i class="fas fa-paw"></i></div>
+                    <div class="game-info">
+                        <div class="game-name">VIRTUAL PET</div>
+                        <div class="game-code">КОД: СИМУЛЯТОР_v2</div>
+                    </div>
+                    <div class="game-status">ГОТОВ</div>
+                </a>
             </div>
-            <div class="launch-btn"><i class="fas fa-chevron-right"></i></div>
-        </a>
-    </div>
-
-    <div class="section-label"><i class="fas fa-satellite-dish"></i> Входящие данные</div>
-
-    <div class="news-terminal glass-panel">
-        <div class="terminal-header">
-            <span class="terminal-title">/// ПОСЛЕДНИЕ СОБЫТИЯ</span>
-            <span class="terminal-count" id="newsCount">0 NEW</span>
         </div>
-        <div class="news-list" id="newsList">
-            <div style="padding:20px; text-align:center; color:var(--text-dim); font-size:12px;">
-                <i class="fas fa-circle-notch fa-spin"></i> Расшифровка потока...
+
+        <!-- NEWS PANEL -->
+        <div class="tactical-panel">
+            <div class="corner corner-tl"></div>
+            <div class="corner corner-tr"></div>
+            <div class="corner corner-bl"></div>
+            <div class="corner corner-br"></div>
+            
+            <div class="panel-header">
+                <span><i class="fas fa-satellite-dish"></i> ВХОДЯЩИЙ ПОТОК</span>
+                <span id="newsCount" class="text-warn">0 СООБЩЕНИЙ</span>
+            </div>
+            <div class="panel-content news-feed" id="newsFeed">
+                <div style="text-align: center; padding: 20px; opacity: 0.5;">
+                    <i class="fas fa-circle-notch fa-spin"></i><br>
+                    <span style="font-size: 10px;">ПОЛУЧЕНИЕ ДАННЫХ...</span>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="action-area">
-        <button class="btn-download" id="downloadBtn">
-            <i class="fas fa-file-export"></i>
-            <span>Скачать Дайджест</span>
+        <!-- DOWNLOAD BUTTON -->
+        <button class="tactical-btn" id="downloadBtn">
+            <i class="fas fa-file-download"></i>
+            <span>ЗАГРУЗИТЬ ДАЙДЖЕСТ</span>
         </button>
-    </div>
 
-    <footer>
-        <p>SYSTEM VERSION 2026.4</p>
-        <a href="https://t.me/cheburashNEWS" class="tg-link">CHANNEL_ACCESS</a>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="tactical-footer">
+        <div>ЧБ НОВОСТНОЙ АГРЕГАТОР © 2026</div>
+        <div style="margin-top: 6px;">СИСТЕМА БЕЗОПАСНОСТИ: АКТИВНА</div>
+        <a href="https://t.me/cheburashNEWS" class="footer-link" target="_blank">
+            <i class="fab fa-telegram"></i> КАНАЛ СВЯЗИ
+        </a>
     </footer>
 
     <script>
+        // === TELEGRAM INIT ===
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
 
-        // === 1. INTELLIGENT GREETING ===
-        const hour = new Date().getHours();
-        const greetingEl = document.getElementById('greetingText');
-        let greeting = 'Доброй ночи';
-        if (hour >= 5 && hour < 12) greeting = 'Доброе утро';
-        else if (hour >= 12 && hour < 18) greeting = 'Добрый день';
-        else if (hour >= 18 && hour < 23) greeting = 'Добрый вечер';
-        greetingEl.textContent = `${greeting}, Оператор`;
-
-        // === 2. LIVE CLOCK ===
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('clock').textContent = now.toLocaleTimeString('ru-RU');
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        // === 3. THEME LOGIC ===
-        const themeBtn = document.getElementById('themeToggle');
-        const icon = themeBtn.querySelector('i');
-        
-        // Auto-detect Telegram theme
-        if (tg.colorScheme === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            icon.className = 'fas fa-sun';
-        } else {
-            document.documentElement.setAttribute('data-theme', 'light');
-            icon.className = 'fas fa-moon';
-        }
-
-        themeBtn.addEventListener('click', () => {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-            icon.className = isDark ? 'fas fa-moon' : 'fas fa-sun';
-            if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
-        });
-
-        // === 4. NEWS DATA (Mocked for Stability) ===
-        const newsData = [
-            { source: 'МИР', class: 'src-world', text: 'Глобальные рынки показывают стабильный рост на фоне новых технологий.' },
-            { source: 'РОССИЯ', class: 'src-rf', text: 'Запущен новый спутник связи для покрытия отдаленных регионов.' },
-            { source: 'СВО', class: 'src-svo', text: 'Подразделения выполнили плановые задачи на указанном направлении.' }
-        ];
-
-        const newsList = document.getElementById('newsList');
-        document.getElementById('newsCount').textContent = `${newsData.length} NEW`;
-        
-        newsList.innerHTML = newsData.map(item => `
-            <div class="news-item">
-                <span class="news-source ${item.class}">${item.source}</span>
-                <div>${item.text}</div>
-            </div>
-        `).join('');
-
-        // === 5. HAPTICS & DOWNLOAD ===
+        // === HAPTIC FEEDBACK ===
         document.querySelectorAll('a, button').forEach(el => {
             el.addEventListener('click', () => {
-                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
             });
         });
 
+        // === SYSTEM TIME ===
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('systemTime').textContent = 
+                now.toLocaleTimeString('ru-RU');
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // === OPERATOR NAME ===
+        if (tg.initDataUnsafe?.user) {
+            const name = tg.initDataUnsafe.user.first_name || 'ОПЕРАТОР';
+            document.getElementById('operatorName').textContent = name.toUpperCase();
+        }
+
+        // === NEWS DATA ===
+        const newsData = [
+            { tag: 'МИР', class: 'tag-world', time: '14:32', text: 'Международные наблюдатели зафиксировали стабилизацию ситуации в регионе' },
+            { tag: 'РОССИЯ', class: 'tag-russia', time: '13:15', text: 'Правительство утвердило новый пакет экономических мер поддержки' },
+            { tag: 'СВО', class: 'tag-svo', time: '12:48', text: 'Минобороны сообщило о выполнении плановых задач на всех направлениях' }
+        ];
+
+        function renderNews() {
+            const feed = document.getElementById('newsFeed');
+            document.getElementById('newsCount').textContent = `${newsData.length} СООБЩЕНИЙ`;
+            
+            feed.innerHTML = newsData.map(item => `
+                <div class="news-entry">
+                    <div class="news-meta">
+                        <span class="news-tag ${item.class}">[${item.tag}]</span>
+                        <span>ВРЕМЯ: ${item.time}</span>
+                    </div>
+                    <div class="news-text">${item.text}</div>
+                </div>
+            `).join('');
+        }
+        renderNews();
+
+        // === DOWNLOAD FUNCTION ===
         document.getElementById('downloadBtn').addEventListener('click', () => {
-            if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
             
-            const content = `ЧБ ДАЙДЖЕСТ // ${new Date().toLocaleDateString()}\n\n` + 
-                            newsData.map(n => `[${n.source}] ${n.text}`).join('\n') + 
-                            `\n\n/// КОНЕЦ ПЕРЕДАЧИ`;
+            const date = new Date().toLocaleDateString('ru-RU');
+            let content = `╔════════════════════════════════════════╗\n`;
+            content += `   ЧБ ТАКТИЧЕСКИЙ ДАЙДЖЕСТ\n`;
+            content += `   ДАТА: ${date}\n`;
+            content += `   СТАТУС: КОНФИДЕНЦИАЛЬНО\n`;
+            content += `╚════════════════════════════════════════╝\n\n`;
             
-            const blob = new Blob([content], { type: 'text/plain' });
+            content += `[ИГРОВЫЕ МОДУЛИ]\n`;
+            content += `  ■ СЛУЖЕБНАЯ СОБАКА: ПОГОНЯ ULTIMATE\n`;
+            content += `  ■ VIRTUAL PET: СИМУЛЯТОР v2\n\n`;
+            
+            content += `[ВХОДЯЩИЙ ПОТОК]\n`;
+            newsData.forEach(item => {
+                content += `  [${item.tag}] ${item.time} — ${item.text}\n`;
+            });
+            
+            content += `\n╔════════════════════════════════════════╗\n`;
+            content += `   КАНАЛ СВЯЗИ: t.me/cheburashNEWS\n`;
+            content += `   БОТ: @CheburashNEWS_bot\n`;
+            content += `╚════════════════════════════════════════╝\n`;
+
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'CHB_REPORT.txt';
+            a.href = url;
+            a.download = `CHB_BRIEFING_${Date.now()}.txt`;
+            document.body.appendChild(a);
             a.click();
-            
-            tg.showAlert({ title: 'Успешно', message: 'Отчет загружен в устройство.' });
+            document.body.removeChild(a);
+
+            tg.showAlert({
+                title: 'ВЫПОЛНЕНО',
+                message: 'ДАЙДЖЕСТ ЗАГРУЖЕН НА УСТРОЙСТВО',
+                buttons: [{ type: 'ok' }]
+            });
         });
 
-        // === 6. CONFIG LINKS (Edit Here) ===
+        // === GAME LINKS CONFIG ===
         // Замените ссылки ниже на свои
-        // document.getElementById('linkDog').href = "https://your-game-link.com/dog";
-        // document.getElementById('linkPet').href = "https://your-game-link.com/pet";
-
+        // document.getElementById('gameDog').href = 'ВАША_ССЫЛКА';
+        // document.getElementById('gamePet').href = 'ВАША_ССЫЛКА';
     </script>
 </body>
 </html>
