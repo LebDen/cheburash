@@ -7,89 +7,6 @@
     <title>ЧБ Новости</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-title">ЧБ Новости</div>
-        <div class="header-subtitle">Информационный центр</div>
-    </header>
-
-    <!-- Status Bar -->
-    <div class="status-bar">
-        <div class="status-online">
-            <div class="status-dot"></div>
-            <span>Онлайн</span>
-        </div>
-        <div class="status-time" id="currentTime">--:--</div>
-    </div>
-
-    <!-- Games Section -->
-    <div class="section">
-        <div class="section-header">Игры</div>
-        <a href="#" class="game-item" id="gameDog">
-            <div class="game-icon dog"><i class="fas fa-dog"></i></div>
-            <div class="game-info">
-                <div class="game-name">Служебная Собака</div>
-                <div class="game-desc">ПОГОНЯ ULTIMATE</div>
-            </div>
-            <div class="game-arrow"><i class="fas fa-chevron-right"></i></div>
-        </a>
-        <a href="#" class="game-item" id="gamePet">
-            <div class="game-icon pet"><i class="fas fa-paw"></i></div>
-            <div class="game-info">
-                <div class="game-name">Virtual PET</div>
-                <div class="game-desc">Тамагочи 2.0</div>
-            </div>
-            <div class="game-arrow"><i class="fas fa-chevron-right"></i></div>
-        </a>
-    </div>
-
-    <!-- News Section -->
-    <div class="section">
-        <div class="section-header">
-            <span>Новости по категориям</span>
-            <button class="refresh-btn" id="refreshBtn">
-                <i class="fas fa-sync-alt"></i>
-            </button>
-        </div>
-        <div id="newsContainer">
-            <div class="loading">
-                <i class="fas fa-circle-notch fa-spin"></i>
-                <div>Загрузка новостей...</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Download Section -->
-    <div class="download-section">
-        <button class="download-btn" id="downloadBtn">
-            <i class="fas fa-file-download"></i>
-            <span>Скачать дайджест</span>
-        </button>
-    </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-       # 📱 Минималистичный шаблон для ЧБ Новостей
-
-Отлично! Я сделаю чистый `index.html` в стиле Telegram Mini App, который будет работать с вашими существующими JS-файлами (`main.js`, `config.js`, `admin-panel.js`, `rss-parser.js`).
-
----
-
-## 📄 `index.html` (Минималистичный шаблон)
-
-```html
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#ffffff">
-    <title>ЧБ Новости</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -112,7 +29,8 @@
     <!-- Games Section -->
     <div class="section">
         <div class="section-header">Игры</div>
-        <a href="#" class="game-item" id="gameDog">
+        
+        <a href="https://t.me/cheburashNEWS" class="game-item" id="gameDog">
             <div class="game-icon dog"><i class="fas fa-dog"></i></div>
             <div class="game-info">
                 <div class="game-name">Служебная Собака</div>
@@ -120,7 +38,8 @@
             </div>
             <div class="game-arrow"><i class="fas fa-chevron-right"></i></div>
         </a>
-        <a href="#" class="game-item" id="gamePet">
+
+        <a href="https://t.me/cheburashNEWS" class="game-item" id="gamePet">
             <div class="game-icon pet"><i class="fas fa-paw"></i></div>
             <div class="game-info">
                 <div class="game-name">Virtual PET</div>
