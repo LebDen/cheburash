@@ -6,6 +6,7 @@
     <meta name="theme-color" content="#ffffff">
     <title>ЧБ Новости</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/rss-parser@3.13.0/dist/rss-parser.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -102,6 +103,23 @@
             text-transform: uppercase;
             font-weight: 500;
             letter-spacing: 0.3px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .refresh-btn {
+            background: none;
+            border: none;
+            color: var(--tg-link);
+            font-size: 13px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .refresh-btn:active {
+            background: var(--tg-secondary-bg);
         }
 
         /* Game Items */
@@ -180,7 +198,6 @@
             margin-bottom: 6px;
             padding: 2px 8px;
             border-radius: 6px;
-            background: var(--tg-secondary-bg);
         }
 
         .tag-world {
@@ -204,9 +221,34 @@
             margin-bottom: 6px;
         }
 
+        .news-source {
+            font-size: 12px;
+            color: var(--tg-hint);
+            margin-bottom: 4px;
+        }
+
         .news-time {
             font-size: 12px;
             color: var(--tg-hint);
+        }
+
+        /* Category Section */
+        .category-block {
+            border-top: 1px solid var(--border);
+        }
+
+        .category-block:first-child {
+            border-top: none;
+        }
+
+        .category-title {
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--tg-secondary-bg);
         }
 
         /* Download Button */
@@ -261,17 +303,25 @@
             font-size: 14px;
         }
 
-        /* Empty state */
-        .empty-state {
-            text-align: center;
-            padding: 30px 16px;
-            color: var(--tg-hint);
+        .loading i {
+            margin-bottom: 8px;
         }
 
-        .empty-state i {
-            font-size: 48px;
-            margin-bottom: 12px;
-            opacity: 0.3;
+        /* Error state */
+        .error-state {
+            text-align: center;
+            padding: 20px;
+            color: #ff3b30;
+            font-size: 14px;
+        }
+
+        /* Category badge */
+        .category-badge {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: var(--tg-secondary-bg);
+            color: var(--tg-hint);
         }
     </style>
 </head>
@@ -325,11 +375,16 @@
 
     <!-- News Section -->
     <div class="section">
-        <div class="section-header">Последние новости</div>
+        <div class="section-header">
+            <span>Последние новости</span>
+            <button class="refresh-btn" id="refreshBtn">
+                <i class="fas fa-sync-alt"></i> Обновить
+            </button>
+        </div>
         <div id="newsContainer">
             <div class="loading">
                 <i class="fas fa-circle-notch fa-spin"></i>
-                <div style="margin-top: 8px;">Загрузка...</div>
+                <div>Загрузка новостей...</div>
             </div>
         </div>
     </div>
@@ -337,7 +392,7 @@
     <!-- Download Section -->
     <div class="download-section">
         <button class="download-btn" id="downloadBtn">
-            <i class="fas fa-download"></i>
+            <i class="fas fa-file-download"></i>
             <span>Скачать дайджест</span>
         </button>
     </div>
@@ -352,83 +407,291 @@
     </footer>
 
     <script>
-        // Telegram WebApp
+        // ==================== CONFIG ====================
+        const CONFIG = {
+            RSS_FEEDS: {
+                world: [
+                    'https://ria.ru/export/rss2/index.xml',
+                    'https://tass.ru/rss/v2.xml'
+                ],
+                russia: [
+                    'https://ria.ru/export/rss2/russia.xml',
+                    'https://rg.ru/rss/region.xml'
+                ],
+                svo: [
+                    'https://tass.ru/rss/v2.xml?feed=48'
+                ]
+            },
+            CORS_PROXY: 'https://api.allorigins.win/raw?url=',
+            MAX_NEWS_PER_CATEGORY: 5,
+            TIMEOUT: 10000
+        };
+
+        // ==================== TELEGRAM INIT ====================
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
 
-        // Update time
+        // ==================== STATE ====================
+        let newsCache = {
+            world: [],
+            russia: [],
+            svo: []
+        };
+        let lastUpdateTime = null;
+
+        // ==================== UTILS ====================
         function updateTime() {
             const now = new Date();
             document.getElementById('currentTime').textContent = 
                 now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+            lastUpdateTime = now;
         }
         setInterval(updateTime, 1000);
         updateTime();
 
-        // News data
-        const newsData = [
-            { tag: 'Мир', class: 'tag-world', time: '14:32', text: 'Международные наблюдатели зафиксировали стабилизацию ситуации в регионе' },
-            { tag: 'Россия', class: 'tag-russia', time: '13:15', text: 'Правительство утвердило новый пакет экономических мер' },
-            { tag: 'СВО', class: 'tag-svo', time: '12:48', text: 'Минобороны сообщило о выполнении плановых задач' }
-        ];
+        function stripHtml(html) {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || '';
+        }
 
-        // Render news
+        function timeAgo(date) {
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000);
+            if (diff < 60) return 'только что';
+            if (diff < 3600) return `${Math.floor(diff/60)} мин. назад`;
+            if (diff < 86400) return `${Math.floor(diff/3600)} ч. назад`;
+            return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+        }
+
+        function haptic(type = 'light') {
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred(type);
+            }
+        }
+
+        // ==================== RSS PARSER ====================
+        async function fetchFeed(url) {
+            try {
+                const proxyUrl = CONFIG.CORS_PROXY + encodeURIComponent(url);
+                const response = await fetch(proxyUrl, {
+                    signal: AbortSignal.timeout(CONFIG.TIMEOUT)
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const xml = await response.text();
+                
+                const parser = new RSSParser();
+                const feed = await parser.parseString(xml);
+                
+                return feed.items.slice(0, CONFIG.MAX_NEWS_PER_CATEGORY).map(item => ({
+                    title: stripHtml(item.title),
+                    description: stripHtml(item.description || '').substring(0, 200),
+                    link: item.link,
+                    pubDate: item.pubDate ? new Date(item.pubDate) : new Date(),
+                    source: item.source || new URL(item.link).hostname
+                }));
+            } catch (error) {
+                console.warn(`Ошибка загрузки ${url}:`, error.message);
+                return null;
+            }
+        }
+
+        async function fetchCategory(category) {
+            const feeds = CONFIG.RSS_FEEDS[category] || [];
+            if (!feeds.length) return [];
+            
+            const results = await Promise.allSettled(feeds.map(url => fetchFeed(url)));
+            
+            const allItems = results
+                .filter(r => r.status === 'fulfilled' && r.value)
+                .flatMap(r => r.value)
+                .sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate))
+                .slice(0, CONFIG.MAX_NEWS_PER_CATEGORY);
+            
+            return allItems.map(item => ({
+                ...item,
+                category,
+                timeAgo: timeAgo(item.pubDate)
+            }));
+        }
+
+        async function loadAllNews() {
+            const container = document.getElementById('newsContainer');
+            container.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                    <div>Загрузка новостей...</div>
+                </div>
+            `;
+
+            try {
+                const [world, russia, svo] = await Promise.all([
+                    fetchCategory('world'),
+                    fetchCategory('russia'),
+                    fetchCategory('svo')
+                ]);
+
+                newsCache = { world, russia, svo };
+                renderNews();
+                updateTime();
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div style="margin-top: 8px;">Ошибка загрузки новостей</div>
+                        <button class="refresh-btn" onclick="loadAllNews()" style="margin-top: 12px;">
+                            <i class="fas fa-sync-alt"></i> Повторить
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
         function renderNews() {
             const container = document.getElementById('newsContainer');
-            container.innerHTML = newsData.map(item => `
-                <div class="news-item">
-                    <span class="news-tag ${item.class}">${item.tag}</span>
-                    <div class="news-text">${item.text}</div>
-                    <div class="news-time">${item.time}</div>
-                </div>
-            `).join('');
-        }
-        renderNews();
+            const categories = [
+                { key: 'world', name: '🌍 Мир', class: 'tag-world' },
+                { key: 'russia', name: '🇷🇺 Россия', class: 'tag-russia' },
+                { key: 'svo', name: '⚔️ СВО', class: 'tag-svo' }
+            ];
 
-        // Haptic feedback
-        document.querySelectorAll('a, button').forEach(el => {
-            el.addEventListener('click', () => {
-                if (tg.HapticFeedback) {
-                    tg.HapticFeedback.impactOccurred('light');
-                }
+            let html = '';
+            categories.forEach(cat => {
+                const items = newsCache[cat.key] || [];
+                if (items.length === 0) return;
+
+                html += `
+                    <div class="category-block">
+                        <div class="category-title">
+                            ${cat.name}
+                            <span class="category-badge">${items.length}</span>
+                        </div>
+                        ${items.map(item => `
+                            <div class="news-item">
+                                <div class="news-source">${item.source} • ${item.timeAgo}</div>
+                                <div class="news-text">${item.title}</div>
+                                <a href="${item.link}" class="news-time" target="_blank" style="color: var(--tg-link); text-decoration: none;">
+                                    Читать →
+                                </a>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
             });
-        });
 
-        // Download
-        document.getElementById('downloadBtn').addEventListener('click', () => {
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.notificationOccurred('success');
+            if (html === '') {
+                html = `
+                    <div class="error-state">
+                        <i class="fas fa-inbox"></i>
+                        <div style="margin-top: 8px;">Нет новостей</div>
+                        <button class="refresh-btn" onclick="loadAllNews()" style="margin-top: 12px;">
+                            <i class="fas fa-sync-alt"></i> Обновить
+                        </button>
+                    </div>
+                `;
             }
 
-            const date = new Date().toLocaleDateString('ru-RU');
-            let content = `ЧБ Дайджест\n${date}\n\n`;
-            content += `Игры:\n`;
-            content += `• Служебная Собака: ПОГОНЯ ULTIMATE\n`;
-            content += `• Virtual PET: Тамагочи 2.0\n\n`;
-            content += `Новости:\n`;
-            newsData.forEach(item => {
-                content += `[${item.tag}] ${item.time} — ${item.text}\n`;
-            });
-            content += `\nКанал: t.me/cheburashNEWS`;
+            container.innerHTML = html;
+        }
 
+        // ==================== DOWNLOAD DIGEST ====================
+        function generateDigestContent() {
+            const date = new Date().toLocaleDateString('ru-RU', { 
+                day: 'numeric', month: 'long', year: 'numeric' 
+            });
+            const time = new Date().toLocaleTimeString('ru-RU', { 
+                hour: '2-digit', minute: '2-digit' 
+            });
+
+            let content = `╔════════════════════════════════════════════════════╗\n`;
+            content += `         ЧБ НОВОСТИ | ИНФОРМАЦИОННЫЙ ДАЙДЖЕСТ\n`;
+            content += `╚════════════════════════════════════════════════════╝\n\n`;
+            content += `📅 Дата: ${date}\n`;
+            content += `⏰ Время: ${time}\n`;
+            content += `📊 Статус: Актуальная сводка\n\n`;
+            content += `═══════════════════════════════════════════════════════\n\n`;
+
+            // Games
+            content += `🎮 ИГРОВЫЕ МОДУЛИ\n`;
+            content += `───────────────────────────────────────────────────────\n`;
+            content += `  [1] Служебная Собака: ПОГОНЯ ULTIMATE\n`;
+            content += `  [2] Virtual PET: Тамагочи 2.0\n\n`;
+
+            // News by category
+            const categories = [
+                { key: 'world', name: '🌍 МИР' },
+                { key: 'russia', name: '🇷🇺 РОССИЯ' },
+                { key: 'svo', name: '⚔️ СВО' }
+            ];
+
+            categories.forEach(cat => {
+                const items = newsCache[cat.key] || [];
+                content += `${cat.name}\n`;
+                content += `───────────────────────────────────────────────────────\n`;
+                
+                if (items.length === 0) {
+                    content += `  Нет данных\n\n`;
+                } else {
+                    items.forEach((item, index) => {
+                        content += `  [${index + 1}] ${item.title}\n`;
+                        content += `      Источник: ${item.source}\n`;
+                        content += `      Время: ${item.timeAgo}\n`;
+                        content += `      Ссылка: ${item.link}\n\n`;
+                    });
+                }
+            });
+
+            content += `═══════════════════════════════════════════════════════\n\n`;
+            content += `📬 ТЕЛЕГРАМ КАНАЛ: t.me/cheburashNEWS\n`;
+            content += `🤖 БОТ: @CheburashNEWS_bot\n\n`;
+            content += `╔════════════════════════════════════════════════════╗\n`;
+            content += `         © 2026 ЧБ НОВОСТНОЙ АГРЕГАТОР\n`;
+            content += `╚════════════════════════════════════════════════════╝\n`;
+
+            return content;
+        }
+
+        function downloadDigest() {
+            haptic('success');
+            
+            const content = generateDigestContent();
             const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `CHB_${Date.now()}.txt`;
+            a.download = `CHB_Digest_${new Date().toISOString().slice(0,10)}.txt`;
+            document.body.appendChild(a);
             a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
 
             tg.showAlert({
-                title: 'Готово',
-                message: 'Дайджест загружен',
+                title: '✅ Готово',
+                message: 'Дайджест загружен на ваше устройство',
                 buttons: [{ type: 'ok' }]
             });
+        }
+
+        // ==================== EVENT LISTENERS ====================
+        document.querySelectorAll('a, button').forEach(el => {
+            el.addEventListener('click', () => haptic('light'));
         });
 
-        // Configure game links (replace with your links)
-        // document.getElementById('gameDog').href = 'YOUR_LINK_HERE';
-        // document.getElementById('gamePet').href = 'YOUR_LINK_HERE';
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            haptic('medium');
+            loadAllNews();
+        });
+
+        document.getElementById('downloadBtn').addEventListener('click', downloadDigest);
+
+        // Configure game links
+        // document.getElementById('gameDog').href = 'ВАША_ССЫЛКА';
+        // document.getElementById('gamePet').href = 'ВАША_ССЫЛКА';
+
+        // ==================== INIT ====================
+        loadAllNews();
     </script>
 </body>
 </html>
