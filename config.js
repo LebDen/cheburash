@@ -1,68 +1,59 @@
-// ==================== КОНФИГУРАЦИЯ ПРОЕКТА ====================
-
-// Настройки администратора
-const ADMIN_CONFIG = {
-    // Пароль по умолчанию (РЕКОМЕНДУЕТСЯ СМЕНИТЬ!)
-    defaultPassword: 'admin123',
-    
-    // Минимальная длина пароля
-    minPasswordLength: 6,
-    
-    // Максимальная длина заголовка новости
-    maxTitleLength: 200
-};
-
-// Настройки обновления
-const UPDATE_CONFIG = {
-    // Интервал автообновления (в минутах, 0 = отключено)
-    autoUpdateInterval: 0,
-    
-    // Кэш новостей (в минутах)
-    cacheDuration: 60,
-    
-    // Таймаут запроса к RSS (в миллисекундах)
-    requestTimeout: 15000
-};
-
-// Настройки отображения
-const DISPLAY_CONFIG = {
-    // Количество новостей в превью на главной
-    previewNewsCount: 6,
-    
-    // Количество новостей в каждой категории
-    categoryNewsCount: 12,
-    
-    // Показывать время публикации
-    showTime: true,
-    
-    // Формат даты
-    dateFormat: {
-        day: '2-digit',
-        month: 'short',
-        hour: '2-digit',
-        minute: '2-digit'
+/**
+ * ЧБ Новости 2026 — Конфигурация
+ */
+const CONFIG = {
+    // RSS-источники (официальные, публичные)
+    RSS_FEEDS: {
+        world: [
+            'https://ria.ru/export/rss2/index.xml',
+            'https://tass.ru/rss/v2.xml'
+        ],
+        russia: [
+            'https://ria.ru/export/rss2/russia.xml',
+            'https://rg.ru/rss/region.xml'
+        ],
+        svo: [
+            'https://function.mil.ru/news_page/country/more.htm',
+            'https://tass.ru/rss/v2.xml?feed=48' // Пример: лента по теме СВО
+        ]
     },
-    
-    // Максимальное количество слов в описании
-    maxDescriptionWords: 100
+
+    // Настройки парсинга
+    PARSER: {
+        timeout: 10000, // 10 секунд
+        maxItemsPerFeed: 10, // Макс. новостей с одного источника
+        corsProxy: 'https://api.allorigins.win/raw?url=', // CORS-прокси для браузерных запросов
+        userAgent: 'CHB-NewsBot/1.0 (+https://t.me/cheburashNEWS)'
+    },
+
+    // Таймер обновления
+    COUNTDOWN: {
+        nextUpdate: new Date(new Date().setHours(18, 0, 0, 0)), // Ежедневно в 18:00
+        autoRefresh: true
+    },
+
+    // Админ-панель
+    ADMIN: {
+        passwordHash: '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d9', // SHA256 от "password" (замените!)
+        sessionKey: 'chb_admin_session',
+        sessionDuration: 3600000 // 1 час
+    },
+
+    // Хранение (localStorage)
+    STORAGE: {
+        newsKey: 'chb_news_cache',
+        settingsKey: 'chb_settings',
+        maxCacheAge: 3600000 // 1 час
+    },
+
+    // Интеграции
+    TELEGRAM: {
+        botUsername: '@CheburashNEWS_bot',
+        channelUrl: 'https://t.me/cheburashNEWS'
+    }
 };
 
-// Настройки Telegram
-const TELEGRAM_CONFIG = {
-    // Количество новостей в сообщении
-    newsPerCategory: 3,
-    
-    // Максимальная длина заголовка в сообщении
-    maxTitleLength: 80,
-    
-    // Ссылка на сайт (для публикации)
-    siteUrl: 'https://ваш-сайт.com'
-};
-
-// ==================== ЭКСПОРТ КОНФИГУРАЦИИ ====================
-window.APP_CONFIG = {
-    admin: ADMIN_CONFIG,
-    update: UPDATE_CONFIG,
-    display: DISPLAY_CONFIG,
-    telegram: TELEGRAM_CONFIG
-};
+// Экспорт для модулей
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = CONFIG;
+}
