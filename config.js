@@ -1,5 +1,43 @@
-const CONFIG = {
-    RSS_FEEDS: {
+// ==================== КОНФИГУРАЦИЯ ПРОЕКТА ====================
+
+// Настройки администратора
+const ADMIN_CONFIG = {
+    defaultPassword: 'admin123',
+    minPasswordLength: 6,
+    maxTitleLength: 200
+};
+
+// Настройки обновления
+const UPDATE_CONFIG = {
+    autoUpdateInterval: 0,
+    cacheDuration: 60,
+    requestTimeout: 15000
+};
+
+// Настройки отображения
+const DISPLAY_CONFIG = {
+    previewNewsCount: 6,
+    categoryNewsCount: 12,
+    showTime: true,
+    dateFormat: {
+        day: '2-digit',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit'
+    },
+    maxDescriptionWords: 100
+};
+
+// Настройки Telegram
+const TELEGRAM_CONFIG = {
+    newsPerCategory: 3,
+    maxTitleLength: 80,
+    siteUrl: 'https://ваш-сайт.com'
+};
+
+// RSS Источники
+const RSS_CONFIG = {
+    feeds: {
         world: [
             'https://ria.ru/export/rss2/index.xml',
             'https://tass.ru/rss/v2.xml'
@@ -9,30 +47,18 @@ const CONFIG = {
             'https://rg.ru/rss/region.xml'
         ],
         svo: [
-            'https://tass.ru/rss/v2.xml?feed=48'
+            'https://ria.ru/export/rss2/russia.xml'
         ]
     },
-    CORS_PROXY: 'https://api.allorigins.win/raw?url=',
-    MAX_NEWS_PER_CATEGORY: 5,
-    TIMEOUT: 10000,
-    
-    // Настройки игр (замените на свои ссылки)
-    GAMES: {
-        dog: {
-            name: 'Служебная Собака',
-            subtitle: 'ПОГОНЯ ULTIMATE',
-            url: 'ВАША_ССЫЛКА_НА_СОБАКУ'
-        },
-        pet: {
-            name: 'Virtual PET',
-            subtitle: 'Тамагочи 2.0',
-            url: 'ВАША_ССЫЛКА_НА_PET'
-        }
-    },
-    
-    // Telegram
-    TELEGRAM: {
-        channel: 'https://t.me/cheburashNEWS',
-        bot: '@CheburashNEWS_bot'
-    }
+    corsProxy: 'https://api.allorigins.win/raw?url=',
+    maxItemsPerFeed: 10
+};
+
+// ==================== ЭКСПОРТ КОНФИГУРАЦИИ ====================
+window.APP_CONFIG = {
+    admin: ADMIN_CONFIG,
+    update: UPDATE_CONFIG,
+    display: DISPLAY_CONFIG,
+    telegram: TELEGRAM_CONFIG,
+    rss: RSS_CONFIG
 };
