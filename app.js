@@ -10,7 +10,7 @@ let lastUpdateTime = null;
 // ==================== UTILS ====================
 function updateTime() {
     const now = new Date();
-    document.getElementById('currentTime').textContent =
+    document.getElementById('currentTime').textContent = 
         now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
     lastUpdateTime = now;
 }
@@ -26,9 +26,9 @@ function stripHtml(html) {
 function timeAgo(date) {
     const now = new Date();
     const diff = Math.floor((now - date) / 1000);
-    if (diff < 60) return '������ ���';
-    if (diff < 3600) return `${Math.floor(diff / 60)} ���. �����`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)} �. �����`;
+    if (diff < 60) return 'только что';
+    if (diff < 3600) return `${Math.floor(diff/60)} мин. назад`;
+    if (diff < 86400) return `${Math.floor(diff/3600)} ч. назад`;
     return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
 }
 
@@ -44,11 +44,11 @@ async function fetchFeed(url) {
             signal: AbortSignal.timeout(CONFIG.TIMEOUT)
         });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
+        
         const xml = await response.text();
         const parser = new RSSParser();
         const feed = await parser.parseString(xml);
-
+        
         return feed.items.slice(0, CONFIG.MAX_NEWS_PER_CATEGORY).map(item => ({
             title: stripHtml(item.title),
             description: stripHtml(item.description || '').substring(0, 200),
@@ -57,7 +57,7 @@ async function fetchFeed(url) {
             source: item.source || new URL(item.link).hostname.replace('www.', '')
         }));
     } catch (error) {
-        console.warn(`������ ${url}:`, error.message);
+        console.warn(`Ошибка ${url}:`, error.message);
         return null;
     }
 }
@@ -65,9 +65,9 @@ async function fetchFeed(url) {
 async function fetchCategory(category) {
     const feeds = CONFIG.RSS_FEEDS[category] || [];
     if (!feeds.length) return [];
-
+    
     const results = await Promise.allSettled(feeds.map(url => fetchFeed(url)));
-
+    
     return results
         .filter(r => r.status === 'fulfilled' && r.value)
         .flatMap(r => r.value)
@@ -78,7 +78,7 @@ async function fetchCategory(category) {
 
 async function loadAllNews() {
     const container = document.getElementById('newsContainer');
-    container.innerHTML = `<div class="loading"><i class="fas fa-circle-notch fa-spin"></i><div>��������...</div></div>`;
+    container.innerHTML = `<div class="loading"><i class="fas fa-circle-notch fa-spin"></i><div>Загрузка...</div></div>`;
 
     try {
         const [world, russia, svo] = await Promise.all([
@@ -90,16 +90,16 @@ async function loadAllNews() {
         renderNews();
         updateTime();
     } catch (error) {
-        container.innerHTML = `<div class="error-state"><i class="fas fa-exclamation-triangle"></i><div style="margin-top:8px">������ ��������</div><button class="refresh-btn" onclick="loadAllNews()" style="margin-top:12px"><i class="fas fa-sync-alt"></i> ���������</button></div>`;
+        container.innerHTML = `<div class="error-state"><i class="fas fa-exclamation-triangle"></i><div style="margin-top:8px">Ошибка загрузки</div><button class="refresh-btn" onclick="loadAllNews()" style="margin-top:12px"><i class="fas fa-sync-alt"></i> Повторить</button></div>`;
     }
 }
 
 function renderNews() {
     const container = document.getElementById('newsContainer');
     const categories = [
-        { key: 'world', name: '?? ���', class: 'tag-world' },
-        { key: 'russia', name: '???? ������', class: 'tag-russia' },
-        { key: 'svo', name: '?? ���', class: 'tag-svo' }
+        { key: 'world', name: '🌍 Мир', class: 'tag-world' },
+        { key: 'russia', name: '🇷🇺 Россия', class: 'tag-russia' },
+        { key: 'svo', name: '⚔️ СВО', class: 'tag-svo' }
     ];
 
     let html = '';
@@ -109,65 +109,65 @@ function renderNews() {
         html += `<div class="category-block"><div class="category-title">${cat.name}<span class="category-badge">${items.length}</span></div>`;
         items.forEach(item => {
             html += `<div class="news-item">
-                <div class="news-source">${item.source} � ${item.timeAgo}</div>
+                <div class="news-source">${item.source} • ${item.timeAgo}</div>
                 <div class="news-text">${item.title}</div>
-                <a href="${item.link}" class="news-time" target="_blank" style="color:var(--tg-link);text-decoration:none">������ ?</a>
+                <a href="${item.link}" class="news-time" target="_blank" style="color:var(--tg-link);text-decoration:none">Читать →</a>
             </div>`;
         });
         html += `</div>`;
     });
 
-    container.innerHTML = html || `<div class="error-state"><i class="fas fa-inbox"></i><div style="margin-top:8px">��� ��������</div><button class="refresh-btn" onclick="loadAllNews()" style="margin-top:12px"><i class="fas fa-sync-alt"></i> ��������</button></div>`;
+    container.innerHTML = html || `<div class="error-state"><i class="fas fa-inbox"></i><div style="margin-top:8px">Нет новостей</div><button class="refresh-btn" onclick="loadAllNews()" style="margin-top:12px"><i class="fas fa-sync-alt"></i> Обновить</button></div>`;
 }
 
-// ==================== DIGEST GENERATOR (������ ��� � ����� ����) ====================
+// ==================== DIGEST GENERATOR (формат как в вашем коде) ====================
 function generateDigestContent() {
     const date = new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
     const time = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
 
-    let content = `????????????????????????????????????????????????????\n`;
-    content += `         �� ������� | �������������� ��������\n`;
-    content += `????????????????????????????????????????????????????\n\n`;
-    content += `?? ����: ${date}\n`;
-    content += `? �����: ${time}\n`;
-    content += `?? ������: ���������� ������\n\n`;
-    content += `????????????????????????????????????????????????????\n\n`;
+    let content = `════════════════════════════════════════════════════\n`;
+    content += `         ЧБ НОВОСТИ | ИНФОРМАЦИОННЫЙ ДАЙДЖЕСТ\n`;
+    content += `════════════════════════════════════════════════════\n\n`;
+    content += `📅 Дата: ${date}\n`;
+    content += `⏰ Время: ${time}\n`;
+    content += `📊 Статус: Актуальная сводка\n\n`;
+    content += `────────────────────────────────────────────────────\n\n`;
 
     // Games
-    content += `?? ������� ������\n`;
-    content += `????????????????????????????????????????????????????\n`;
+    content += `🎮 ИГРОВЫЕ МОДУЛИ\n`;
+    content += `────────────────────────────────────────────────────\n`;
     content += `  [1] ${CONFIG.GAMES.dog.name}: ${CONFIG.GAMES.dog.subtitle}\n`;
     content += `  [2] ${CONFIG.GAMES.pet.name}: ${CONFIG.GAMES.pet.subtitle}\n\n`;
 
     // News by category
     const categories = [
-        { key: 'world', name: '?? ���' },
-        { key: 'russia', name: '???? ������' },
-        { key: 'svo', name: '?? ���' }
+        { key: 'world', name: '🌍 МИР' },
+        { key: 'russia', name: '🇷🇺 РОССИЯ' },
+        { key: 'svo', name: '⚔️ СВО' }
     ];
 
     categories.forEach(cat => {
         const items = newsCache[cat.key] || [];
         content += `${cat.name}\n`;
-        content += `????????????????????????????????????????????????????\n`;
+        content += `────────────────────────────────────────────────────\n`;
         if (items.length === 0) {
-            content += `  ��� ������\n\n`;
+            content += `  Нет данных\n\n`;
         } else {
             items.forEach((item, index) => {
                 content += `  [${index + 1}] ${item.title}\n`;
-                content += `      ��������: ${item.source}\n`;
-                content += `      �����: ${item.timeAgo}\n`;
-                content += `      ������: ${item.link}\n\n`;
+                content += `      Источник: ${item.source}\n`;
+                content += `      Время: ${item.timeAgo}\n`;
+                content += `      Ссылка: ${item.link}\n\n`;
             });
         }
     });
 
-    content += `????????????????????????????????????????????????????\n\n`;
-    content += `?? �������� �����: ${CONFIG.TELEGRAM.channel}\n`;
-    content += `?? ���: ${CONFIG.TELEGRAM.bot}\n\n`;
-    content += `????????????????????????????????????????????????????\n`;
-    content += `         � 2026 �� ��������� ���������\n`;
-    content += `????????????????????????????????????????????????????\n`;
+    content += `────────────────────────────────────────────────────\n\n`;
+    content += `📬 ТЕЛЕГРАМ КАНАЛ: ${CONFIG.TELEGRAM.channel}\n`;
+    content += `🤖 БОТ: ${CONFIG.TELEGRAM.bot}\n\n`;
+    content += `════════════════════════════════════════════════════\n`;
+    content += `         © 2026 ЧБ НОВОСТНОЙ АГРЕГАТОР\n`;
+    content += `════════════════════════════════════════════════════\n`;
 
     return content;
 }
@@ -179,13 +179,13 @@ function downloadDigest() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `CHB_Digest_${new Date().toISOString().slice(0, 10)}.txt`;
+    a.download = `CHB_Digest_${new Date().toISOString().slice(0,10)}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    tg.showAlert({ title: '? ������', message: '�������� ��������', buttons: [{ type: 'ok' }] });
+    tg.showAlert({ title: '✅ Готово', message: 'Дайджест загружен', buttons: [{ type: 'ok' }] });
 }
 
 // ==================== EVENT LISTENERS ====================
