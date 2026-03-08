@@ -1,111 +1,146 @@
-/**
- * ЧБ Новости 2026 — Парсер RSS
- */
-class RSSParser {
-    constructor(config) {
-        this.config = config;
-        this.parser = typeof Parser !== 'undefined' ? new Parser({
-            customFields: {
-                item: ['content:encoded', 'media:content']
-            }
-        }) : null;
-    }
+// ==================== RSS ПАРСЕР ====================
 
-    // Загрузка и парсинг одной ленты
-    async fetchFeed(url) {
+const newsParser = {
+    // Загрузка из кэша
+    loadFromCache: function() {
         try {
-            // Используем CORS-прокси для браузерных запросов
-            const proxyUrl = this.config.corsProxy + encodeURIComponent(url);
-            const response = await fetch(proxyUrl, {
-                headers: { 'User-Agent': this.config.userAgent },
-                signal: AbortSignal.timeout(this.config.timeout)
-            });
-            
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const xml = await response.text();
-            
-            return this.parser ? await this.parser.parseString(xml) : this.fallbackParse(xml);
-        } catch (error) {
-            console.warn(`Ошибка загрузки ${url}:`, error.message);
+            const cached = localStorage.getItem('newsData');
+            return cached ? JSON.parse(cached) : null;
+        } catch (e) {
+            console.error('Ошибка загрузки кэша:', e);
             return null;
         }
-    }
+    },
 
-    // Резервный парсер (если rss-parser не подключён)
-    fallbackParse(xml) {
+    // Сохранение в кэш
+    saveToCache: function(data) {
+        try {
+            localStorage.setItem('newsData', JSON.stringify(data));
+            localStorage.setItem('lastUpdate', new Date().toISOString());
+        } catch (e) {
+            console.error('Ошибка сохранения кэша:', e);
+        }
+    },
+
+    // Проверка валидности кэша
+    isCacheValid: function() {
+        const lastUpdate = localStorage.getItem('lastUpdate');
+        if (!lastUpdate) return false;
+        
+        const cacheAge = Date.now() - new Date(lastUpdate).getTime();
+        const maxAge = APP_CONFIG.update.cacheDuration * 60 * 1000;
+        
+        return cacheAge < maxAge;
+    },
+
+    // Форматирование даты
+    formatDate: function(date) {
+        if (!date) return '';
+        const d = new Date(date);
+        return d.toLocaleDateString('ru-RU', APP_CONFIG.display.dateFormat);
+    },
+
+    // Обрезка текста
+    truncateWords: function(text, maxWords) {
+        if (!text) return '';
+        const words = text.split(' ');
+        if (words.length <= maxWords) return text;
+        return words.slice(0, maxWords).join(' ') + '...';
+    },
+
+    // Парсинг всех категорий
+    parseAll: async function() {
+        const categories = ['world', 'russia', 'svo'];
+        const result = {
+            world: { items: [], sources: [] },
+            russia: { items: [], sources: [] },
+            svo: { items: [], sources: [] },
+            timestamp: new Date().toISOString(),
+            totalNews: 0
+        };
+
+        for (const category of categories) {
+            const data = await this.parseCategory(category);
+            result[category] = data;
+            result.totalNews += data.items.length;
+        }
+
+        this.saveToCache(result);
+        return result;
+    },
+
+    // Парсинг категории
+    parseCategory: async function(category) {
+        const feeds = APP_CONFIG.rss.feeds[category] || [];
         const items = [];
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(xml, 'text/xml');
-        const entries = doc.querySelectorAll('item, entry');
-        
-        entries.forEach(entry => {
-            const title = entry.querySelector('title')?.textContent || 'Без заголовка';
-            const link = entry.querySelector('link')?.textContent 
-                      || entry.querySelector('link')?.getAttribute('href') 
-                      || '#';
-            const description = entry.querySelector('description')?.textContent 
-                             || entry.querySelector('summary')?.textContent 
-                             || '';
-            const pubDate = entry.querySelector('pubDate, published')?.textContent;
-            const source = entry.querySelector('source')?.textContent 
-                        || new URL(link).hostname;
-            
-            if (title && link) {
-                items.push({
-                    title: this.stripHtml(title),
-                    description: this.stripHtml(description).substring(0, 200) + '...',
-                    link: link.trim(),
-                    pubDate: pubDate ? new Date(pubDate) : new Date(),
-                    source: this.stripHtml(source)
-                });
-            }
-        });
-        
-        return { items: items.slice(0, this.config.maxItemsPerFeed) };
-    }
+        const sources = new Set();
 
-    // Очистка от HTML-тегов
-    stripHtml(html) {
+        for (const feedUrl of feeds) {
+            try {
+                const feedItems = await this.fetchFeed(feedUrl);
+                feedItems.forEach(item => {
+                    items.push({
+                        ...item,
+                        category,
+                        formattedDate: this.formatDate(item.pubDate),
+                        shortDescription: this.truncateWords(item.description, APP_CONFIG.display.maxDescriptionWords)
+                    });
+                    sources.add(item.source);
+                });
+            } catch (e) {
+                console.warn(`Ошибка парсинга ${feedUrl}:`, e);
+            }
+        }
+
+        // Сортировка по дате
+        items.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
+        return {
+            items: items.slice(0, APP_CONFIG.display.categoryNewsCount),
+            sources: Array.from(sources)
+        };
+    },
+
+    // Загрузка одной ленты
+    fetchFeed: async function(url) {
+        const proxyUrl = APP_CONFIG.rss.corsProxy + encodeURIComponent(url);
+        
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), APP_CONFIG.update.requestTimeout);
+
+        try {
+            const response = await fetch(proxyUrl, {
+                signal: controller.signal,
+                headers: { 'Accept': 'application/rss+xml, application/xml' }
+            });
+            clearTimeout(timeout);
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+            const xml = await response.text();
+            const parser = new RSSParser();
+            const feed = await parser.parseString(xml);
+
+            return (feed.items || []).slice(0, APP_CONFIG.rss.maxItemsPerFeed).map(item => ({
+                title: this.stripHtml(item.title),
+                link: item.link,
+                pubDate: item.pubDate || new Date().toISOString(),
+                source: item.source || new URL(item.link).hostname.replace('www.', ''),
+                description: this.stripHtml(item.contentSnippet || item.description || '')
+            }));
+        } catch (e) {
+            throw e;
+        }
+    },
+
+    // Очистка HTML
+    stripHtml: function(html) {
+        if (!html) return '';
         const tmp = document.createElement('div');
         tmp.innerHTML = html;
         return tmp.textContent || tmp.innerText || '';
     }
+};
 
-    // Форматирование даты
-    formatTimeAgo(date) {
-        const now = new Date();
-        const diff = Math.floor((now - date) / 1000);
-        
-        if (diff < 60) return 'только что';
-        if (diff < 3600) return `${Math.floor(diff/60)} мин. назад`;
-        if (diff < 86400) return `${Math.floor(diff/3600)} ч. назад`;
-        return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
-    }
-
-    // Загрузка всех лент категории
-    async fetchCategory(category) {
-        const feeds = this.config.RSS_FEEDS[category] || [];
-        if (!feeds.length) return [];
-        
-        const results = await Promise.allSettled(
-            feeds.map(url => this.fetchFeed(url))
-        );
-        
-        const allItems = results
-            .filter(r => r.status === 'fulfilled' && r.value?.items)
-            .flatMap(r => r.value.items)
-            .sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate))
-            .slice(0, 20); // Топ-20 свежих
-        
-        return allItems.map(item => ({
-            ...item,
-            category,
-            timeAgo: this.formatTimeAgo(item.pubDate)
-        }));
-    }
-}
-
-// Экспорт
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = RSSParser;
-}
+// Экспорт глобально
+window.newsParser = newsParser;
