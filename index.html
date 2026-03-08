@@ -2,224 +2,208 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0f172a">
     <title>ЧБ | Новости</title>
-    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
-<body data-theme="light">
+<body data-theme="dark">
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+        <span class="hamburger"><span></span><span></span><span></span></span>
+    </button>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <div class="logo-text">ЧБ</div>
+            <button class="mobile-menu-close" id="mobileMenuClose"><i class="fas fa-times"></i></button>
+        </div>
+        <nav class="mobile-nav">
+            <a href="#today" class="mobile-nav-link active" data-section="today">
+                <i class="fas fa-home"></i><span>Главная</span>
+            </a>
+            <a href="#info" class="mobile-nav-link" data-section="info">
+                <i class="fas fa-newspaper"></i><span>Новости</span>
+            </a>
+            <a href="#games" class="mobile-nav-link" data-section="games">
+                <i class="fas fa-gamepad"></i><span>Игры</span>
+            </a>
+            <a href="#" class="mobile-nav-link" id="mobileThemeToggle">
+                <i class="fas fa-sun"></i><span>Светлая</span>
+            </a>
+        </nav>
+        <div class="mobile-menu-footer">© 2026 ЧБ</div>
+    </div>
 
     <!-- Header -->
     <header class="header">
-        <div class="container header-content">
+        <div class="header-container">
             <div class="logo">
-                <span class="logo-text">ЧБ</span>
+                <div class="logo-text">ЧБ</div>
+                <span class="logo-title">Новости</span>
             </div>
-            <nav class="nav-desktop">
-                <a href="#today" class="nav-tab active">Главная</a>
-                <a href="#info" class="nav-tab">Информирование</a>
-                <a href="#sources" class="nav-tab">Источники</a>
-            </nav>
             <div class="header-actions">
-                <button id="themeToggle" class="icon-btn" title="Тема">
-                    <i class="fas fa-moon"></i>
-                </button>
-                <button id="adminBtn" class="icon-btn" title="Админ">
-                    <i class="fas fa-cog"></i>
-                </button>
-                <button id="mobileMenuToggle" class="icon-btn mobile-only">
-                    <i class="fas fa-bars"></i>
+                <button class="theme-toggle" id="themeToggle" title="Сменить тему">
+                    <i class="fas fa-sun"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Mobile Menu -->
-    <div id="mobileMenu" class="mobile-menu">
-        <div class="mobile-menu-header">
-            <span class="logo-text">ЧБ</span>
-            <button id="mobileMenuClose" class="icon-btn">
-                <i class="fas fa-times"></i>
-            </button>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">ЧБ Новости</h1>
+            <p class="hero-subtitle">Актуальная информация из официальных источников</p>
+            <div class="hero-actions">
+                <button class="btn btn-primary" id="updateNewsBtn">
+                    <i class="fas fa-sync-alt"></i> Обновить
+                </button>
+                <button class="btn btn-outline" id="downloadDigestBtn">
+                    <i class="fas fa-download"></i> Скачать
+                </button>
+            </div>
         </div>
-        <nav class="mobile-nav">
-            <a href="#today" class="mobile-nav-link active">Главная</a>
-            <a href="#info" class="mobile-nav-link">Информирование</a>
-            <a href="#sources" class="mobile-nav-link">Источники</a>
-        </nav>
-    </div>
+    </section>
 
     <!-- Main Content -->
-    <main class="main">
+    <main class="main-content">
         <div class="container">
+            <!-- Navigation Tabs -->
+            <div class="nav-tabs">
+                <a href="#today" class="nav-tab active" data-section="today">
+                    <i class="fas fa-home"></i><span>Главная</span>
+                </a>
+                <a href="#info" class="nav-tab" data-section="info">
+                    <i class="fas fa-newspaper"></i><span>Новости</span>
+                </a>
+                <a href="#games" class="nav-tab" data-section="games">
+                    <i class="fas fa-gamepad"></i><span>Игры</span>
+                </a>
+            </div>
 
-            <!-- Section: Home -->
+            <!-- Section: Главная -->
             <section id="today" class="section active">
-                <h1 class="section-title">ЧБ Новости</h1>
-                <p class="section-subtitle">Новостной агрегатор</p>
-
-                <div class="hero">
-                    <p class="hero-text">Актуальная информация из официальных источников</p>
-                    <div class="hero-actions">
-                        <button id="updateNewsBtn" class="btn btn-primary">
-                            <i class="fas fa-sync-alt"></i> Обновить
-                        </button>
-                        <button id="downloadDigestBtn" class="btn">
-                            <i class="fas fa-download"></i> Скачать
-                        </button>
-                    </div>
+                <div class="section-header">
+                    <h2>Главная</h2>
                 </div>
-
-                <div class="countdown">
-                    <span class="countdown-label">До следующего выпуска</span>
-                    <div class="countdown-timer">
-                        <span class="countdown-item"><span id="countdownHours">00</span><small>ч</small></span>
-                        <span class="countdown-separator">:</span>
-                        <span class="countdown-item"><span id="countdownMinutes">00</span><small>м</small></span>
-                        <span class="countdown-separator">:</span>
-                        <span class="countdown-item"><span id="countdownSeconds">00</span><small>с</small></span>
-                    </div>
-                </div>
-
-                <div id="previewNewsGrid" class="news-grid"></div>
-                <div id="previewNoContent" class="no-content show">
-                    <p>Нет новостей</p>
-                    <small>Нажмите кнопку "Обновить"</small>
+                <div class="news-grid" id="previewNewsGrid"></div>
+                <div class="no-content" id="previewNoContent">
+                    <i class="fas fa-inbox"></i>
+                    <p>Нет новостей. Нажмите "Обновить"</p>
+                    <button class="btn btn-primary mt-3" id="previewUpdateBtn">
+                        <i class="fas fa-sync-alt"></i> Обновить
+                    </button>
                 </div>
             </section>
 
-            <!-- Section: Info -->
+            <!-- Section: Новости -->
             <section id="info" class="section">
-                <h1 class="section-title">Информирование</h1>
-
-                <div class="category" style="margin-bottom: 2rem;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.5rem;">
-                        <h2 style="font-size:1.2rem;">🌍 Новости мира</h2>
-                        <span id="worldSourcesCount" style="font-size:0.8rem; color:var(--text-muted);">0 источников</span>
-                    </div>
-                    <div id="worldNewsList" class="news-list"></div>
-                    <div id="worldNoContent" class="no-content show"><p>Нет новостей</p></div>
+                <div class="section-header">
+                    <h2>Новости по категориям</h2>
+                    <button class="btn btn-sm btn-outline" id="refreshNewsBtn">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
                 </div>
 
-                <div class="category" style="margin-bottom: 2rem;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.5rem;">
-                        <h2 style="font-size:1.2rem;">🇷🇺 Новости России</h2>
-                        <span id="russiaSourcesCount" style="font-size:0.8rem; color:var(--text-muted);">0 источников</span>
+                <!-- Мир -->
+                <div class="category-section">
+                    <div class="category-header">
+                        <h3>🌍 Мир</h3>
+                        <span class="badge" id="worldSourcesCount">0</span>
                     </div>
-                    <div id="russiaNewsList" class="news-list"></div>
-                    <div id="russiaNoContent" class="no-content show"><p>Нет новостей</p></div>
+                    <div class="loading" id="worldLoading"><div class="spinner"></div></div>
+                    <div class="news-grid" id="worldNewsList"></div>
+                    <div class="no-content" id="worldNoContent"><i class="fas fa-inbox"></i><p>Нет новостей</p></div>
                 </div>
 
-                <div class="category">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.5rem;">
-                        <h2 style="font-size:1.2rem;">⚔️ Новости СВО</h2>
-                        <span id="svoSourcesCount" style="font-size:0.8rem; color:var(--text-muted);">0 источников</span>
+                <!-- Россия -->
+                <div class="category-section">
+                    <div class="category-header">
+                        <h3>🇷🇺 Россия</h3>
+                        <span class="badge" id="russiaSourcesCount">0</span>
                     </div>
-                    <div id="svoNewsList" class="news-list"></div>
-                    <div id="svoNoContent" class="no-content show"><p>Нет новостей</p></div>
+                    <div class="loading" id="russiaLoading"><div class="spinner"></div></div>
+                    <div class="news-grid" id="russiaNewsList"></div>
+                    <div class="no-content" id="russiaNoContent"><i class="fas fa-inbox"></i><p>Нет новостей</p></div>
                 </div>
-            </section>
 
-            <!-- Section: Sources -->
-            <section id="sources" class="section">
-                <h1 class="section-title">Источники</h1>
-                <div class="sources-grid">
-                    <div class="source-card">
-                        <h3>РИА Новости</h3>
-                        <span class="source-url">ria.ru</span>
-                        <a href="https://ria.ru" class="btn" target="_blank">Перейти</a>
+                <!-- СВО -->
+                <div class="category-section">
+                    <div class="category-header">
+                        <h3>⚔️ СВО</h3>
+                        <span class="badge" id="svoSourcesCount">0</span>
                     </div>
-                    <div class="source-card">
-                        <h3>ТАСС</h3>
-                        <span class="source-url">tass.ru</span>
-                        <a href="https://tass.ru" class="btn" target="_blank">Перейти</a>
-                    </div>
-                    <div class="source-card">
-                        <h3>Минобороны РФ</h3>
-                        <span class="source-url">mil.ru</span>
-                        <a href="https://function.mil.ru" class="btn" target="_blank">Перейти</a>
-                    </div>
-                    <div class="source-card">
-                        <h3>Российская газета</h3>
-                        <span class="source-url">rg.ru</span>
-                        <a href="https://rg.ru" class="btn" target="_blank">Перейти</a>
-                    </div>
-                    <div class="source-card">
-                        <h3>Звезда</h3>
-                        <span class="source-url">tvzvezda.ru</span>
-                        <a href="https://tvzvezda.ru" class="btn" target="_blank">Перейти</a>
-                    </div>
+                    <div class="loading" id="svoLoading"><div class="spinner"></div></div>
+                    <div class="news-grid" id="svoNewsList"></div>
+                    <div class="no-content" id="svoNoContent"><i class="fas fa-inbox"></i><p>Нет новостей</p></div>
                 </div>
             </section>
 
+            <!-- Section: Авторские игры -->
+            <section id="games" class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-gamepad"></i> Авторские игры</h2>
+                </div>
+                <div class="games-grid">
+                    <a href="https://t.me/GameDOGBot/denbotgamedog2" class="game-card" target="_blank">
+                        <div class="game-icon dog"><i class="fas fa-dog"></i></div>
+                        <div class="game-info">
+                            <h3>Служебная Собака</h3>
+                            <p>ПОГОНЯ ULTIMATE</p>
+                        </div>
+                        <div class="game-action"><i class="fas fa-play"></i></div>
+                    </a>
+                    <a href="https://t.me/minibrogame_bot/mini" class="game-card" target="_blank">
+                        <div class="game-icon pet"><i class="fas fa-paw"></i></div>
+                        <div class="game-info">
+                            <h3>Virtual PET</h3>
+                            <p>Тамагочи 2.0</p>
+                        </div>
+                        <div class="game-action"><i class="fas fa-play"></i></div>
+                    </a>
+                </div>
+                <div class="games-note">
+                    <i class="fab fa-telegram"></i>
+                    <span>Игры запускаются в Telegram</span>
+                </div>
+            </section>
+
+            <!-- Support Section -->
+            <section class="support-section">
+                <div class="support-content">
+                    <i class="fas fa-heart"></i>
+                    <h3>Поддержать проект</h3>
+                    <p>Подпишитесь на наш канал для эксклюзивных материалов</p>
+                    <a href="https://t.me/cheburashNEWS" class="support-btn" target="_blank">
+                        <i class="fab fa-telegram"></i> Перейти в канал
+                    </a>
+                </div>
+            </section>
         </div>
     </main>
 
     <!-- Footer -->
     <footer class="footer">
-        <div class="container footer-content">
-            <div>© 2026 ЧБ Новости</div>
-            <div>
-                <a href="#sources" style="margin-right:1rem;">Источники</a>
-                <button id="footerDownloadBtn" style="color:inherit; background:none; border:none; padding:0;">Скачать дайджест</button>
-            </div>
+        <div class="footer-content">
+            <div class="logo-text">ЧБ</div>
+            <span>Новости 2026</span>
+        </div>
+        <div class="footer-meta">
+            <span>Обновлено: <span id="footerLastUpdate">—</span></span>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2026 ЧБ. Все права защищены.</p>
         </div>
     </footer>
 
-    <!-- Admin Modal -->
-    <div class="modal fade" id="adminModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="adminModalTitle">Админ-панель</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="admin-tabs">
-                        <button class="tab-btn active" data-tab="login">Вход</button>
-                        <button class="tab-btn" data-tab="manual">Добавить</button>
-                        <button class="tab-btn" data-tab="settings">Настройки</button>
-                    </div>
-
-                    <div id="loginTab" class="tab-content active">
-                        <div class="login-content">
-                            <input type="password" id="adminPassword" class="form-control" placeholder="Пароль" style="margin-bottom:1rem;">
-                            <button id="loginBtn" class="btn btn-primary" style="width:100%">Войти</button>
-                        </div>
-                    </div>
-
-                    <div id="manualTab" class="tab-content">
-                        <form id="manualNewsForm">
-                            <input type="text" id="manualTitle" class="form-control" placeholder="Заголовок" style="margin-bottom:0.5rem;">
-                            <textarea id="manualDescription" class="form-control" placeholder="Описание" style="margin-bottom:0.5rem;"></textarea>
-                            <input type="text" id="manualUrl" class="form-control" placeholder="Ссылка" style="margin-bottom:0.5rem;">
-                            <select id="manualCategory" class="form-control" style="margin-bottom:0.5rem;">
-                                <option value="world">Мир</option>
-                                <option value="russia">Россия</option>
-                                <option value="svo">СВО</option>
-                            </select>
-                            <input type="text" id="manualSource" class="form-control" placeholder="Источник" style="margin-bottom:1rem;">
-                            <button type="submit" class="btn btn-primary" style="width:100%">Добавить</button>
-                        </form>
-                    </div>
-
-                    <div id="settingsTab" class="tab-content">
-                        <input type="text" id="logoUrl" class="form-control" placeholder="URL Логотипа" style="margin-bottom:1rem;">
-                        <button id="saveLogoBtn" class="btn" style="width:100%; margin-bottom:1rem;">Сохранить логотип</button>
-                        <button id="clearCacheBtn" class="btn" style="width:100%; color:red; border-color:red;">Очистить кэш</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/rss-parser@3.13.0/dist/rss-parser.min.js"></script>
     <script src="config.js"></script>
     <script src="rss-parser.js"></script>
-    <script src="admin-panel.js"></script>
     <script src="main.js"></script>
 </body>
 </html>
