@@ -7,131 +7,16 @@
     <title>ЧБ Новости</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --tg-bg: var(--tg-theme-bg-color, #ffffff);
-            --tg-text: var(--tg-theme-text-color, #000000);
-            --tg-hint: var(--tg-theme-hint-color, #999999);
-            --tg-link: var(--tg-theme-link-color, #3390ec);
-            --tg-button: var(--tg-theme-button-color, #3390ec);
-            --tg-button-text: var(--tg-theme-button-text-color, #ffffff);
-            --tg-secondary-bg: var(--tg-theme-secondary-bg-color, #f5f5f5);
-            --border: rgba(0, 0, 0, 0.1);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--tg-secondary-bg);
-            color: var(--tg-text);
-            line-height: 1.5;
-            padding-bottom: 20px;
-        }
-        .header {
-            background: var(--tg-bg);
-            padding: 16px;
-            position: sticky; top: 0; z-index: 100;
-            border-bottom: 1px solid var(--border);
-        }
-        .header-title { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
-        .header-subtitle { font-size: 13px; color: var(--tg-hint); }
-        .status-bar {
-            background: var(--tg-bg); padding: 12px 16px;
-            display: flex; justify-content: space-between; align-items: center;
-            font-size: 13px; border-bottom: 1px solid var(--border);
-        }
-        .status-online { display: flex; align-items: center; gap: 6px; color: #34c759; font-weight: 500; }
-        .status-dot { width: 8px; height: 8px; background: #34c759; border-radius: 50%; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-        .status-time { color: var(--tg-hint); font-size: 13px; }
-        .section {
-            background: var(--tg-bg); margin: 12px 0;
-            border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
-        }
-        .section-header {
-            padding: 12px 16px 8px; font-size: 13px; color: var(--tg-hint);
-            text-transform: uppercase; font-weight: 500; letter-spacing: 0.3px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .refresh-btn {
-            background: none; border: none; color: var(--tg-link);
-            font-size: 13px; cursor: pointer; padding: 4px 8px; border-radius: 6px;
-            display: flex; align-items: center; gap: 4px;
-        }
-        .refresh-btn:active { background: var(--tg-secondary-bg); }
-        .game-item {
-            display: flex; align-items: center; padding: 14px 16px;
-            text-decoration: none; color: var(--tg-text);
-            border-bottom: 1px solid var(--border); transition: background 0.2s;
-        }
-        .game-item:last-child { border-bottom: none; }
-        .game-item:active { background: var(--tg-secondary-bg); }
-        .game-icon {
-            width: 42px; height: 42px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px; margin-right: 14px; color: white;
-        }
-        .game-icon.dog { background: linear-gradient(135deg, #ff9500, #ff5e3a); }
-        .game-icon.pet { background: linear-gradient(135deg, #5ac8fa, #007aff); }
-        .game-info { flex: 1; }
-        .game-name { font-size: 16px; font-weight: 500; margin-bottom: 2px; }
-        .game-desc { font-size: 13px; color: var(--tg-hint); }
-        .game-arrow { color: var(--tg-hint); font-size: 14px; }
-        .news-item { padding: 14px 16px; border-bottom: 1px solid var(--border); }
-        .news-item:last-child { border-bottom: none; }
-        .news-tag {
-            display: inline-block; font-size: 12px; font-weight: 600;
-            margin-bottom: 6px; padding: 2px 8px; border-radius: 6px;
-        }
-        .tag-world { color: #007aff; background: rgba(0, 122, 255, 0.1); }
-        .tag-russia { color: #ff3b30; background: rgba(255, 59, 48, 0.1); }
-        .tag-svo { color: #ff9500; background: rgba(255, 149, 0, 0.1); }
-        .news-text { font-size: 15px; line-height: 1.4; margin-bottom: 6px; }
-        .news-source { font-size: 12px; color: var(--tg-hint); margin-bottom: 4px; }
-        .news-time { font-size: 12px; color: var(--tg-hint); }
-        .category-block { border-top: 1px solid var(--border); }
-        .category-block:first-child { border-top: none; }
-        .category-title {
-            padding: 10px 16px; font-size: 14px; font-weight: 600;
-            display: flex; align-items: center; gap: 8px;
-            background: var(--tg-secondary-bg);
-        }
-        .category-badge {
-            font-size: 11px; padding: 2px 6px; border-radius: 4px;
-            background: var(--tg-secondary-bg); color: var(--tg-hint);
-        }
-        .download-section { padding: 16px; }
-        .download-btn {
-            width: 100%; padding: 14px; background: var(--tg-button);
-            color: var(--tg-button-text); border: none; border-radius: 12px;
-            font-size: 16px; font-weight: 500; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            transition: opacity 0.2s;
-        }
-        .download-btn:active { opacity: 0.8; }
-        .footer {
-            text-align: center; padding: 20px 16px;
-            color: var(--tg-hint); font-size: 13px;
-        }
-        .footer-link {
-            color: var(--tg-link); text-decoration: none;
-            display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 14px;
-        }
-        .loading { text-align: center; padding: 20px; color: var(--tg-hint); font-size: 14px; }
-        .loading i { margin-bottom: 8px; }
-        .error-state { text-align: center; padding: 20px; color: #ff3b30; font-size: 14px; }
-        .last-update {
-            text-align: center; font-size: 11px; color: var(--tg-hint);
-            padding: 8px 16px; background: var(--tg-secondary-bg);
-            border-top: 1px solid var(--border);
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Header -->
     <header class="header">
         <div class="header-title">ЧБ Новости</div>
         <div class="header-subtitle">Информационный центр</div>
     </header>
 
+    <!-- Status Bar -->
     <div class="status-bar">
         <div class="status-online">
             <div class="status-dot"></div>
@@ -140,6 +25,7 @@
         <div class="status-time" id="currentTime">--:--</div>
     </div>
 
+    <!-- Games Section -->
     <div class="section">
         <div class="section-header">Игры</div>
         <a href="#" class="game-item" id="gameDog">
@@ -160,6 +46,7 @@
         </a>
     </div>
 
+    <!-- News Section -->
     <div class="section">
         <div class="section-header">
             <span>Новости по категориям</span>
@@ -170,11 +57,12 @@
         <div id="newsContainer">
             <div class="loading">
                 <i class="fas fa-circle-notch fa-spin"></i>
-                <div>Загрузка...</div>
+                <div>Загрузка новостей...</div>
             </div>
         </div>
     </div>
 
+    <!-- Download Section -->
     <div class="download-section">
         <button class="download-btn" id="downloadBtn">
             <i class="fas fa-file-download"></i>
@@ -182,233 +70,249 @@
         </button>
     </div>
 
+    <!-- Footer -->
+    <footer class="footer">
+       # 📱 Минималистичный шаблон для ЧБ Новостей
+
+Отлично! Я сделаю чистый `index.html` в стиле Telegram Mini App, который будет работать с вашими существующими JS-файлами (`main.js`, `config.js`, `admin-panel.js`, `rss-parser.js`).
+
+---
+
+## 📄 `index.html` (Минималистичный шаблон)
+
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#ffffff">
+    <title>ЧБ Новости</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-title">ЧБ Новости</div>
+        <div class="header-subtitle">Информационный центр</div>
+    </header>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div class="status-online">
+            <div class="status-dot"></div>
+            <span>Онлайн</span>
+        </div>
+        <div class="status-time" id="currentTime">--:--</div>
+    </div>
+
+    <!-- Games Section -->
+    <div class="section">
+        <div class="section-header">Игры</div>
+        <a href="#" class="game-item" id="gameDog">
+            <div class="game-icon dog"><i class="fas fa-dog"></i></div>
+            <div class="game-info">
+                <div class="game-name">Служебная Собака</div>
+                <div class="game-desc">ПОГОНЯ ULTIMATE</div>
+            </div>
+            <div class="game-arrow"><i class="fas fa-chevron-right"></i></div>
+        </a>
+        <a href="#" class="game-item" id="gamePet">
+            <div class="game-icon pet"><i class="fas fa-paw"></i></div>
+            <div class="game-info">
+                <div class="game-name">Virtual PET</div>
+                <div class="game-desc">Тамагочи 2.0</div>
+            </div>
+            <div class="game-arrow"><i class="fas fa-chevron-right"></i></div>
+        </a>
+    </div>
+
+    <!-- News Section -->
+    <div class="section">
+        <div class="section-header">
+            <span>Новости по категориям</span>
+            <button class="refresh-btn" id="updateNewsBtn">
+                <i class="fas fa-sync-alt"></i> Обновить
+            </button>
+        </div>
+        
+        <!-- World News -->
+        <div class="category-block">
+            <div class="category-title">
+                🌍 Новости мира
+                <span class="category-badge" id="worldSourcesCount">0 источников</span>
+            </div>
+            <div class="loading" id="worldLoading">
+                <i class="fas fa-circle-notch fa-spin"></i> Загрузка...
+            </div>
+            <div class="news-list" id="worldNewsList"></div>
+            <div class="no-content" id="worldNoContent">
+                <i class="fas fa-inbox"></i>
+                <p>Нет новостей</p>
+            </div>
+        </div>
+
+        <!-- Russia News -->
+        <div class="category-block">
+            <div class="category-title">
+                🇷🇺 Новости России
+                <span class="category-badge" id="russiaSourcesCount">0 источников</span>
+            </div>
+            <div class="loading" id="russiaLoading">
+                <i class="fas fa-circle-notch fa-spin"></i> Загрузка...
+            </div>
+            <div class="news-list" id="russiaNewsList"></div>
+            <div class="no-content" id="russiaNoContent">
+                <i class="fas fa-inbox"></i>
+                <p>Нет новостей</p>
+            </div>
+        </div>
+
+        <!-- SVO News -->
+        <div class="category-block">
+            <div class="category-title">
+                ⚔️ Новости СВО
+                <span class="category-badge" id="svoSourcesCount">0 источников</span>
+            </div>
+            <div class="loading" id="svoLoading">
+                <i class="fas fa-circle-notch fa-spin"></i> Загрузка...
+            </div>
+            <div class="news-list" id="svoNewsList"></div>
+            <div class="no-content" id="svoNoContent">
+                <i class="fas fa-inbox"></i>
+                <p>Нет новостей</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Section -->
+    <div class="download-section">
+        <button class="download-btn" id="downloadDigestBtn">
+            <i class="fas fa-file-download"></i>
+            <span>Скачать дайджест</span>
+        </button>
+    </div>
+
+    <!-- Footer -->
     <footer class="footer">
         <div>© 2026 ЧБ Новости</div>
+        <div class="footer-update">
+            <i class="fas fa-clock"></i> Последнее обновление: <span id="footerLastUpdate">-</span>
+        </div>
         <a href="https://t.me/cheburashNEWS" class="footer-link" target="_blank">
             <i class="fab fa-telegram"></i> Наш канал
         </a>
     </footer>
-    
-    <div class="last-update">
-        Обновлено: <span id="lastUpdate">—</span>
-    </div>
 
-    <script>
-        // ========== TELEGRAM INIT ==========
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
-
-        // ========== CONFIG ==========
-        const CONFIG = {
-            NEWS_FILE: 'news.json',
-            CACHE_BUST: true, // Добавляет ?t=timestamp чтобы избежать кэша
-            GAMES: {
-                dog: { name: 'Служебная Собака', subtitle: 'ПОГОНЯ ULTIMATE', url: 'ВАША_ССЫЛКА_НА_СОБАКУ' },
-                pet: { name: 'Virtual PET', subtitle: 'Тамагочи 2.0', url: 'ВАША_ССЫЛКА_НА_PET' }
-            },
-            TELEGRAM: { channel: 'https://t.me/cheburashNEWS', bot: '@CheburashNEWS_bot' }
-        };
-
-        // ========== STATE ==========
-        let newsData = null;
-        let lastLoadTime = null;
-
-        // ========== UTILS ==========
-        function updateTime() {
-            const now = new Date();
-            document.getElementById('currentTime').textContent = now.toLocaleTimeString('ru-RU', {hour:'2-digit',minute:'2-digit'});
-        }
-        setInterval(updateTime, 1000);
-        updateTime();
-
-        function timeAgo(dateStr) {
-            if (!dateStr) return '';
-            const date = new Date(dateStr);
-            const now = new Date();
-            const diff = Math.floor((now - date) / 1000);
-            if (diff < 60) return 'только что';
-            if (diff < 3600) return Math.floor(diff/60) + ' мин. назад';
-            if (diff < 86400) return Math.floor(diff/3600) + ' ч. назад';
-            return date.toLocaleDateString('ru-RU', {day:'numeric', month:'short'});
-        }
-
-        function haptic(type='light') {
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred(type);
-        }
-
-        // ========== LOAD NEWS FROM JSON ==========
-        async function loadNews() {
-            const container = document.getElementById('newsContainer');
-            container.innerHTML = `<div class="loading"><i class="fas fa-circle-notch fa-spin"></i><div>Загрузка...</div></div>`;
-
-            try {
-                // Добавляем timestamp чтобы браузер не кэшировал файл
-                const url = CONFIG.NEWS_FILE + (CONFIG.CACHE_BUST ? '?t=' + Date.now() : '');
-                const response = await fetch(url);
-                
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                
-                newsData = await response.json();
-                lastLoadTime = new Date(newsData.updated || Date.now());
-                
-                renderNews();
-                updateLastUpdateTime();
-                
-            } catch (error) {
-                console.error('Ошибка загрузки новостей:', error);
-                container.innerHTML = `
-                    <div class="error-state">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <div style="margin-top:8px">Не удалось загрузить новости</div>
-                        <div style="font-size:11px;margin:8px 0;color:var(--tg-hint)">
-                            Убедитесь, что файл news.json существует в той же папке
-                        </div>
-                        <button class="refresh-btn" onclick="loadNews()" style="margin-top:12px">
-                            <i class="fas fa-sync-alt"></i> Повторить
+    <!-- Admin Modal -->
+    <div class="modal fade" id="adminModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-shield"></i>
+                        <span id="adminModalTitle">Админ-панель</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="admin-tabs">
+                        <button class="tab-btn active" data-tab="login">
+                            <i class="fas fa-sign-in-alt"></i> Вход
+                        </button>
+                        <button class="tab-btn" data-tab="manual">
+                            <i class="fas fa-plus"></i> Добавить
+                        </button>
+                        <button class="tab-btn" data-tab="telegram">
+                            <i class="fab fa-telegram"></i> Telegram
                         </button>
                     </div>
-                `;
-            }
-        }
 
-        function updateLastUpdateTime() {
-            if (lastLoadTime) {
-                document.getElementById('lastUpdate').textContent = 
-                    lastLoadTime.toLocaleString('ru-RU', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-            }
-        }
+                    <!-- Login Tab -->
+                    <div class="tab-content active" id="loginTab">
+                        <div class="text-center mb-4">
+                            <i class="fas fa-user-shield" style="font-size: 3rem; color: #6366f1;"></i>
+                            <h5 class="mt-3">Вход в админ-панель</h5>
+                            <p class="text-muted">Введите пароль для доступа</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Пароль</label>
+                            <input type="password" class="form-control" id="adminPassword" placeholder="Введите пароль">
+                        </div>
+                        <button class="btn btn-primary w-100" id="loginBtn">
+                            <i class="fas fa-sign-in-alt"></i> Войти
+                        </button>
+                    </div>
 
-        // ========== RENDER ==========
-        function renderNews() {
-            const container = document.getElementById('newsContainer');
-            
-            if (!newsData || !newsData.categories) {
-                container.innerHTML = `<div class="error-state"><i class="fas fa-inbox"></i><div style="margin-top:8px">Нет данных</div></div>`;
-                return;
-            }
+                    <!-- Manual Add Tab -->
+                    <div class="tab-content" id="manualTab">
+                        <div class="text-center mb-4">
+                            <i class="fas fa-plus-circle" style="font-size: 3rem; color: #10b981;"></i>
+                            <h5 class="mt-3">Добавить новость</h5>
+                        </div>
+                        <form id="manualNewsForm">
+                            <div class="mb-3">
+                                <label class="form-label">Заголовок *</label>
+                                <input type="text" class="form-control" id="manualTitle" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Описание *</label>
+                                <textarea class="form-control" id="manualDescription" rows="3" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Ссылка *</label>
+                                <input type="url" class="form-control" id="manualUrl" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Категория *</label>
+                                <select class="form-select" id="manualCategory" required>
+                                    <option value="world">🌍 Мир</option>
+                                    <option value="russia">🇷🇺 Россия</option>
+                                    <option value="svo">⚔️ СВО</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Источник *</label>
+                                <input type="text" class="form-control" id="manualSource" required>
+                            </div>
+                            <button class="btn btn-success w-100" type="submit">
+                                <i class="fas fa-plus"></i> Добавить
+                            </button>
+                        </form>
+                    </div>
 
-            const categories = [
-                { key: 'world', name: '🌍 Мир', class: 'tag-world' },
-                { key: 'russia', name: '🇷🇺 Россия', class: 'tag-russia' },
-                { key: 'svo', name: '⚔️ СВО', class: 'tag-svo' }
-            ];
+                    <!-- Telegram Tab -->
+                    <div class="tab-content" id="telegramTab">
+                        <div class="text-center mb-4">
+                            <i class="fab fa-telegram" style="font-size: 3rem; color: #0088cc;"></i>
+                            <h5 class="mt-3">Текст для Telegram</h5>
+                        </div>
+                        <div class="mb-3">
+                            <textarea class="form-control" id="telegramText" rows="10" readonly></textarea>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" id="generateTelegramTextBtn">
+                                <i class="fas fa-sync-alt"></i> Сгенерировать
+                            </button>
+                            <button class="btn btn-success" id="copyTelegramTextBtn">
+                                <i class="fas fa-copy"></i> Копировать
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            let html = '';
-            let total = 0;
-
-            categories.forEach(cat => {
-                const items = newsData.categories[cat.key] || [];
-                if (items.length === 0) return;
-                total += items.length;
-                
-                html += `<div class="category-block">
-                    <div class="category-title">${cat.name} <span class="category-badge">${items.length}</span></div>`;
-                
-                items.forEach(item => {
-                    html += `<div class="news-item">
-                        <span class="news-tag ${cat.class}">${item.source || 'Источник'}</span>
-                        <div class="news-text">${item.title}</div>
-                        <div class="news-source">${timeAgo(item.date)}</div>
-                        ${item.link ? `<a href="${item.link}" class="news-time" target="_blank" style="color:var(--tg-link);text-decoration:none">Читать →</a>` : ''}
-                    </div>`;
-                });
-                html += `</div>`;
-            });
-
-            if (total === 0) {
-                html = `<div class="error-state">
-                    <i class="fas fa-inbox"></i>
-                    <div style="margin-top:8px">Нет новостей в файле news.json</div>
-                </div>`;
-            }
-
-            container.innerHTML = html;
-        }
-
-        // ========== DIGEST ==========
-        function generateDigestContent() {
-            if (!newsData) return 'Ошибка: данные не загружены';
-            
-            const date = new Date().toLocaleDateString('ru-RU', {day:'numeric',month:'long',year:'numeric'});
-            const time = new Date().toLocaleTimeString('ru-RU', {hour:'2-digit',minute:'2-digit'});
-
-            let c = `════════════════════════════════════════════════════\n`;
-            c += `         ЧБ НОВОСТИ | ИНФОРМАЦИОННЫЙ ДАЙДЖЕСТ\n`;
-            c += `════════════════════════════════════════════════════\n\n`;
-            c += `📅 Дата: ${date}\n⏰ Время: ${time}\n`;
-            c += `📊 Обновлено: ${newsData.updated ? new Date(newsData.updated).toLocaleString('ru-RU') : '—'}\n\n`;
-            c += `────────────────────────────────────────────────────\n\n`;
-
-            c += `🎮 ИГРОВЫЕ МОДУЛИ\n`;
-            c += `────────────────────────────────────────────────────\n`;
-            c += `  [1] ${CONFIG.GAMES.dog.name}: ${CONFIG.GAMES.dog.subtitle}\n`;
-            c += `  [2] ${CONFIG.GAMES.pet.name}: ${CONFIG.GAMES.pet.subtitle}\n\n`;
-
-            const cats = [
-                {key:'world', name:'🌍 МИР'},
-                {key:'russia', name:'🇷🇺 РОССИЯ'},
-                {key:'svo', name:'⚔️ СВО'}
-            ];
-
-            cats.forEach(cat => {
-                const items = newsData.categories?.[cat.key] || [];
-                c += `${cat.name}\n`;
-                c += `────────────────────────────────────────────────────\n`;
-                if (!items.length) {
-                    c += `  Нет данных\n\n`;
-                } else {
-                    items.forEach((item, i) => {
-                        c += `  [${i+1}] ${item.title}\n`;
-                        if (item.source) c += `      Источник: ${item.source}\n`;
-                        if (item.date) c += `      Время: ${timeAgo(item.date)}\n`;
-                        if (item.link) c += `      Ссылка: ${item.link}\n`;
-                        c += `\n`;
-                    });
-                }
-            });
-
-            c += `────────────────────────────────────────────────────\n\n`;
-            c += `📬 ТЕЛЕГРАМ КАНАЛ: ${CONFIG.TELEGRAM.channel}\n`;
-            c += `🤖 БОТ: ${CONFIG.TELEGRAM.bot}\n\n`;
-            c += `════════════════════════════════════════════════════\n`;
-            c += `         © 2026 ЧБ НОВОСТНОЙ АГРЕГАТОР\n`;
-            c += `════════════════════════════════════════════════════\n`;
-            return c;
-        }
-
-        function downloadDigest() {
-            if (!newsData) {
-                tg.showAlert({title:'⚠️', message:'Сначала загрузите новости', buttons:[{type:'ok'}]});
-                return;
-            }
-            
-            haptic('success');
-            const content = generateDigestContent();
-            const blob = new Blob([content], {type:'text/plain;charset=utf-8'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `CHB_Digest_${new Date().toISOString().slice(0,10)}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            tg.showAlert({title:'✅ Готово', message:'Дайджест загружен', buttons:[{type:'ok'}]});
-        }
-
-        // ========== EVENTS ==========
-        document.querySelectorAll('a, button').forEach(el => {
-            el.addEventListener('click', () => haptic('light'));
-        });
-        document.getElementById('refreshBtn').addEventListener('click', () => { haptic('medium'); loadNews(); });
-        document.getElementById('downloadBtn').addEventListener('click', downloadDigest);
-        document.getElementById('gameDog').href = CONFIG.GAMES.dog.url;
-        document.getElementById('gamePet').href = CONFIG.GAMES.pet.url;
-
-        // ========== START ==========
-        loadNews();
-    </script>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/rss-parser@3.13.0/dist/rss-parser.min.js"></script>
+    <script src="config.js"></script>
+    <script src="rss-parser.js"></script>
+    <script src="admin-panel.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>
