@@ -184,7 +184,7 @@
                     <div class="no-content" id="worldNoContent">
                         <div class="no-content-icon"><i class="fas fa-inbox"></i></div>
                         <h4>Нет новостей</h4>
-                        <button class="btn btn-primary mt-3" onclick="updateNews()">
+                        <button class="btn btn-primary mt-3" onclick="refreshCategory('world')">
                             <i class="fas fa-sync-alt"></i> Обновить
                         </button>
                     </div>
@@ -195,7 +195,7 @@
                     <div class="category-header">
                         <h3>🇷🇺 Новости России</h3>
                         <div class="category-meta">
-                            <span class="badge" id="russiaSourcesCount">0 источников</span>
+                            <span class="badge" id="worldSourcesCount">0 источников</span>
                         </div>
                     </div>
 
@@ -209,7 +209,7 @@
                     <div class="no-content" id="russiaNoContent">
                         <div class="no-content-icon"><i class="fas fa-inbox"></i></div>
                         <h4>Нет новостей</h4>
-                        <button class="btn btn-primary mt-3" onclick="updateNews()">
+                        <button class="btn btn-primary mt-3" onclick="refreshCategory('russia')">
                             <i class="fas fa-sync-alt"></i> Обновить
                         </button>
                     </div>
@@ -220,7 +220,7 @@
                     <div class="category-header">
                         <h3>⚔️ Новости СВО</h3>
                         <div class="category-meta">
-                            <span class="badge" id="svoSourcesCount">0 источников</span>
+                            <span class="badge" id="worldSourcesCount">0 источников</span>
                         </div>
                     </div>
 
@@ -234,7 +234,7 @@
                     <div class="no-content" id="svoNoContent">
                         <div class="no-content-icon"><i class="fas fa-inbox"></i></div>
                         <h4>Нет новостей</h4>
-                        <button class="btn btn-primary mt-3" onclick="updateNews()">
+                        <button class="btn btn-primary mt-3" onclick="refreshCategory('svo')">
                             <i class="fas fa-sync-alt"></i> Обновить
                         </button>
                     </div>
@@ -364,9 +364,9 @@
                             <i class="fas fa-plus"></i>
                             <span>Добавить</span>
                         </button>
-                        <button class="tab-btn" data-tab="telegram">
-                            <i class="fab fa-telegram"></i>
-                            <span>Telegram</span>
+                        <button class="tab-btn" data-tab="settings">
+                            <i class="fas fa-cog"></i>
+                            <span>Настройки</span>
                         </button>
                     </div>
 
@@ -439,27 +439,25 @@
                         </div>
                     </div>
 
-                    <!-- Telegram Tab -->
-                    <div class="tab-content" id="telegramTab">
+                    <!-- Settings Tab -->
+                    <div class="tab-content" id="settingsTab">
                         <div class="login-content">
                             <div class="login-icon">
-                                <i class="fab fa-telegram"></i>
+                                <i class="fas fa-cog"></i>
                             </div>
-                            <h3>Текст для Telegram</h3>
-                            <p>Скопируйте и опубликуйте в канале</p>
+                            <h3>Настройки</h3>
+                            <p>Персонализируйте агрегатор</p>
 
                             <div class="mb-3">
-                                <textarea class="form-control" id="telegramText" rows="10" readonly></textarea>
+                                <label class="form-label">URL логотипа</label>
+                                <input type="url" class="form-control" id="logoUrl" placeholder="https://example.com/logo.png">
+                                <small class="form-text">Оставьте пустым для текстового логотипа</small>
                             </div>
 
-                            <div class="d-grid gap-2">
-                                <button class="btn btn-primary" id="generateTelegramTextBtn">
-                                    <i class="fas fa-sync-alt"></i> Сгенерировать
-                                </button>
-                                <button class="btn btn-success" id="copyTelegramTextBtn">
-                                    <i class="fas fa-copy"></i> Копировать
-                                </button>
-                            </div>
+                            <button class="btn btn-primary w-100" id="saveLogoBtn">
+                                <i class="fas fa-save"></i>
+                                <span>Сохранить</span>
+                            </button>
                         </div>
                     </div>
                 </div>

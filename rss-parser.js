@@ -1,43 +1,93 @@
 // ==================== RSS-ПАРСЕР С РАСПРЕДЕЛЕНИЕМ ПО КЛЮЧЕВЫМ СЛОВАМ ====================
+
 class RSSNewsParser {
     constructor() {
         this.parser = new RSSParser({
             customFields: {
-                item: ['pubDate', 'link', 'guid', 'description', 'content:encoded']
+                item: ['pubDate', 'link', 'guid', 'description']
             }
         });
-        
-        // РАБОЧИЕ RSS-ЛЕНТЫ (проверено 2026)
+
+        // ВСЕ ИСТОЧНИКИ БЕЗ РАЗДЕЛЕНИЯ НА КАТЕГОРИИ
+        // Теперь все ленты парсятся вместе и распределяются по ключевым словам
         this.allFeeds = [
+            // РИА Новости
             { name: 'РИА Новости', url: 'https://ria.ru/export/rss2/archive/index.xml' },
+            // ТАСС
             { name: 'ТАСС', url: 'https://tass.ru/rss/v2.xml' },
+            // Минобороны РФ
+            { name: 'Минобороны РФ', url: 'https://function.mil.ru/rss/news.htm' },
+            // Российская газета
             { name: 'Российская газета', url: 'https://rg.ru/xml/index.xml' },
-            { name: 'Известия', url: 'https://iz.ru/rss' }
+            // Звезда
+            { name: 'Звезда', url: 'https://tvzvezda.ru/rss.xml' }
         ];
 
         // КЛЮЧЕВЫЕ СЛОВА ДЛЯ КАЖДОЙ КАТЕГОРИИ
         this.keywords = {
             svo: [
                 'сво', 'спецоперация', 'специальная военная операция', 'зона сво', 'донбасс', 'донецк', 'днр', 'луганск', 'лнр',
-                'запорожье', 'херсон', 'купянск', 'бахмут', 'авдеевка', 'маринка', 'соледар', 'линия соприкосновения',
-                'министерство обороны рф', 'военкомат', 'мобилизация', 'контрактник', 'добровольцы', 'штурмовик',
-                'обстрел', 'артобстрел', 'дрон', 'бпла', 'пво', 'военная техника', 'танк', 'вдв', 'морпехи', 'флот'
+                'запорожье', 'запорожская область', 'херсон', 'херсонская область', 'купянск', 'изюм', 'бахмут', 'артёмовск',
+                'авдеевка', 'маринка', 'красный лиман', 'соледар', 'северск', 'крменная', 'дебальцево', 'горловка', 'макеевка',
+                'новоазовск', 'линия соприкосновения', 'передовая', 'окоп', 'траншея', 'вс рф', 'министерство обороны рф', 'шойгу',
+                'герасимов', 'военкомат', 'мобилизация', 'контрактник', 'добровольцы', 'чвк', 'вагнер', 'штурмовик', 'разведка',
+                'диверсия', 'обстрел', 'артобстрел', 'миномёт', 'гаубица', 'град', 'смерч', 'ураган', 'искандер', 'калибр',
+                'дрон', 'бпла', 'шахед', 'герань', 'ланцет', 'пво', 'с-400', 'панцирь', 'реб', 'разминирование', 'сапёр',
+                'эвакуация мирных жителей', 'гуманитарный коридор', 'гумконвой', 'военнопленные', 'обмен пленными', 'груз-200',
+                'потери', 'безвозвратные потери', 'раненые', 'госпиталь', 'медэвакуация', 'тыл', 'снабжение', 'военная техника',
+                'танк', 'бмп', 'бтр', 'армата', 'курганец', 'бумеранг', 'военная база', 'полигон', 'учения', 'призыв', 'отсрочка',
+                'бронепоезд', 'железнодорожные войска', 'фортификационные сооружения', 'укрепрайон', 'логистика', 'воинская часть',
+                'командир батальона', 'полка', 'дивизии', 'бригады', 'штаб', 'разведбат', 'десант', 'вдв', 'морпехи', 'флот',
+                'черноморский флот', 'северный флот', 'тоф', 'балтфлот', 'авиация', 'штурмовик су-25', 'су-34', 'су-35', 'миг-31',
+                'ту-95', 'ту-160', 'беспилотник', 'разведывательный дрон', 'корректировка огня', 'артиллерийская подготовка',
+                'штурм населённого пункта', 'зачистка', 'блокпост', 'кпп', 'пропускной режим', 'военная комендатура',
+                'военная администрация', 'референдум', 'присоединение', 'новые регионы', 'новые субъекты рф', 'воссоединение',
+                'денацификация', 'демилитаризация'
             ],
             russia: [
-                'россия', 'рф', 'российская федерация', 'российский', 'россияне', 'москва', 'санкт-петербург',
-                'правительство рф', 'госдума', 'совет федерации', 'кремль', 'президент рф', 'губернатор',
-                'регион', 'область', 'край', 'республика', 'нацпроекты', 'экономика россии'
+                'россия', 'рф', 'российская федерация', 'российский', 'россияне', 'россиянин', 'россиянка', 'федеральный округ',
+                'субъект рф', 'москва', 'мо', 'подмосковье', 'санкт-петербург', 'спб', 'питер', 'ленинградская область', 'новосибирск',
+                'екатеринбург', 'казань', 'самара', 'челябинск', 'ростов-на-дону', 'уфа', 'волгоград', 'пермь', 'красноярск',
+                'воронеж', 'саратов', 'краснодар', 'тюмень', 'иркутск', 'хабаровск', 'владивосток', 'нижний новгород', 'омск',
+                'кемерово', 'киров', 'ярославль', 'татарстан', 'башкортостан', 'дагестан', 'чечня', 'ингушетия', 'северная осетия',
+                'кабардино-балкария', 'карачаево-черкесия', 'адыгея', 'калмыкия', 'тува', 'алтай', 'хакасия', 'якутия', 'саха',
+                'крым', 'севастополь', 'калининградская область', 'дальний восток', 'сибирь', 'урал', 'поволжье', 'цфо', 'сзфо',
+                'юфо', 'скфо', 'пфо', 'уфо', 'сфо', 'дфо', 'кремль', 'администрация президента рф', 'правительство рф', 'госдума',
+                'совет федерации', 'цик россии', 'избирком', 'центризбирком', 'цб рф', 'банк россии', 'мосбиржа', 'спб биржа',
+                'рубль', 'рублёвый', 'мрот', 'пенсия пфр', 'материнский капитал', 'маткапитал', 'омс', 'полис омс', 'егэ', 'огэ',
+                'рособрнадзор', 'роструд', 'роспотребнадзор', 'росздравнадзор', 'минздрав рф', 'минобрнауки рф', 'минтранс рф',
+                'минстрой рф', 'минэнерго рф', 'минсельхоз рф', 'фнс россии', 'пфр', 'фсс', 'фмс', 'мвд россии', 'ск россии',
+                'фсб россии', 'фсин', 'росгвардия', 'гибдд', 'жкх', 'капремонт', 'фонд капремонта', 'мусорная реформа',
+                'региональный оператор', 'ржд', 'ростелеком', 'почта россии', 'сбербанк', 'втб', 'газпром', 'роснефть', 'лукойл',
+                'новатэк', 'сбер', 'аэрофлот', 'мир (карта)', 'нацпроекты', 'майские указы', 'госпрограмма рф', 'фз', 'федеральный закон',
+                'ук рф', 'коап рф', 'конституция рф', 'президент рф', 'премьер-министр рф', 'губернатор', 'мэр москвы', 'мэр петербурга',
+                'глава республики', 'глава региона', 'облдума', 'заксобрание'
             ],
             world: [
-                'сша', 'америка', 'китай', 'ес', 'евросоюз', 'германия', 'франция', 'великобритания',
-                'оон', 'нато', 'саммит', 'переговоры', 'санкции', 'война', 'конфликт', 'выборы',
-                'президент', 'премьер', 'международный', 'мировая экономика'
+                'сша', 'америка', 'вашингтон', 'белый дом', 'конгресс', 'байден', 'трамп', 'китай', 'пекин', 'си цзиньпин', 'ес',
+                'евросоюз', 'еврокомиссия', 'брюссель', 'германия', 'франция', 'великобритания', 'британия', 'лондон', 'борис джонсон',
+                'сунак', 'канада', 'япония', 'токио', 'индия', 'нью-дель', 'бразилия', 'буэнос-айрес', 'аргентина', 'мексика', 'турция',
+                'эрдоган', 'израиль', 'тель-авив', 'нетаньяху', 'палестина', 'газа', 'западный берег', 'иран', 'тегеран',
+                'саудовская аравия', 'эр-рияд', 'египет', 'каир', 'юар', 'нигерия', 'австралия', 'оон', 'un', 'генассамблея',
+                'совбез оон', 'гуттериш', 'нато', 'nato', 'альянс', 'саммит нато', 'вто', 'мвф', 'всемирный банк', 'фрг', 'доллар',
+                'евро', 'юань', 'иена', 'фунт стерлингов', 'биткоин', 'криптовалюта', 'климат', 'cop', 'глобальное потепление',
+                'парижское соглашение', 'углеродный след', 'мигранты', 'беженцы', 'эмиграция', 'иммиграция', 'граница',
+                'пограничный контроль', 'теракт', 'терроризм', 'игил', 'аль-каида', 'хамас', 'хезболла', 'война', 'конфликт',
+                'мирные переговоры', 'санкции', 'эмбарго', 'экспорт', 'импорт', 'дефицит', 'инфляция', 'рецессия', 'безработица',
+                'ввп мира', 'фондовый рынок', 'уолл-стрит', 'dow jones', 's&p 500', 'nasdaq', 'франкфуртская биржа', 'токийская биржа',
+                'катастрофа', 'землетрясение', 'цунами', 'ураган', 'тайфун', 'наводнение', 'засуха', 'лесной пожар', 'эпидемия',
+                'пандемия', 'воз', 'коронавирус', 'оспа обезьян', 'вакцина', 'технология', 'искусственный интеллект', 'ai', 'чипы',
+                'полупроводники', 'телекоммуникации', '5g', 'космос', 'наза', 'spacex', 'илон маск', 'юнеско', 'юникэф', 'красный крест',
+                'амнистия интернешнл', 'правозащитники', 'выборы за рубежом', 'президентские выборы', 'парламентские выборы',
+                'референдум за рубежом', 'протесты за рубежом', 'забастовка', 'социальные волнения'
             ]
         };
 
+        // Кэш для ускорения повторных запросов
         this.cache = new Map();
     }
 
+    // Форматирование даты
     formatDate(dateString) {
         try {
             const date = new Date(dateString);
@@ -52,6 +102,7 @@ class RSSNewsParser {
         }
     }
 
+    // Очистка HTML из текста
     stripHtml(html) {
         if (!html) return '';
         const tmp = document.createElement('DIV');
@@ -59,12 +110,14 @@ class RSSNewsParser {
         return tmp.textContent || tmp.innerText || '';
     }
 
+    // Ограничение длины текста
     truncateText(text, maxLength) {
         if (!text) return '';
         if (text.length <= maxLength) return text;
         return text.substring(0, maxLength - 3) + '...';
     }
 
+    // Обрезка текста до 100 слов
     truncateWords(text, wordCount = 100) {
         if (!text) return '';
         const cleanText = this.stripHtml(text);
@@ -73,6 +126,7 @@ class RSSNewsParser {
         return words.slice(0, wordCount).join(' ') + '...';
     }
 
+    // Удаление дубликатов по ссылке
     removeDuplicates(newsItems) {
         const seen = new Set();
         return newsItems.filter(item => {
@@ -83,27 +137,37 @@ class RSSNewsParser {
         });
     }
 
+    // РАСПРЕДЕЛЕНИЕ НОВОСТЕЙ ПО КАТЕГОРИЯМ НА ОСНОВЕ КЛЮЧЕВЫХ СЛОВ
     categorizeNewsItem(item) {
+        // Объединяем заголовок и описание для анализа
         const text = (item.title + ' ' + item.description).toLowerCase();
 
-        // СВО (высший приоритет)
+        // Проверяем СВО (высший приоритет)
         for (const keyword of this.keywords.svo) {
             if (text.includes(keyword)) {
                 return 'svo';
             }
         }
 
-        // Россия
+        // Проверяем Россию
         for (const keyword of this.keywords.russia) {
             if (text.includes(keyword)) {
                 return 'russia';
             }
         }
 
-        // Мир (по умолчанию)
+        // Проверяем Мир
+        for (const keyword of this.keywords.world) {
+            if (text.includes(keyword)) {
+                return 'world';
+            }
+        }
+
+        // Если не подошло ни под одну категорию - относим к миру
         return 'world';
     }
 
+    // Парсинг одной ленты
     async parseFeed(feed) {
         const cacheKey = `${feed.url}_${Math.floor(Date.now() / 300000)}`;
         if (this.cache.has(cacheKey)) {
@@ -111,7 +175,6 @@ class RSSNewsParser {
         }
 
         try {
-            // Используем rss2json для обхода CORS
             const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}`;
 
             const response = await fetch(proxyUrl, {
@@ -124,7 +187,7 @@ class RSSNewsParser {
             const data = await response.json();
             if (data.status !== 'ok') throw new Error(`RSS parsing error: ${data.message || 'Unknown error'}`);
 
-            const items = (data.items || []).map(item => ({
+            const items = data.items.map(item => ({
                 title: this.truncateText(item.title || 'Без заголовка', 200),
                 link: item.link || '#',
                 pubDate: item.pubDate || new Date().toISOString(),
@@ -144,19 +207,22 @@ class RSSNewsParser {
         }
     }
 
+    // ПАРСИНГ ВСЕХ НОВОСТЕЙ И РАСПРЕДЕЛЕНИЕ ПО КАТЕГОРИЯМ
     async parseAll() {
         showLoading(true);
 
         try {
+            // Парсим все ленты параллельно
             const results = await Promise.allSettled(
                 this.allFeeds.map(feed =>
                     Promise.race([
                         this.parseFeed(feed),
-                        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 15000))
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
                     ])
                 )
             );
 
+            // Объединяем все новости
             const allItems = [];
             const allSources = new Set();
 
@@ -167,8 +233,10 @@ class RSSNewsParser {
                 }
             });
 
+            // Удаляем дубликаты
             const uniqueItems = this.removeDuplicates(allItems);
 
+            // РАСПРЕДЕЛЯЕМ НОВОСТИ ПО КАТЕГОРИЯМ
             const categories = { world: [], russia: [], svo: [] };
             const categorySources = { world: new Set(), russia: new Set(), svo: new Set() };
 
@@ -178,9 +246,10 @@ class RSSNewsParser {
                 categorySources[category].add(item.source);
             });
 
+            // Сортируем по дате (свежие первыми) и ограничиваем количество
             Object.keys(categories).forEach(cat => {
                 categories[cat].sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-                categories[cat] = categories[cat].slice(0, 15);
+                categories[cat] = categories[cat].slice(0, 15); // Берём 15 новостей
             });
 
             const result = {
@@ -201,27 +270,31 @@ class RSSNewsParser {
                 totalSources: allSources.size
             };
 
+            // Сохраняем в кэш
             this.saveToCache(result);
 
-            console.log('✅ Парсинг завершён:');
-            console.log(`   🌍 Мир: ${categories.world.length} новостей`);
-            console.log(`   🇷🇺 Россия: ${categories.russia.length} новостей`);
-            console.log(`   ⚔️ СВО: ${categories.svo.length} новостей`);
+            // Статистика в консоли
+            console.log('✅ Парсинг завершён успешно:');
+            console.log(`   🌍 Мир: ${categories.world.length} новостей из ${categorySources.world.size} источников`);
+            console.log(`   🇷🇺 Россия: ${categories.russia.length} новостей из ${categorySources.russia.size} источников`);
+            console.log(`   ⚔️ СВО: ${categories.svo.length} новостей из ${categorySources.svo.size} источников`);
             console.log(`   💎 Всего: ${result.totalNews} новостей`);
 
+            // Визуальная индикация в интерфейсе
             this.updateCategoryBadges(result);
 
             return result;
 
         } catch (error) {
             console.error('❌ Критическая ошибка парсинга:', error);
-            showNotification('❌ Ошибка при загрузке новостей', 'danger');
+            showNotification('❌ Ошибка при загрузке новостей. Проверьте интернет-соединение.', 'danger');
             return null;
         } finally {
             showLoading(false);
         }
     }
 
+    // Обновление бейджей с количеством источников в интерфейсе
     updateCategoryBadges(data) {
         if (data.world.sources.length > 0) {
             document.getElementById('worldSourcesCount').textContent =
@@ -243,15 +316,18 @@ class RSSNewsParser {
         return 'источников';
     }
 
+    // Сохранение в кэш
     saveToCache(data) {
         try {
             localStorage.setItem('newsData', JSON.stringify(data));
             localStorage.setItem('lastUpdate', new Date().toISOString());
+            console.log('💾 Данные сохранены в кэш');
         } catch (error) {
             console.error('Ошибка сохранения в кэш:', error);
         }
     }
 
+    // Загрузка из кэша
     loadFromCache() {
         try {
             const cachedData = localStorage.getItem('newsData');
@@ -261,9 +337,11 @@ class RSSNewsParser {
             const data = JSON.parse(cachedData);
             const cacheAge = (Date.now() - new Date(lastUpdate).getTime()) / (1000 * 60);
             if (cacheAge > 60) {
+                console.log('🕒 Кэш устарел');
                 return null;
             }
 
+            console.log(`✅ Загружено из кэша (${Math.floor(cacheAge)} мин назад)`);
             return data;
         } catch (error) {
             console.error('Ошибка загрузки из кэша:', error);
@@ -279,9 +357,11 @@ class RSSNewsParser {
     }
 }
 
+// Глобальный экземпляр парсера
 const newsParser = new RSSNewsParser();
 
 // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
+
 function showLoading(show) {
     const loadingElements = document.querySelectorAll('.loading');
     loadingElements.forEach(el => {
@@ -292,7 +372,7 @@ function showLoading(show) {
 function showNotification(message, type = 'info') {
     const oldNotifications = document.querySelectorAll('.app-notification');
     oldNotifications.forEach(el => el.remove());
-    
+
     const notification = document.createElement('div');
     notification.className = `alert alert-${type} alert-dismissible fade show app-notification`;
     notification.style.cssText = `
@@ -302,6 +382,7 @@ function showNotification(message, type = 'info') {
         z-index: 9999;
         min-width: 350px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        animation: slideInDown 0.3s ease;
     `;
     notification.innerHTML = `
         ${message}
@@ -309,9 +390,29 @@ function showNotification(message, type = 'info') {
     `;
 
     document.body.appendChild(notification);
-
     setTimeout(() => {
         notification.classList.remove('show');
+        notification.classList.add('fade');
         setTimeout(() => notification.remove(), 300);
     }, 5000);
+}
+
+// УДАЛЕНА ФУНКЦИЯ refreshCategory - обновление только общее
+// Все кнопки обновления категорий удалены из интерфейса
+
+function getCategoryName(category) {
+    const names = {
+        world: 'Новости мира',
+        russia: 'Новости России',
+        svo: 'Новости СВО'
+    };
+    return names[category] || category;
+}
+
+function copyPageLink() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+        showNotification('✅ Ссылка скопирована!', 'success');
+    }).catch(() => {
+        showNotification('❌ Не удалось скопировать ссылку', 'danger');
+    });
 }
