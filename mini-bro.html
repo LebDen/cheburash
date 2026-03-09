@@ -1,0 +1,3487 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🐕 Легендарный Пёс - Premium Edition</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a67d8;
+            --secondary: #764ba2;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #ef4444;
+            --info: #60a5fa;
+            --purple: #a855f7;
+            --pink: #ec4899;
+            --telegram: #0088cc;
+            --telegram-dark: #006699;
+            --bg-gradient: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            --card-bg: rgba(255, 255, 255, 0.97);
+            --card-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            --glow: 0 0 20px rgba(102, 126, 234, 0.5);
+        }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 15px;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* === BACKGROUND ANIMATION === */
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-particle {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0.1;
+            animation: floatBg 20s infinite linear;
+        }
+
+        @keyframes floatBg {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.15;
+            }
+
+            90% {
+                opacity: 0.15;
+            }
+
+            100% {
+                transform: translateY(-100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .game-wrapper {
+            max-width: 1200px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        @media (max-width: 1000px) {
+            .game-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .main-panel {
+            background: var(--card-bg);
+            border-radius: 28px;
+            padding: 28px;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 22px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        /* === HEADER === */
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        h1 {
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2rem;
+            margin-bottom: 5px;
+            text-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .streak-badge {
+            position: absolute;
+            top: -10px;
+            right: 0;
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        /* === PET AREA === */
+        .pet-stage {
+            background: linear-gradient(180deg, #f0f4ff 0%, #e0e7ff 100%);
+            border-radius: 24px;
+            padding: 35px 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 30px rgba(102, 126, 234, 0.1);
+        }
+
+        .stage-badges {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .evolution-badge, .level-badge, .breed-badge {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .level-badge {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        }
+
+        .breed-badge {
+            background: linear-gradient(135deg, var(--purple), var(--pink));
+        }
+
+        .pet-container {
+            position: relative;
+            margin: 25px 0;
+            cursor: pointer;
+        }
+
+        .pet {
+            font-size: 110px;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            user-select: none;
+            filter: drop-shadow(0 15px 30px rgba(0,0,0,0.3));
+            display: inline-block;
+        }
+
+            .pet:hover {
+                transform: scale(1.12) rotate(8deg);
+            }
+
+            .pet.clicking {
+                animation: clickBounce 0.3s ease;
+            }
+
+        @keyframes clickBounce {
+            0%, 100% {
+                transform: scale(1) rotate(0deg);
+            }
+
+            50% {
+                transform: scale(1.18) rotate(-5deg);
+            }
+        }
+
+        .pet.evolving {
+            animation: evolve 1.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes evolve {
+            0% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+                filter: brightness(1);
+            }
+
+            20% {
+                transform: scale(1.15) rotate(-15deg);
+                opacity: 0.9;
+            }
+
+            40% {
+                transform: scale(1.35) rotate(15deg);
+                opacity: 0.7;
+                filter: brightness(1.3);
+            }
+
+            60% {
+                transform: scale(1.5) rotate(-10deg);
+                opacity: 0.5;
+                filter: brightness(1.5);
+            }
+
+            80% {
+                transform: scale(1.25) rotate(10deg);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+                filter: brightness(1);
+            }
+        }
+
+        .pet.sleeping {
+            animation: sleepBreath 2.5s infinite ease-in-out;
+        }
+
+        @keyframes sleepBreath {
+            0%, 100% {
+                transform: scale(1) translateY(0);
+            }
+
+            50% {
+                transform: scale(1.06) translateY(-12px);
+            }
+        }
+
+        .pet.wagging {
+            animation: tailWag 0.4s ease infinite;
+        }
+
+        @keyframes tailWag {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+
+            25% {
+                transform: rotate(-8deg);
+            }
+
+            75% {
+                transform: rotate(8deg);
+            }
+        }
+
+        .pet.eating {
+            animation: eating 0.5s ease infinite;
+        }
+
+        @keyframes eating {
+            0%, 100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.08);
+            }
+        }
+
+        .pet.playing {
+            animation: playing 0.6s ease infinite;
+        }
+
+        @keyframes playing {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            25% {
+                transform: translateY(-15px) rotate(-10deg);
+            }
+
+            75% {
+                transform: translateY(-15px) rotate(10deg);
+            }
+        }
+
+        .pet-size-indicator {
+            font-size: 0.85rem;
+            color: #666;
+            background: rgba(255,255,255,0.9);
+            padding: 5px 14px;
+            border-radius: 14px;
+            margin-top: 10px;
+            display: inline-block;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .pet-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-top: 12px;
+            text-shadow: 0 0 10px rgba(118, 75, 162, 0.2);
+        }
+
+        .pet-mood {
+            font-size: 2.2rem;
+            margin-top: 6px;
+            animation: moodBounce 1s ease infinite;
+        }
+
+        @keyframes moodBounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .growth-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            top: 0;
+            left: 0;
+        }
+
+        .particle {
+            position: absolute;
+            font-size: 1.6rem;
+            animation: floatUp 1.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) scale(0.5) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100px) scale(1.3) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .heart-particle {
+            position: absolute;
+            font-size: 1.4rem;
+            animation: heartFloat 1.2s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes heartFloat {
+            0% {
+                transform: translateY(0) scale(0.8);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-60px) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* === DECORATIONS === */
+        .bone-decoration, .paw-prints, .star-decoration {
+            position: absolute;
+            opacity: 0.12;
+            pointer-events: none;
+        }
+
+        .bone-decoration {
+            font-size: 2.2rem;
+            animation: floatBone 4s ease-in-out infinite;
+        }
+
+        @keyframes floatBone {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-25px) rotate(180deg);
+            }
+        }
+
+        .paw-prints {
+            font-size: 1.8rem;
+            animation: pawFloat 5s ease-in-out infinite;
+        }
+
+        @keyframes pawFloat {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(15deg);
+            }
+        }
+
+        .star-decoration {
+            font-size: 1.5rem;
+            animation: starTwinkle 3s ease-in-out infinite;
+        }
+
+        @keyframes starTwinkle {
+            0%, 100% {
+                opacity: 0.1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.3;
+                transform: scale(1.2);
+            }
+        }
+
+        /* === STATS GRID === */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 600px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, #f8f9ff, #f0f4ff);
+            padding: 14px;
+            border-radius: 16px;
+            transition: all 0.25s;
+            border: 2px solid transparent;
+        }
+
+            .stat-item:hover {
+                transform: translateY(-3px);
+                border-color: var(--primary);
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+            }
+
+            .stat-item.critical {
+                border-color: var(--danger);
+                animation: criticalPulse 1s infinite;
+            }
+
+        @keyframes criticalPulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-value {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #333;
+            background: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+
+        .stat-bar-container {
+            height: 10px;
+            background: #e0e7ff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-bar-fill {
+            height: 100%;
+            border-radius: 8px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .stat-bar-fill::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+                animation: shimmer 2.5s infinite;
+            }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        /* === XP SECTION === */
+        .xp-section {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-radius: 18px;
+            padding: 16px;
+            margin: 20px 0;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .xp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .xp-label {
+            font-weight: 700;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.95rem;
+        }
+
+        .xp-value {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        .xp-bar-container {
+            height: 18px;
+            background: #e0e7ff;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .xp-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--purple));
+            border-radius: 10px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+            .xp-bar-fill::after {
+                content: '⭐';
+                position: absolute;
+                right: 6px;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: 0.9rem;
+                animation: starSpin 3s linear infinite;
+            }
+
+        @keyframes starSpin {
+            0% {
+                transform: translateY(-50%) rotate(0deg);
+            }
+
+            100% {
+                transform: translateY(-50%) rotate(360deg);
+            }
+        }
+
+        .next-level-info {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        /* === CONTROLS === */
+        .controls-section {
+            margin: 20px 0;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .controls-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 14px 10px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.35);
+            position: relative;
+            overflow: hidden;
+        }
+
+            .action-btn::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+                transition: left 0.5s;
+            }
+
+            .action-btn:hover::before {
+                left: 100%;
+            }
+
+            .action-btn:hover:not(:disabled) {
+                transform: translateY(-4px);
+                box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+            }
+
+            .action-btn:active:not(:disabled) {
+                transform: translateY(-2px);
+            }
+
+            .action-btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+            .action-btn .icon {
+                font-size: 1.6rem;
+            }
+
+            .action-btn .label {
+                font-size: 0.8rem;
+            }
+
+            .action-btn .cooldown {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 3px;
+                background: rgba(255,255,255,0.5);
+                transform: scaleX(0);
+                transform-origin: left;
+            }
+
+            .action-btn.cooldown-active .cooldown {
+                animation: cooldownBar 2s linear forwards;
+            }
+
+        @keyframes cooldownBar {
+            0% {
+                transform: scaleX(1);
+            }
+
+            100% {
+                transform: scaleX(0);
+            }
+        }
+
+        .action-btn.sleep {
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+        }
+
+        .action-btn.heal {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .action-btn.train {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        }
+
+        .action-btn.clean {
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+        }
+
+        .action-btn.shop {
+            background: linear-gradient(135deg, var(--purple), var(--pink));
+        }
+
+        .action-btn.game {
+            background: linear-gradient(135deg, #ec4899, #db2777);
+        }
+
+        .action-btn.premium {
+            background: linear-gradient(135deg, var(--telegram), var(--telegram-dark));
+        }
+
+        /* === TABS === */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 80px;
+            padding: 10px 15px;
+            border: none;
+            background: #f0f4ff;
+            color: #666;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.25s;
+            font-size: 0.85rem;
+        }
+
+            .tab-btn:hover {
+                background: #e0e7ff;
+            }
+
+            .tab-btn.active {
+                background: linear-gradient(135deg, var(--primary), var(--secondary));
+                color: white;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            }
+
+        .tab-content {
+            display: none;
+        }
+
+            .tab-content.active {
+                display: block;
+                animation: fadeIn 0.3s ease;
+            }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* === MESSAGE BOX === */
+        .message-box {
+            background: linear-gradient(135deg, #f8f9ff, #f0f4ff);
+            border-radius: 14px;
+            padding: 14px 18px;
+            text-align: center;
+            font-weight: 600;
+            min-height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 15px 0;
+            border-left: 5px solid var(--primary);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+
+            .message-box.success {
+                background: linear-gradient(135deg, #d4edda, #c3e6cb);
+                color: #155724;
+                border-left-color: var(--success);
+            }
+
+            .message-box.warning {
+                background: linear-gradient(135deg, #fff3cd, #ffeeba);
+                color: #856404;
+                border-left-color: var(--warning);
+            }
+
+            .message-box.error {
+                background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+                color: #721c24;
+                border-left-color: var(--danger);
+            }
+
+            .message-box.info {
+                background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+                color: #0c5460;
+                border-left-color: var(--info);
+            }
+
+            .message-box.evolution {
+                background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+                color: var(--secondary);
+                border-left-color: var(--secondary);
+                font-weight: 700;
+                font-size: 1.05rem;
+            }
+
+            .message-box.premium {
+                background: linear-gradient(135deg, rgba(0, 136, 204, 0.15), rgba(0, 102, 153, 0.15));
+                color: var(--telegram);
+                border-left-color: var(--telegram);
+                font-weight: 700;
+            }
+
+        /* === SHOP === */
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .shop-item {
+            background: linear-gradient(135deg, #f8f9ff, #f0f4ff);
+            padding: 12px;
+            border-radius: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s;
+            border: 2px solid transparent;
+        }
+
+            .shop-item:hover {
+                transform: translateY(-3px);
+                border-color: var(--primary);
+                box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+            }
+
+            .shop-item.owned {
+                opacity: 0.6;
+                cursor: default;
+            }
+
+        .shop-item-icon {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .shop-item-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .shop-item-price {
+            font-size: 0.75rem;
+            color: var(--warning);
+            font-weight: 700;
+        }
+
+        /* === PREMIUM SHOP === */
+        .premium-shop-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .premium-item {
+            background: linear-gradient(135deg, rgba(0, 136, 204, 0.1), rgba(0, 102, 153, 0.1));
+            padding: 14px;
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s;
+            border: 2px solid rgba(0, 136, 204, 0.3);
+            position: relative;
+        }
+
+            .premium-item:hover {
+                transform: translateY(-4px);
+                border-color: var(--telegram);
+                box-shadow: 0 8px 25px rgba(0, 136, 204, 0.3);
+            }
+
+        .premium-item-icon {
+            font-size: 2.2rem;
+            margin-bottom: 6px;
+        }
+
+        .premium-item-name {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--telegram);
+            margin-bottom: 4px;
+        }
+
+        .premium-item-desc {
+            font-size: 0.7rem;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .premium-item-price {
+            font-size: 0.8rem;
+            color: var(--telegram);
+            font-weight: 700;
+            background: rgba(0, 136, 204, 0.15);
+            padding: 4px 10px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .premium-item.purchased {
+            opacity: 0.5;
+            cursor: default;
+            border-color: #888;
+        }
+
+            .premium-item.purchased::after {
+                content: '✓';
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                font-size: 1.2rem;
+                color: var(--success);
+                font-weight: 700;
+            }
+
+        /* === MINI GAMES === */
+        .mini-game-area {
+            background: linear-gradient(135deg, #f0f4ff, #e0e7ff);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mini-game-target {
+            font-size: 3rem;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.15s;
+        }
+
+            .mini-game-target:hover {
+                transform: scale(1.15);
+            }
+
+            .mini-game-target:active {
+                transform: scale(0.95);
+            }
+
+        .mini-game-score {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 15px;
+        }
+
+        .mini-game-timer {
+            font-size: 1.2rem;
+            color: var(--danger);
+            font-weight: 700;
+            margin-top: 8px;
+        }
+
+        /* === SIDE PANEL === */
+        .side-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        /* === QUESTS === */
+        .quest-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .quest-item {
+            background: linear-gradient(135deg, #f8f9ff, #f0f4ff);
+            padding: 11px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.25s;
+        }
+
+            .quest-item:hover {
+                transform: translateX(5px);
+            }
+
+            .quest-item.completed {
+                background: linear-gradient(135deg, rgba(74, 222, 128, 0.2), rgba(34, 197, 94, 0.2));
+                opacity: 0.75;
+            }
+
+        .quest-checkbox {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            border: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 0.8rem;
+        }
+
+        .quest-item.completed .quest-checkbox {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .quest-text {
+            font-size: 0.8rem;
+            flex: 1;
+            color: #555;
+        }
+
+        .quest-reward {
+            font-size: 0.7rem;
+            color: var(--warning);
+            font-weight: 700;
+            background: rgba(251, 191, 36, 0.2);
+            padding: 2px 6px;
+            border-radius: 8px;
+        }
+
+        /* === ACHIEVEMENTS === */
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .achievement-item {
+            background: linear-gradient(135deg, #f8f9ff, #f0f4ff);
+            padding: 10px;
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.25s;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+            .achievement-item:hover {
+                transform: scale(1.08);
+            }
+
+            .achievement-item.locked {
+                opacity: 0.45;
+                filter: grayscale(1);
+            }
+
+            .achievement-item.unlocked {
+                background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(245, 158, 11, 0.2));
+                box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+            }
+
+        .achievement-icon {
+            font-size: 1.4rem;
+            margin-bottom: 3px;
+        }
+
+        .achievement-name {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: #555;
+        }
+
+        /* === EVOLUTION PATH === */
+        .evolution-path {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 8px;
+            position: relative;
+            overflow-x: auto;
+        }
+
+            .evolution-path::before {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 30px;
+                right: 30px;
+                height: 3px;
+                background: linear-gradient(90deg, #e0e7ff, var(--primary), #e0e7ff);
+                transform: translateY(-50%);
+                z-index: 0;
+            }
+
+        .evolution-stage {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f0f4ff, #e0e7ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            z-index: 1;
+            transition: all 0.35s;
+            position: relative;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+            .evolution-stage.completed {
+                background: linear-gradient(135deg, var(--primary), var(--secondary));
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
+            }
+
+            .evolution-stage.current {
+                background: linear-gradient(135deg, var(--warning), #f59e0b);
+                box-shadow: 0 4px 20px rgba(251, 191, 36, 0.6);
+                transform: scale(1.2);
+                animation: currentPulse 1.5s infinite;
+            }
+
+        @keyframes currentPulse {
+            0%, 100% {
+                box-shadow: 0 4px 20px rgba(251, 191, 36, 0.6);
+            }
+
+            50% {
+                box-shadow: 0 4px 30px rgba(251, 191, 36, 0.8);
+            }
+        }
+
+        .evolution-stage-label {
+            position: absolute;
+            bottom: -22px;
+            font-size: 0.6rem;
+            color: #666;
+            white-space: nowrap;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: 600;
+        }
+
+        /* === STATS DETAIL === */
+        .stats-detail {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .stat-detail-item {
+            background: linear-gradient(135deg, #f8f9ff, #f0f4ff);
+            padding: 10px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-detail-value {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-detail-label {
+            font-size: 0.7rem;
+            color: #666;
+            margin-top: 3px;
+            font-weight: 500;
+        }
+
+        /* === CURRENCY === */
+        .currency-display {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+
+        .currency-item {
+            background: linear-gradient(135deg, #f8f9ff, #f0f4ff);
+            padding: 8px 14px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .currency-icon {
+            font-size: 1.2rem;
+        }
+
+        .currency-item.stars {
+            background: linear-gradient(135deg, rgba(0, 136, 204, 0.15), rgba(0, 102, 153, 0.15));
+            border: 2px solid rgba(0, 136, 204, 0.3);
+        }
+
+        /* === RESET === */
+        .reset-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 14px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 12px;
+            transition: all 0.25s;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.35);
+        }
+
+            .reset-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(239, 68, 68, 0.5);
+            }
+
+        /* === MODAL === */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.75);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+            .modal-overlay.active {
+                display: flex;
+                animation: fadeIn 0.3s ease;
+            }
+
+        .modal {
+            background: white;
+            border-radius: 28px;
+            padding: 35px;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            animation: modalPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+        }
+
+        @keyframes modalPop {
+            0% {
+                transform: scale(0.7) translateY(-50px);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-icon {
+            font-size: 4.5rem;
+            margin-bottom: 15px;
+            animation: modalIconBounce 1s ease infinite;
+        }
+
+        @keyframes modalIconBounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .modal-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+
+        .modal-text {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e7ff;
+            border-radius: 12px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            text-align: center;
+            transition: border-color 0.25s;
+        }
+
+            .modal-input:focus {
+                outline: none;
+                border-color: var(--primary);
+            }
+
+        .modal-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 14px 35px;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+            .modal-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+            }
+
+            .modal-btn.secondary {
+                background: linear-gradient(135deg, #666, #444);
+                margin-left: 10px;
+            }
+
+            .modal-btn.premium {
+                background: linear-gradient(135deg, var(--telegram), var(--telegram-dark));
+            }
+
+        .modal-btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* === FOOTER === */
+        .footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #f0f4ff;
+        }
+
+        /* === SPECIAL EFFECTS === */
+        .level-up-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 999;
+            display: none;
+        }
+
+            .level-up-effect.active {
+                display: block;
+            }
+
+        .confetti {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            animation: confettiFall 3.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100px) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(100vh) rotate(720deg) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        /* === TOOLTIP === */
+        .tooltip {
+            position: relative;
+        }
+
+            .tooltip::after {
+                content: attr(data-tooltip);
+                position: absolute;
+                bottom: 100%;
+                left: 50%;
+                transform: translateX(-50%) translateY(-5px);
+                background: #2d3748;
+                color: white;
+                padding: 6px 12px;
+                border-radius: 10px;
+                font-size: 0.75rem;
+                white-space: nowrap;
+                opacity: 0;
+                pointer-events: none;
+                transition: all 0.25s;
+                margin-bottom: 8px;
+                font-weight: 600;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            }
+
+            .tooltip:hover::after {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+
+        /* === DOG STAGE INDICATOR === */
+        .dog-stage-indicator {
+            display: flex;
+            gap: 6px;
+            margin-top: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .dog-stage-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #e0e7ff;
+            transition: all 0.35s;
+            cursor: pointer;
+        }
+
+            .dog-stage-dot:hover {
+                transform: scale(1.3);
+            }
+
+            .dog-stage-dot.active {
+                background: linear-gradient(135deg, var(--warning), #f59e0b);
+                transform: scale(1.4);
+                box-shadow: 0 0 15px rgba(251, 191, 36, 0.6);
+            }
+
+            .dog-stage-dot.completed {
+                background: var(--success);
+            }
+
+        /* === BREED SELECTION === */
+        .breed-selection {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .breed-option {
+            background: linear-gradient(135deg, #f8f9ff, #f0f4ff);
+            padding: 15px 10px;
+            border-radius: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s;
+            border: 3px solid transparent;
+        }
+
+            .breed-option:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+            }
+
+            .breed-option.selected {
+                border-color: var(--primary);
+                background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            }
+
+        .breed-option-emoji {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+        }
+
+        .breed-option-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #555;
+        }
+
+        /* === SETTINGS === */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9ff;
+            border-radius: 10px;
+        }
+
+        .setting-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .toggle-switch {
+            width: 50px;
+            height: 26px;
+            background: #e0e7ff;
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+            .toggle-switch.active {
+                background: var(--success);
+            }
+
+            .toggle-switch::after {
+                content: '';
+                position: absolute;
+                top: 3px;
+                left: 3px;
+                width: 20px;
+                height: 20px;
+                background: white;
+                border-radius: 50%;
+                transition: transform 0.3s;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            }
+
+            .toggle-switch.active::after {
+                transform: translateX(24px);
+            }
+
+        /* === NOTIFICATIONS === */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .notification {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 14px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            min-width: 280px;
+            border-left: 4px solid var(--primary);
+        }
+
+        @keyframes slideIn {
+            0% {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-icon {
+            font-size: 1.8rem;
+        }
+
+        .notification-text {
+            flex: 1;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .notification-close {
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #999;
+            transition: color 0.2s;
+        }
+
+            .notification-close:hover {
+                color: #333;
+            }
+
+        /* === SCROLLBAR === */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f0f4ff;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+        }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: linear-gradient(135deg, var(--primary-dark), var(--secondary));
+            }
+
+        /* === EVENT BADGE === */
+        .event-badge {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ec4899, #db2777);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+            animation: eventPulse 2s infinite;
+        }
+
+        @keyframes eventPulse {
+            0%, 100% {
+                transform: translateX(-50%) scale(1);
+            }
+
+            50% {
+                transform: translateX(-50%) scale(1.08);
+            }
+        }
+
+        /* === PREMIUM BADGE === */
+        .premium-badge {
+            background: linear-gradient(135deg, var(--telegram), var(--telegram-dark));
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 8px;
+        }
+
+        /* === STARS ANIMATION === */
+        .stars-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 998;
+            display: none;
+        }
+
+            .stars-rain.active {
+                display: block;
+            }
+
+        .star-fall {
+            position: absolute;
+            font-size: 1.5rem;
+            animation: starFall 2s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes starFall {
+            0% {
+                transform: translateY(-50px) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Particles -->
+    <div class="bg-particles" id="bg-particles"></div>
+
+    <!-- Notification Container -->
+    <div class="notification-container" id="notification-container"></div>
+
+    <!-- Stars Rain Effect -->
+    <div class="stars-rain" id="stars-rain"></div>
+
+    <div class="game-wrapper">
+        <!-- MAIN PANEL -->
+        <div class="main-panel">
+            <div class="game-header">
+                <h1>🐕 Легендарный Пёс <span class="premium-badge">⭐ Premium</span></h1>
+                <p class="subtitle">Premium Edition • Telegram Stars</p>
+                <div class="streak-badge" id="streak-badge">🔥 0 дней</div>
+            </div>
+
+            <!-- Currency Display -->
+            <div class="currency-display">
+                <div class="currency-item">
+                    <span class="currency-icon">⭐</span>
+                    <span id="xp-currency">0</span>
+                </div>
+                <div class="currency-item">
+                    <span class="currency-icon">🦴</span>
+                    <span id="bones-currency">0</span>
+                </div>
+                <div class="currency-item">
+                    <span class="currency-icon">💎</span>
+                    <span id="gems-currency">0</span>
+                </div>
+                <div class="currency-item stars">
+                    <span class="currency-icon">🌟</span>
+                    <span id="stars-currency">0</span>
+                    <span style="font-size: 0.7rem; color: var(--telegram);">Telegram</span>
+                </div>
+            </div>
+
+            <!-- PET STAGE -->
+            <div class="pet-stage">
+                <div class="stage-badges">
+                    <div class="evolution-badge" id="evolution-badge">🐶 Щенок</div>
+                    <div class="level-badge" id="level-badge">Ур. 1</div>
+                </div>
+
+                <!-- Decorations -->
+                <div class="bone-decoration" style="top: 25px; left: 25px;">🦴</div>
+                <div class="bone-decoration" style="top: 35px; right: 35px; animation-delay: 1.5s;">🦴</div>
+                <div class="paw-prints" style="bottom: 25px; left: 20px;">🐾</div>
+                <div class="paw-prints" style="bottom: 30px; right: 25px; animation-delay: 2s;">🐾</div>
+                <div class="star-decoration" style="top: 15px; left: 50%; font-size: 1.2rem;">⭐</div>
+                <div class="star-decoration" style="bottom: 20px; left: 30%; animation-delay: 1s;">⭐</div>
+                <div class="star-decoration" style="bottom: 25px; right: 35%; animation-delay: 2s;">⭐</div>
+
+                <div class="pet-container" id="pet-container">
+                    <div class="pet" id="pet">🐶</div>
+                    <div class="growth-particles" id="particles"></div>
+                </div>
+
+                <div class="pet-size-indicator" id="size-indicator">Размер: 1.0x</div>
+                <div class="pet-name" id="pet-name">Без имени</div>
+                <div class="pet-mood" id="pet-mood">😊</div>
+
+                <div class="dog-stage-indicator" id="dog-stage-indicator">
+                    <!-- Dots will be added via JS -->
+                </div>
+            </div>
+
+            <!-- XP PROGRESS -->
+            <div class="xp-section">
+                <div class="xp-header">
+                    <span class="xp-label">⭐ Опыт до следующего уровня</span>
+                    <span class="xp-value" id="xp-text">0 / 100 XP</span>
+                </div>
+                <div class="xp-bar-container">
+                    <div class="xp-bar-fill" id="xp-bar" style="width: 0%"></div>
+                </div>
+                <div class="next-level-info" id="next-level-info">До следующего уровня: 100 XP</div>
+            </div>
+
+            <!-- STATS -->
+            <div class="section-title">📊 Состояние питомца</div>
+            <div class="stats-grid">
+                <div class="stat-item" id="stat-hunger">
+                    <div class="stat-header">
+                        <span class="stat-label">🍖 Голод</span>
+                        <span class="stat-value" id="hunger-value">70%</span>
+                    </div>
+                    <div class="stat-bar-container">
+                        <div class="stat-bar-fill" id="hunger-bar" style="width: 70%; background: #4ade80;"></div>
+                    </div>
+                </div>
+
+                <div class="stat-item" id="stat-happiness">
+                    <div class="stat-header">
+                        <span class="stat-label">❤️ Счастье</span>
+                        <span class="stat-value" id="happiness-value">70%</span>
+                    </div>
+                    <div class="stat-bar-container">
+                        <div class="stat-bar-fill" id="happiness-bar" style="width: 70%; background: #fbbf24;"></div>
+                    </div>
+                </div>
+
+                <div class="stat-item" id="stat-energy">
+                    <div class="stat-header">
+                        <span class="stat-label">💤 Энергия</span>
+                        <span class="stat-value" id="energy-value">70%</span>
+                    </div>
+                    <div class="stat-bar-container">
+                        <div class="stat-bar-fill" id="energy-bar" style="width: 70%; background: #60a5fa;"></div>
+                    </div>
+                </div>
+
+                <div class="stat-item" id="stat-health">
+                    <div class="stat-header">
+                        <span class="stat-label">🏥 Здоровье</span>
+                        <span class="stat-value" id="health-value">100%</span>
+                    </div>
+                    <div class="stat-bar-container">
+                        <div class="stat-bar-fill" id="health-bar" style="width: 100%; background: #ef4444;"></div>
+                    </div>
+                </div>
+
+                <div class="stat-item" id="stat-clean">
+                    <div class="stat-header">
+                        <span class="stat-label">🚿 Чистота</span>
+                        <span class="stat-value" id="clean-value">100%</span>
+                    </div>
+                    <div class="stat-bar-container">
+                        <div class="stat-bar-fill" id="clean-bar" style="width: 100%; background: #4ade80;"></div>
+                    </div>
+                </div>
+
+                <div class="stat-item" id="stat-strength">
+                    <div class="stat-header">
+                        <span class="stat-label">💪 Сила</span>
+                        <span class="stat-value" id="strength-value">1</span>
+                    </div>
+                    <div class="stat-bar-container">
+                        <div class="stat-bar-fill" id="strength-bar" style="width: 5%; background: #f59e0b;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABS -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('actions')">⚡ Действия</button>
+                <button class="tab-btn" onclick="switchTab('shop')">🏪 Магазин</button>
+                <button class="tab-btn" onclick="switchTab('premium')">🌟 Premium</button>
+                <button class="tab-btn" onclick="switchTab('games')">🎮 Мини-игры</button>
+                <button class="tab-btn" onclick="switchTab('memories')">📸 Воспоминания</button>
+            </div>
+
+            <!-- TAB: ACTIONS -->
+            <div class="tab-content active" id="tab-actions">
+                <div class="controls-grid">
+                    <button class="action-btn" onclick="feed()" id="btn-feed" data-tooltip="+25 Голод, +10 XP, +5 🦴">
+                        <span class="icon">🍖</span>
+                        <span class="label">Покормить</span>
+                        <div class="cooldown"></div>
+                    </button>
+                    <button class="action-btn" onclick="play()" id="btn-play" data-tooltip="+30 Счастье, +15 XP">
+                        <span class="icon">🎾</span>
+                        <span class="label">Поиграть</span>
+                        <div class="cooldown"></div>
+                    </button>
+                    <button class="action-btn sleep" onclick="sleep()" id="btn-sleep" data-tooltip="Восстановить энергию">
+                        <span class="icon">💤</span>
+                        <span class="label">Спать</span>
+                    </button>
+                    <button class="action-btn heal" onclick="heal()" id="btn-heal" data-tooltip="+20 Здоровье">
+                        <span class="icon">💊</span>
+                        <span class="label">Лечить</span>
+                        <div class="cooldown"></div>
+                    </button>
+                    <button class="action-btn train" onclick="train()" id="btn-train" data-tooltip="+10 Сила, +20 XP">
+                        <span class="icon">🏋️</span>
+                        <span class="label">Тренировать</span>
+                        <div class="cooldown"></div>
+                    </button>
+                    <button class="action-btn clean" onclick="clean()" id="btn-clean" data-tooltip="+50 Чистота, +10 XP">
+                        <span class="icon">🚿</span>
+                        <span class="label">Мыть</span>
+                        <div class="cooldown"></div>
+                    </button>
+                    <button class="action-btn premium" onclick="changeName()" id="btn-name" data-tooltip="Изменить имя (5 🌟)">
+                        <span class="icon">🏷️</span>
+                        <span class="label">Имя (5⭐)</span>
+                    </button>
+                    <button class="action-btn" onclick="petClick()" id="btn-pet" data-tooltip="Погладить питомца">
+                        <span class="icon">👋</span>
+                        <span class="label">Гладить</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: SHOP -->
+            <div class="tab-content" id="tab-shop">
+                <div class="shop-grid" id="shop-grid">
+                    <!-- Shop items will be inserted via JS -->
+                </div>
+            </div>
+
+            <!-- TAB: PREMIUM -->
+            <div class="tab-content" id="tab-premium">
+                <div style="text-align: center; margin-bottom: 15px;">
+                    <h3 style="color: var(--telegram); margin-bottom: 8px;">🌟 Premium Магазин</h3>
+                    <p style="color: #666; font-size: 0.85rem;">Покупайте за Telegram Stars</p>
+                </div>
+                <div class="premium-shop-grid" id="premium-shop-grid">
+                    <!-- Premium items will be inserted via JS -->
+                </div>
+            </div>
+
+            <!-- TAB: GAMES -->
+            <div class="tab-content" id="tab-games">
+                <div class="mini-game-area" id="mini-game-area">
+                    <h3 style="color: var(--secondary); margin-bottom: 15px;">🎯 Поймай мячик!</h3>
+                    <div class="mini-game-target" id="mini-game-target">🎾</div>
+                    <div class="mini-game-score" id="mini-game-score">Счёт: 0</div>
+                    <div class="mini-game-timer" id="mini-game-timer">Время: 30с</div>
+                    <button class="action-btn game" onclick="startMiniGame()" style="margin-top: 15px; width: auto; padding: 12px 30px;">
+                        <span class="icon">🎮</span>
+                        <span class="label">Начать игру</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MEMORIES -->
+            <div class="tab-content" id="tab-memories">
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 3rem; margin-bottom: 10px;">📸</div>
+                    <h3 style="color: var(--secondary); margin-bottom: 10px;">Альбом воспоминаний</h3>
+                    <p style="color: #666; margin-bottom: 15px;">Здесь сохраняются важные моменты с вашим питомцем</p>
+                    <div id="memories-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                        <!-- Memories will be added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- MESSAGE -->
+            <div class="message-box info" id="message">
+                Добро пожаловать! Начните заботу о вашем щенке 🐕
+            </div>
+
+            <!-- FOOTER -->
+            <div class="footer">
+                Прогресс сохраняется автоматически • Играйте каждый день для бонусов • v3.0 Premium
+            </div>
+        </div>
+
+        <!-- SIDE PANEL -->
+        <div class="side-panel">
+            <!-- DAILY BONUS -->
+            <div class="card">
+                <div class="side-title">🎁 Ежедневный бонус</div>
+                <button class="action-btn" onclick="claimDailyBonus()" id="daily-bonus-btn" style="width: 100%;">
+                    <span class="icon">🎁</span>
+                    <span class="label">Получить бонус</span>
+                </button>
+                <div style="text-align: center; margin-top: 8px; font-size: 0.8rem; color: #666;" id="daily-bonus-timer">
+                    Следующий бонус через: 24ч
+                </div>
+            </div>
+
+            <!-- GET STARS -->
+            <div class="card">
+                <div class="side-title">🌟 Получить Stars</div>
+                <button class="action-btn premium" onclick="showGetStarsModal()" style="width: 100%;">
+                    <span class="icon">💳</span>
+                    <span class="label">Купить Stars</span>
+                </button>
+                <div style="text-align: center; margin-top: 8px; font-size: 0.75rem; color: #666;">
+                    Telegram Stars для премиум функций
+                </div>
+            </div>
+
+            <!-- QUESTS -->
+            <div class="card">
+                <div class="side-title">📋 Ежедневные задания</div>
+                <div class="quest-list" id="quest-list">
+                    <!-- Quests will be inserted here -->
+                </div>
+            </div>
+
+            <!-- ACHIEVEMENTS -->
+            <div class="card">
+                <div class="side-title">🏆 Достижения</div>
+                <div class="achievement-grid" id="achievement-grid">
+                    <!-- Achievements will be inserted here -->
+                </div>
+            </div>
+
+            <!-- EVOLUTION PATH -->
+            <div class="card">
+                <div class="side-title">🧬 Путь эволюции</div>
+                <div class="evolution-path" id="evolution-path">
+                    <!-- Evolution stages will be inserted here -->
+                </div>
+            </div>
+
+            <!-- STATS DETAIL -->
+            <div class="card">
+                <div class="side-title">📊 Статистика</div>
+                <div class="stats-detail">
+                    <div class="stat-detail-item">
+                        <div class="stat-detail-value" id="stat-days">0</div>
+                        <div class="stat-detail-label">Дней вместе</div>
+                    </div>
+                    <div class="stat-detail-item">
+                        <div class="stat-detail-value" id="stat-actions">0</div>
+                        <div class="stat-detail-label">Действий</div>
+                    </div>
+                    <div class="stat-detail-item">
+                        <div class="stat-detail-value" id="stat-evolutions">0</div>
+                        <div class="stat-detail-label">Эволюций</div>
+                    </div>
+                    <div class="stat-detail-item">
+                        <div class="stat-detail-value" id="stat-level">1</div>
+                        <div class="stat-detail-label">Макс. уровень</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SETTINGS -->
+            <div class="card">
+                <div class="side-title">⚙️ Настройки</div>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <span class="setting-label">🔊 Звуки</span>
+                        <div class="toggle-switch" id="sound-toggle" onclick="toggleSound()"></div>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">✨ Эффекты</span>
+                        <div class="toggle-switch active" id="effects-toggle" onclick="toggleEffects()"></div>
+                    </div>
+                </div>
+                <button class="reset-btn" onclick="resetGame()">🔄 Начать заново</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+            <div class="modal-icon" id="modal-icon">🎉</div>
+            <div class="modal-title" id="modal-title">Заголовок</div>
+            <div class="modal-text" id="modal-text">Текст сообщения</div>
+            <div id="modal-buttons">
+                <button class="modal-btn" onclick="closeModal()">Продолжить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BREED SELECTION MODAL -->
+    <div class="modal-overlay" id="breed-modal-overlay">
+        <div class="modal">
+            <div class="modal-icon">🐕</div>
+            <div class="modal-title">Создание питомца</div>
+            <div class="modal-text">Выберите породу и дайте имя вашему щенку</div>
+
+            <div class="breed-selection" id="breed-selection">
+                <!-- Breeds will be inserted via JS -->
+            </div>
+
+            <input type="text" class="modal-input" id="pet-name-input" placeholder="Введите имя питомца" maxlength="15">
+
+            <button class="modal-btn" onclick="confirmBreed()">Начать игру!</button>
+        </div>
+    </div>
+
+    <!-- GET STARS MODAL -->
+    <div class="modal-overlay" id="stars-modal-overlay">
+        <div class="modal">
+            <div class="modal-icon">🌟</div>
+            <div class="modal-title">Telegram Stars</div>
+            <div class="modal-text">
+                Stars используются для премиум функций:<br>
+                • Изменение имени питомца<br>
+                • Мгновенная эволюция<br>
+                • Премиум товары<br>
+                • Бустеры и ускорители
+            </div>
+            <div class="modal-btn-group">
+                <button class="modal-btn premium" onclick="buyStars(10)">10 🌟 — 99₽</button>
+                <button class="modal-btn premium" onclick="buyStars(50)">50 🌟 — 399₽</button>
+                <button class="modal-btn premium" onclick="buyStars(100)">100 🌟 — 699₽</button>
+            </div>
+            <button class="modal-btn secondary" onclick="closeModal()" style="margin-top: 15px;">Закрыть</button>
+        </div>
+    </div>
+
+    <!-- LEVEL UP EFFECT -->
+    <div class="level-up-effect" id="level-up-effect"></div>
+
+    <script>
+        // ==================== КОНФИГУРАЦИЯ ИГРЫ ====================
+        const DOG_BREEDS = [
+            { id: 'labrador', name: 'Лабрадор', emoji: '🐕', bonus: 'Счастье +10%' },
+            { id: 'husky', name: 'Хаски', emoji: '🐺', bonus: 'Энергия +10%' },
+            { id: 'bulldog', name: 'Бульдог', emoji: '🐶', bonus: 'Здоровье +10%' },
+            { id: 'poodle', name: 'Пудель', emoji: '🐩', bonus: 'XP +10%' },
+            { id: 'shepherd', name: 'Овчарка', emoji: '🦮', bonus: 'Сила +10%' },
+            { id: 'corgi', name: 'Корги', emoji: '🐕', bonus: 'Все статы +5%' }
+        ];
+
+        const DOG_STAGES = [
+            { name: 'Щенок', emoji: '🐶', minLevel: 1, size: 1, desc: 'Милый малыш' },
+            { name: 'Щенок+', emoji: '🐕', minLevel: 5, size: 1.3, desc: 'Подрастает' },
+            { name: 'Юниор', emoji: '🦮', minLevel: 10, size: 1.5, desc: 'Учится командам' },
+            { name: 'Взрослый', emoji: '🐕‍🦺', minLevel: 20, size: 1.8, desc: 'Верный друг' },
+            { name: 'Чемпион', emoji: '🐺', minLevel: 35, size: 2.1, desc: 'Сильный и мудрый' },
+            { name: 'Легенда', emoji: '🦁', minLevel: 50, size: 2.4, desc: 'Лидер стаи' },
+            { name: 'Мифический', emoji: '🐲', minLevel: 75, size: 2.7, desc: 'Древняя сила' },
+            { name: 'Божественный', emoji: '⭐', minLevel: 100, size: 3, desc: 'Космический пёс' }
+        ];
+
+        const SHOP_ITEMS = [
+            { id: 'treat', name: 'Лакомство', icon: '🦴', price: 50, currency: 'bones', effect: 'happiness', value: 20, owned: false },
+            { id: 'toy', name: 'Игрушка', icon: '🎾', price: 100, currency: 'bones', effect: 'happiness', value: 35, owned: false },
+            { id: 'bed', name: 'Кровать', icon: '🛏️', price: 200, currency: 'bones', effect: 'energy', value: 40, owned: false },
+            { id: 'vitamin', name: 'Витамины', icon: '💊', price: 150, currency: 'bones', effect: 'health', value: 30, owned: false },
+            { id: 'shampoo', name: 'Шампунь', icon: '🧴', price: 80, currency: 'bones', effect: 'clean', value: 50, owned: false },
+            { id: 'premium_food', name: 'Премиум корм', icon: '🍖', price: 3, currency: 'gems', effect: 'all', value: 25, owned: false },
+            { id: 'xp_boost', name: 'Ускоритель XP', icon: '⭐', price: 5, currency: 'gems', effect: 'xp_boost', value: 2, owned: false },
+            { id: 'magic_treat', name: 'Магическое лакомство', icon: '✨', price: 10, currency: 'gems', effect: 'max_all', value: 100, owned: false }
+        ];
+
+        const PREMIUM_ITEMS = [
+            { id: 'name_change', name: 'Изменить имя', icon: '🏷️', price: 5, desc: 'Измените имя питомца', purchased: false },
+            { id: 'instant_evolve', name: 'Мгновенная эволюция', icon: '🧬', price: 25, desc: 'Пропустить 5 уровней', purchased: false },
+            { id: 'max_stats', name: 'Максимум статов', icon: '💯', price: 10, desc: 'Все показатели на 100%', purchased: false },
+            { id: 'double_xp', name: 'Двойной XP (24ч)', icon: '⭐⭐', price: 15, desc: '2x опыта на 24 часа', purchased: false },
+            { id: 'auto_feed', name: 'Авто-кормление', icon: '🤖', price: 30, desc: 'Автоматическое кормление', purchased: false },
+            { id: 'golden_skin', name: 'Золотая кожа', icon: '🏆', price: 50, desc: 'Уникальный золотой вид', purchased: false },
+            { id: 'rainbow_skin', name: 'Радужная кожа', icon: '🌈', price: 50, desc: 'Уникальный радужный вид', purchased: false },
+            { id: 'unlimited_energy', name: 'Бесконечная энергия', icon: '⚡', price: 40, desc: 'Энергия не тратится (24ч)', purchased: false }
+        ];
+
+        const ACHIEVEMENTS = [
+            { id: 'first_feed', name: 'Первый корм', icon: '🍖', desc: 'Покормить 1 раз' },
+            { id: 'first_play', name: 'Первая игра', icon: '🎾', desc: 'Поиграть 1 раз' },
+            { id: 'name_given', name: 'Имя дано', icon: '🏷️', desc: 'Дать имя' },
+            { id: 'level_5', name: 'Подрос', icon: '🌟', desc: '5 уровень' },
+            { id: 'level_10', name: 'Юниор', icon: '⭐', desc: '10 уровень' },
+            { id: 'level_20', name: 'Взрослый', icon: '🏆', desc: '20 уровень' },
+            { id: 'level_50', name: 'Легенда', icon: '👑', desc: '50 уровень' },
+            { id: 'level_100', name: 'Бог', icon: '🌌', desc: '100 уровень' },
+            { id: 'days_7', name: 'Неделя', icon: '📅', desc: '7 дней' },
+            { id: 'days_30', name: 'Месяц', icon: '💝', desc: '30 дней' },
+            { id: 'actions_100', name: 'Заботливый', icon: '❤️', desc: '100 действий' },
+            { id: 'actions_500', name: 'Преданный', icon: '🏅', desc: '500 действий' },
+            { id: 'perfect_day', name: 'Идеал', icon: '✨', desc: 'Все 100%' },
+            { id: 'evolution_3', name: 'Эволюция', icon: '🧬', desc: '3 эволюции' },
+            { id: 'game_master', name: 'Игрок', icon: '🎮', desc: 'Выиграть мини-игру' },
+            { id: 'rich', name: 'Богач', icon: '💎', desc: '1000 костей' },
+            { id: 'premium_user', name: 'Premium', icon: '🌟', desc: 'Купить премиум' }
+        ];
+
+        const DAILY_QUESTS = [
+            { id: 'feed_3', text: 'Покормить 3 раза', target: 3, reward: 50, rewardType: 'xp', type: 'feed' },
+            { id: 'play_3', text: 'Поиграть 3 раза', target: 3, reward: 50, rewardType: 'xp', type: 'play' },
+            { id: 'sleep_1', text: 'Уложить спать 1 раз', target: 1, reward: 30, rewardType: 'xp', type: 'sleep' },
+            { id: 'train_2', text: 'Тренировать 2 раза', target: 2, reward: 40, rewardType: 'xp', type: 'train' },
+            { id: 'clean_2', text: 'Помыть 2 раза', target: 2, reward: 40, rewardType: 'xp', type: 'clean' }
+        ];
+
+        const RANDOM_EVENTS = [
+            { text: '🎁 Вам подарили 50 костей!', effect: () => { game.bones += 50; } },
+            { text: '⭐ Найдено 25 XP!', effect: () => { addXP(25); } },
+            { text: '💎 Редкая находка! +5 кристаллов', effect: () => { game.gems += 5; } },
+            { text: '❤️ Питомец нашёл друга! +20 счастье', effect: () => { game.happiness = Math.min(100, game.happiness + 20); } },
+            { text: '🍖 Кто-то оставил корм! +30 голод', effect: () => { game.hunger = Math.min(100, game.hunger + 30); } },
+            { text: '🌟 Кто-то подарил 2 Stars!', effect: () => { game.telegramStars += 2; showNotification('🌟', '+2 Telegram Stars'); } }
+        ];
+
+        // ==================== СОСТОЯНИЕ ИГРЫ ====================
+        const defaultState = {
+            // Stats
+            hunger: 70,
+            happiness: 70,
+            energy: 70,
+            health: 100,
+            clean: 100,
+            strength: 1,
+
+            // Progress
+            level: 1,
+            xp: 0,
+            xpToNext: 100,
+            dogStageIndex: 0,
+
+            // Currency
+            bones: 100,
+            gems: 0,
+            telegramStars: 0,
+            totalXP: 0,
+
+            // Time
+            day: 1,
+            createdAt: Date.now(),
+            lastUpdate: Date.now(),
+            lastQuestReset: Date.now(),
+            lastDailyBonus: 0,
+
+            // State
+            isSleeping: false,
+            name: '',
+            named: false,
+            breed: null,
+            breedIndex: 0,
+
+            // Stats
+            totalActions: 0,
+            totalEvolutions: 0,
+            maxLevel: 1,
+            streak: 0,
+            lastLogin: 0,
+
+            // Content
+            dailyQuests: [],
+            achievements: [],
+            shopItems: [],
+            premiumItems: [],
+            memories: [],
+
+            // Counters
+            questCounters: { feed: 0, play: 0, sleep: 0, train: 0, clean: 0 },
+
+            // Settings
+            soundEnabled: false,
+            effectsEnabled: true,
+
+            // Mini-game
+            miniGameScore: 0,
+            miniGameActive: false,
+
+            // Premium flags
+            doubleXPActive: false,
+            doubleXPExpiry: 0,
+            unlimitedEnergyActive: false,
+            unlimitedEnergyExpiry: 0,
+            autoFeedActive: false,
+            goldenSkin: false,
+            rainbowSkin: false
+        };
+
+        let game = loadGame();
+        let gameLoopInterval;
+        let selectedBreed = 0;
+        let miniGameInterval;
+        let miniGameTime = 30;
+
+        // ==================== ЗАГРУЗКА / СОХРАНЕНИЕ ====================
+        function loadGame() {
+            const saved = localStorage.getItem('tamagotchi_premium_save');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    const elapsed = Math.floor((Date.now() - parsed.lastUpdate) / 60000);
+
+                    if (elapsed > 0 && !parsed.isSleeping) {
+                        parsed.hunger = Math.max(0, parsed.hunger - elapsed * 0.35);
+                        parsed.happiness = Math.max(0, parsed.happiness - elapsed * 0.25);
+                        parsed.energy = Math.max(0, parsed.energy - elapsed * 0.25);
+                        parsed.clean = Math.max(0, parsed.clean - elapsed * 0.18);
+
+                        if (parsed.hunger < 20 || parsed.happiness < 20 || parsed.clean < 30) {
+                            parsed.health = Math.max(0, parsed.health - elapsed * 0.12);
+                        }
+
+                        parsed.day += Math.floor(elapsed / 1440);
+                    }
+
+                    // Проверка ежедневных заданий
+                    const hoursSinceReset = (Date.now() - parsed.lastQuestReset) / 3600000;
+                    if (hoursSinceReset >= 24) {
+                        parsed.dailyQuests = generateDailyQuests();
+                        parsed.lastQuestReset = Date.now();
+                        parsed.questCounters = { feed: 0, play: 0, sleep: 0, train: 0, clean: 0 };
+                    }
+
+                    // Проверка стрика
+                    const daysSinceLogin = Math.floor((Date.now() - parsed.lastLogin) / 86400000);
+                    if (daysSinceLogin === 1) {
+                        parsed.streak++;
+                    } else if (daysSinceLogin > 1) {
+                        parsed.streak = 1;
+                    }
+                    parsed.lastLogin = Date.now();
+
+                    // Инициализация магазина
+                    if (!parsed.shopItems || parsed.shopItems.length === 0) {
+                        parsed.shopItems = SHOP_ITEMS.map(item => ({ ...item, owned: false }));
+                    }
+
+                    // Инициализация премиум товаров
+                    if (!parsed.premiumItems || parsed.premiumItems.length === 0) {
+                        parsed.premiumItems = PREMIUM_ITEMS.map(item => ({ ...item, purchased: false }));
+                    }
+
+                    // Проверка временных премиум эффектов
+                    const now = Date.now();
+                    if (parsed.doubleXPActive && parsed.doubleXPExpiry < now) {
+                        parsed.doubleXPActive = false;
+                    }
+                    if (parsed.unlimitedEnergyActive && parsed.unlimitedEnergyExpiry < now) {
+                        parsed.unlimitedEnergyActive = false;
+                    }
+
+                    return { ...defaultState, ...parsed };
+                } catch (e) {
+                    console.error('Ошибка загрузки:', e);
+                }
+            }
+
+            const newState = { ...defaultState };
+            newState.dailyQuests = generateDailyQuests();
+            newState.shopItems = SHOP_ITEMS.map(item => ({ ...item, owned: false }));
+            newState.premiumItems = PREMIUM_ITEMS.map(item => ({ ...item, purchased: false }));
+            return newState;
+        }
+
+        function saveGame() {
+            game.lastUpdate = Date.now();
+            localStorage.setItem('tamagotchi_premium_save', JSON.stringify(game));
+        }
+
+        function generateDailyQuests() {
+            return DAILY_QUESTS.map(q => ({ ...q, completed: false, progress: 0 }));
+        }
+
+        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+        function init() {
+            createBgParticles();
+
+            if (!game.breed) {
+                showBreedSelection();
+            } else {
+                document.getElementById('breed-modal-overlay').classList.remove('active');
+            }
+
+            updateUI();
+            gameLoopInterval = setInterval(gameLoop, 1000);
+            window.addEventListener('beforeunload', saveGame);
+            document.getElementById('pet-container').addEventListener('click', petClick);
+
+            // Мини-игра
+            document.getElementById('mini-game-target').addEventListener('click', miniGameClick);
+
+            // Проверка ежедневного бонуса
+            checkDailyBonus();
+
+            // Случайное событие
+            setTimeout(() => triggerRandomEvent(), 30000);
+
+            // Авто-кормление
+            if (game.autoFeedActive) {
+                setInterval(() => {
+                    if (game.hunger < 50 && !game.isSleeping) {
+                        feed();
+                        showNotification('🤖', 'Авто-кормление активировано');
+                    }
+                }, 60000);
+            }
+        }
+
+        function createBgParticles() {
+            const container = document.getElementById('bg-particles');
+            const emojis = ['🦴', '🐾', '⭐', '🎾', '💖', '🌟'];
+
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'bg-particle';
+                particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.animationDelay = `${Math.random() * 20}s`;
+                particle.style.animationDuration = `${20 + Math.random() * 20}s`;
+                container.appendChild(particle);
+            }
+        }
+
+        function showBreedSelection() {
+            const container = document.getElementById('breed-selection');
+            container.innerHTML = DOG_BREEDS.map((breed, idx) => `
+            <div class="breed-option ${idx === 0 ? 'selected' : ''}" onclick="selectBreed(${idx})">
+              <div class="breed-option-emoji">${breed.emoji}</div>
+              <div class="breed-option-name">${breed.name}</div>
+              <div style="font-size: 0.65rem; color: #888; margin-top: 4px;">${breed.bonus}</div>
+            </div>
+          `).join('');
+
+            document.getElementById('breed-modal-overlay').classList.add('active');
+            document.getElementById('pet-name-input').value = '';
+            document.getElementById('pet-name-input').focus();
+        }
+
+        function selectBreed(idx) {
+            selectedBreed = idx;
+            document.querySelectorAll('.breed-option').forEach((opt, i) => {
+                opt.classList.toggle('selected', i === idx);
+            });
+        }
+
+        function confirmBreed() {
+            const nameInput = document.getElementById('pet-name-input');
+            const name = nameInput.value.trim();
+
+            if (!name) {
+                alert('Пожалуйста, введите имя для питомца!');
+                return;
+            }
+
+            game.breed = DOG_BREEDS[selectedBreed];
+            game.breedIndex = selectedBreed;
+            game.name = name;
+            game.named = true;
+
+            document.getElementById('breed-modal-overlay').classList.remove('active');
+            updateUI();
+            showModal('🐕', 'Питомец создан!', `Ваш компаньон: ${game.breed.name}\nИмя: ${game.name}\nБонус: ${game.breed.bonus}`);
+            addMemory('🐕', `Создан: ${game.name}`);
+            checkAchievement('name_given', true);
+        }
+
+        // ==================== ОБНОВЛЕНИЕ ИНТЕРФЕЙСА ====================
+        function updateUI() {
+            // Порода
+            if (game.breed) {
+                const badge = document.createElement('div');
+                badge.className = 'breed-badge';
+                badge.textContent = game.breed.name;
+                badge.style.position = 'absolute';
+                badge.style.bottom = '15px';
+                badge.style.left = '15px';
+
+                const existing = document.querySelector('.breed-badge');
+                if (existing) existing.remove();
+                document.querySelector('.pet-stage').appendChild(badge);
+            }
+
+            // Стадия собаки
+            const currentStage = DOG_STAGES[game.dogStageIndex];
+            document.getElementById('evolution-badge').textContent = `${currentStage.emoji} ${currentStage.name}`;
+            document.getElementById('pet').textContent = game.breed ? game.breed.emoji : '🐶';
+
+            // Золотая/радужная кожа
+            if (game.goldenSkin) {
+                document.getElementById('pet').style.filter = 'drop-shadow(0 0 20px #fbbf24) brightness(1.2)';
+            } else if (game.rainbowSkin) {
+                document.getElementById('pet').style.filter = 'drop-shadow(0 0 20px #ec4899) hue-rotate(0deg)';
+                document.getElementById('pet').style.animation = 'rainbow 3s linear infinite';
+            } else {
+                document.getElementById('pet').style.filter = 'drop-shadow(0 15px 30px rgba(0,0,0,0.3))';
+                document.getElementById('pet').style.animation = '';
+            }
+
+            document.getElementById('pet').style.fontSize = `${100 * currentStage.size}px`;
+            document.getElementById('size-indicator').textContent = `Размер: ${currentStage.size.toFixed(1)}x`;
+
+            // Уровень
+            document.getElementById('level-badge').textContent = `Ур. ${game.level}`;
+
+            // Имя
+            document.getElementById('pet-name').textContent = game.named ? game.name : 'Без имени';
+
+            // Настроение
+            updateMood();
+
+            // Статы
+            updateStat('hunger', game.hunger, 'stat-hunger');
+            updateStat('happiness', game.happiness, 'stat-happiness');
+            updateStat('energy', game.energy, 'stat-energy');
+            updateStat('health', game.health, 'stat-health');
+            updateStat('clean', game.clean, 'stat-clean');
+
+            document.getElementById('strength-value').textContent = game.strength;
+            document.getElementById('strength-bar').style.width = `${Math.min(100, game.strength * 2)}%`;
+
+            // Валюта
+            document.getElementById('xp-currency').textContent = game.totalXP;
+            document.getElementById('bones-currency').textContent = game.bones;
+            document.getElementById('gems-currency').textContent = game.gems;
+            document.getElementById('stars-currency').textContent = game.telegramStars;
+
+            // XP
+            const xpPercent = (game.xp / game.xpToNext) * 100;
+            document.getElementById('xp-bar').style.width = `${xpPercent}%`;
+            document.getElementById('xp-text').textContent = `${game.xp} / ${game.xpToNext} XP`;
+            document.getElementById('next-level-info').textContent = `До следующего уровня: ${game.xpToNext - game.xp} XP`;
+
+            // Кнопка сна
+            const sleepBtn = document.getElementById('btn-sleep');
+            sleepBtn.innerHTML = game.isSleeping ?
+                '<span class="icon">☀️</span><span class="label">Разбудить</span>' :
+                '<span class="icon">💤</span><span class="label">Спать</span>';
+            sleepBtn.style.background = game.isSleeping ?
+                'linear-gradient(135deg, #fbbf24, #f59e0b)' :
+                'linear-gradient(135deg, #60a5fa, #3b82f6)';
+
+            // Индикатор стадий
+            updateDogStageIndicator();
+
+            // Задания
+            updateQuests();
+
+            // Достижения
+            updateAchievements();
+
+            // Путь эволюции
+            updateEvolutionPath();
+
+            // Статистика
+            document.getElementById('stat-days').textContent = game.day;
+            document.getElementById('stat-actions').textContent = game.totalActions;
+            document.getElementById('stat-evolutions').textContent = game.totalEvolutions;
+            document.getElementById('stat-level').textContent = game.maxLevel;
+            document.getElementById('streak-badge').textContent = `🔥 ${game.streak} дней`;
+
+            // Магазин
+            updateShop();
+            updatePremiumShop();
+
+            // Настройки
+            document.getElementById('sound-toggle').classList.toggle('active', game.soundEnabled);
+            document.getElementById('effects-toggle').classList.toggle('active', game.effectsEnabled);
+
+            // Воспоминания
+            updateMemories();
+
+            saveGame();
+        }
+
+        function updateStat(id, value, statId) {
+            const bar = document.getElementById(`${id}-bar`);
+            const val = document.getElementById(`${id}-value`);
+            const statItem = document.getElementById(statId);
+
+            bar.style.width = `${Math.min(100, value)}%`;
+            val.textContent = `${Math.round(value)}%`;
+
+            if (value > 60) {
+                bar.style.background = '#4ade80';
+                statItem.classList.remove('critical');
+            } else if (value > 30) {
+                bar.style.background = '#fbbf24';
+                statItem.classList.remove('critical');
+            } else {
+                bar.style.background = '#ef4444';
+                statItem.classList.add('critical');
+            }
+        }
+
+        function updateMood() {
+            const pet = document.getElementById('pet');
+            const mood = document.getElementById('pet-mood');
+
+            pet.className = 'pet';
+
+            if (game.isSleeping) {
+                pet.classList.add('sleeping');
+                mood.textContent = '💤';
+                return;
+            }
+
+            if (game.health < 30) {
+                mood.textContent = '🤒';
+            } else if (game.hunger < 25 || game.energy < 25 || game.clean < 25) {
+                mood.textContent = '😢';
+            } else if (game.happiness > 75 && game.energy > 50) {
+                mood.textContent = '🤩';
+                pet.classList.add('wagging');
+            } else {
+                mood.textContent = '😊';
+            }
+        }
+
+        function updateDogStageIndicator() {
+            const container = document.getElementById('dog-stage-indicator');
+            container.innerHTML = DOG_STAGES.map((stage, idx) => {
+                let className = 'dog-stage-dot';
+                if (idx < game.dogStageIndex) className += ' completed';
+                if (idx === game.dogStageIndex) className += ' active';
+                return `<div class="${className}" title="${stage.name}"></div>`;
+            }).join('');
+        }
+
+        function updateQuests() {
+            const list = document.getElementById('quest-list');
+            list.innerHTML = game.dailyQuests.map(quest => `
+            <div class="quest-item ${quest.completed ? 'completed' : ''}">
+              <div class="quest-checkbox">${quest.completed ? '✓' : ''}</div>
+              <div class="quest-text">${quest.text} (${quest.progress}/${quest.target})</div>
+              <div class="quest-reward">+${quest.reward} ${quest.rewardType === 'xp' ? '⭐' : '🦴'}</div>
+            </div>
+          `).join('');
+        }
+
+        function updateAchievements() {
+            const grid = document.getElementById('achievement-grid');
+            grid.innerHTML = ACHIEVEMENTS.slice(0, 9).map(ach => {
+                const unlocked = game.achievements.includes(ach.id);
+                return `
+              <div class="achievement-item ${unlocked ? 'unlocked' : 'locked'}"
+                   data-tooltip="${ach.desc}" onclick="showAchievementDetail('${ach.id}')">
+                <div class="achievement-icon">${ach.icon}</div>
+                <div class="achievement-name">${ach.name}</div>
+              </div>
+            `;
+            }).join('');
+        }
+
+        function updateEvolutionPath() {
+            const path = document.getElementById('evolution-path');
+            path.innerHTML = DOG_STAGES.slice(0, 5).map((stage, idx) => {
+                let className = 'evolution-stage';
+                if (idx < game.dogStageIndex) className += ' completed';
+                if (idx === game.dogStageIndex) className += ' current';
+
+                return `
+              <div class="${className}">
+                ${stage.emoji}
+                <div class="evolution-stage-label">${stage.name}</div>
+              </div>
+            `;
+            }).join('');
+        }
+
+        function updateShop() {
+            const grid = document.getElementById('shop-grid');
+            grid.innerHTML = game.shopItems.map((item, idx) => `
+            <div class="shop-item ${item.owned ? 'owned' : ''}" onclick="buyItem(${idx})">
+              <div class="shop-item-icon">${item.icon}</div>
+              <div class="shop-item-name">${item.name}</div>
+              <div class="shop-item-price">${item.price} ${item.currency === 'bones' ? '🦴' : '💎'}</div>
+              ${item.owned ? '<div style="font-size: 0.65rem; color: var(--success); margin-top: 4px;">✓ Куплено</div>' : ''}
+            </div>
+          `).join('');
+        }
+
+        function updatePremiumShop() {
+            const grid = document.getElementById('premium-shop-grid');
+            grid.innerHTML = game.premiumItems.map((item, idx) => `
+            <div class="premium-item ${item.purchased ? 'purchased' : ''}" onclick="buyPremiumItem(${idx})">
+              <div class="premium-item-icon">${item.icon}</div>
+              <div class="premium-item-name">${item.name}</div>
+              <div class="premium-item-desc">${item.desc}</div>
+              <div class="premium-item-price">🌟 ${item.price}</div>
+            </div>
+          `).join('');
+        }
+
+        function updateMemories() {
+            const grid = document.getElementById('memories-grid');
+            if (game.memories.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; color: #888; padding: 20px;">Нет воспоминаний. Играйте чаще!</div>';
+                return;
+            }
+
+            grid.innerHTML = game.memories.slice(-9).map(mem => `
+            <div style="background: linear-gradient(135deg, #f8f9ff, #f0f4ff); padding: 10px; border-radius: 10px; text-align: center;">
+              <div style="font-size: 1.5rem;">${mem.icon}</div>
+              <div style="font-size: 0.65rem; color: #666; margin-top: 4px;">${mem.date}</div>
+            </div>
+          `).join('');
+        }
+
+        function showMessage(text, type = 'info') {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = `message-box ${type}`;
+        }
+
+        function showNotification(icon, text) {
+            const container = document.getElementById('notification-container');
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `
+            <div class="notification-icon">${icon}</div>
+            <div class="notification-text">${text}</div>
+            <div class="notification-close" onclick="this.parentElement.remove()">✕</div>
+          `;
+            container.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideIn 0.4s ease reverse';
+                setTimeout(() => notification.remove(), 400);
+            }, 5000);
+        }
+
+        // ==================== ВКЛАДКИ ====================
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+
+        // ==================== ДЕЙСТВИЯ ====================
+        function addXP(amount) {
+            let multiplier = game.breed && game.breed.id === 'poodle' ? 1.1 : 1;
+            if (game.doubleXPActive) multiplier *= 2;
+
+            const xpBoost = game.shopItems.find(i => i.id === 'xp_boost' && i.owned);
+            if (xpBoost) multiplier *= 2;
+
+            const finalAmount = Math.floor(amount * multiplier);
+
+            game.xp += finalAmount;
+            game.totalXP += finalAmount;
+            game.totalActions++;
+
+            while (game.xp >= game.xpToNext) {
+                game.xp -= game.xpToNext;
+                game.level++;
+                game.xpToNext = Math.floor(game.xpToNext * 1.2);
+                game.maxLevel = Math.max(game.maxLevel, game.level);
+
+                if (game.effectsEnabled) showLevelUpEffect();
+                showModal('🎉', 'Новый уровень!', `Ваш питомец достиг ${game.level} уровня!`);
+                addMemory('⭐', `Уровень ${game.level}`);
+
+                checkAchievement('level_5', game.level >= 5);
+                checkAchievement('level_10', game.level >= 10);
+                checkAchievement('level_20', game.level >= 20);
+                checkAchievement('level_50', game.level >= 50);
+                checkAchievement('level_100', game.level >= 100);
+
+                checkDogStage();
+            }
+
+            updateUI();
+        }
+
+        function updateQuestProgress(type) {
+            game.questCounters[type]++;
+
+            game.dailyQuests.forEach(quest => {
+                if (quest.type === type && !quest.completed) {
+                    quest.progress = Math.min(quest.target, quest.progress + 1);
+
+                    if (quest.progress >= quest.target) {
+                        quest.completed = true;
+                        if (quest.rewardType === 'xp') {
+                            addXP(quest.reward);
+                        } else {
+                            game.bones += quest.reward;
+                        }
+                        showMessage(`✓ Задание выполнено! +${quest.reward} ${quest.rewardType === 'xp' ? '⭐' : '🦴'}`, 'success');
+                        showNotification('✅', `Задание: ${quest.text}`);
+                    }
+                }
+            });
+        }
+
+        function checkAchievement(id, condition) {
+            if (condition && !game.achievements.includes(id)) {
+                game.achievements.push(id);
+                const ach = ACHIEVEMENTS.find(a => a.id === id);
+                showModal(ach.icon, 'Достижение!', ach.desc);
+                showNotification('🏆', `Достижение: ${ach.name}`);
+                addXP(100);
+                addMemory('🏆', ach.name);
+            }
+        }
+
+        function checkDogStage() {
+            const nextStage = DOG_STAGES[game.dogStageIndex + 1];
+            if (nextStage && game.level >= nextStage.minLevel) {
+                game.dogStageIndex++;
+                game.totalEvolutions++;
+
+                const pet = document.getElementById('pet');
+                if (game.effectsEnabled) pet.classList.add('evolving');
+
+                setTimeout(() => {
+                    pet.classList.remove('evolving');
+                    showModal(nextStage.emoji, 'Эволюция!', `Ваш питомец стал: ${nextStage.name}!\n${nextStage.desc}`);
+                    showNotification('🧬', `Эволюция: ${nextStage.name}`);
+                    if (game.effectsEnabled) createParticles(30);
+                    updateUI();
+                    addMemory('🧬', nextStage.name);
+                }, 1800);
+
+                checkAchievement('evolution_3', game.totalEvolutions >= 3);
+            }
+        }
+
+        function addMemory(icon, text) {
+            const date = new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+            game.memories.push({ icon, text, date, timestamp: Date.now() });
+            if (game.memories.length > 50) game.memories.shift();
+        }
+
+        function setCooldown(btnId, seconds) {
+            const btn = document.getElementById(btnId);
+            btn.classList.add('cooldown-active');
+            btn.disabled = true;
+
+            setTimeout(() => {
+                btn.classList.remove('cooldown-active');
+                btn.disabled = false;
+            }, seconds * 1000);
+        }
+
+        function feed() {
+            if (game.isSleeping) return showMessage('Щенок спит! 😴', 'warning');
+            if (game.hunger >= 100) return showMessage('Уже не голоден! 😊', 'info');
+
+            const bonus = game.breed && game.breed.id === 'labrador' ? 1.1 : 1;
+            game.hunger = Math.min(100, game.hunger + 25 * bonus);
+            game.happiness = Math.min(100, game.happiness + 5);
+            game.health = Math.min(100, game.health + 2);
+            game.bones += 5;
+
+            addXP(10);
+            updateQuestProgress('feed');
+            checkAchievement('first_feed', true);
+
+            if (game.effectsEnabled) {
+                const pet = document.getElementById('pet');
+                pet.classList.add('eating');
+                setTimeout(() => pet.classList.remove('eating'), 1000);
+                createParticles(8);
+            }
+
+            showMessage('Вкусно поел! 🍖 +5 🦴', 'success');
+            setCooldown('btn-feed', 2);
+            updateUI();
+        }
+
+        function play() {
+            if (game.isSleeping) return showMessage('Щенок спит! 😴', 'warning');
+            if (game.energy < 20 && !game.unlimitedEnergyActive) return showMessage('Слишком устал... 😔', 'warning');
+
+            game.happiness = Math.min(100, game.happiness + 30);
+            if (!game.unlimitedEnergyActive) game.energy = Math.max(0, game.energy - 20);
+            game.hunger = Math.max(0, game.hunger - 15);
+            game.clean = Math.max(0, game.clean - 10);
+
+            addXP(15);
+            updateQuestProgress('play');
+            checkAchievement('first_play', true);
+
+            if (game.effectsEnabled) {
+                const pet = document.getElementById('pet');
+                pet.classList.add('playing');
+                setTimeout(() => pet.classList.remove('playing'), 1200);
+                createParticles(12);
+            }
+
+            showMessage('Весело поиграли! 🎾', 'success');
+            setCooldown('btn-play', 2);
+            updateUI();
+        }
+
+        function sleep() {
+            game.isSleeping = !game.isSleeping;
+
+            if (game.isSleeping) {
+                showMessage('Сладких снов... 💤', 'info');
+            } else {
+                const sleepDuration = Math.min(120, Math.floor((Date.now() - game.lastUpdate) / 60000));
+                const bonus = game.breed && game.breed.id === 'husky' ? 1.1 : 1;
+                game.energy = Math.min(100, game.energy + sleepDuration * 1.5 * bonus);
+                game.hunger = Math.max(0, game.hunger - sleepDuration * 0.5);
+
+                showMessage('Доброе утро! ☀️', 'success');
+                updateQuestProgress('sleep');
+                if (game.effectsEnabled) createParticles(15);
+                addMemory('☀️', 'Проснулся');
+            }
+
+            updateUI();
+        }
+
+        function heal() {
+            if (game.isSleeping) return showMessage('Щенок спит! 😴', 'warning');
+            if (game.health >= 100) return showMessage('Здоровье в порядке! 💪', 'info');
+
+            const bonus = game.breed && game.breed.id === 'bulldog' ? 1.1 : 1;
+            game.health = Math.min(100, game.health + 20 * bonus);
+            game.happiness = Math.max(0, game.happiness - 5);
+
+            addXP(10);
+            showMessage('Щенок чувствует себя лучше! 💊', 'success');
+            setCooldown('btn-heal', 3);
+            updateUI();
+        }
+
+        function train() {
+            if (game.isSleeping) return showMessage('Щенок спит! 😴', 'warning');
+            if (game.energy < 30 && !game.unlimitedEnergyActive) return showMessage('Слишком устал для тренировки... 😔', 'warning');
+
+            const bonus = game.breed && game.breed.id === 'shepherd' ? 1.1 : 1;
+            game.strength += Math.floor(1 * bonus);
+            if (!game.unlimitedEnergyActive) game.energy = Math.max(0, game.energy - 25);
+            game.hunger = Math.max(0, game.hunger - 20);
+            game.happiness = Math.min(100, game.happiness + 10);
+
+            addXP(20);
+            updateQuestProgress('train');
+
+            if (game.effectsEnabled) createParticles(10);
+            showMessage('Тренировка прошла успешно! 💪', 'success');
+            setCooldown('btn-train', 3);
+            updateUI();
+        }
+
+        function clean() {
+            if (game.isSleeping) return showMessage('Щенок спит! 😴', 'warning');
+            if (game.clean >= 100) return showMessage('Уже чисто! 🚿', 'info');
+
+            game.clean = Math.min(100, game.clean + 50);
+            game.happiness = Math.min(100, game.happiness + 5);
+            game.health = Math.min(100, game.health + 5);
+
+            addXP(10);
+            updateQuestProgress('clean');
+
+            if (game.effectsEnabled) createParticles(8);
+            showMessage('Щенок теперь чистый! 🚿', 'success');
+            setCooldown('btn-clean', 2);
+            updateUI();
+        }
+
+        function petClick() {
+            if (game.isSleeping) return;
+
+            const pet = document.getElementById('pet');
+            pet.classList.add('clicking');
+            setTimeout(() => pet.classList.remove('clicking'), 300);
+
+            game.happiness = Math.min(100, game.happiness + 3);
+            if (!game.unlimitedEnergyActive) game.energy = Math.max(0, game.energy - 1);
+
+            addXP(2);
+
+            if (game.effectsEnabled) {
+                createHeartParticle();
+            }
+
+            updateUI();
+        }
+
+        // ==================== ИЗМЕНЕНИЕ ИМЕНИ (PREMIUM) ====================
+        function changeName() {
+            if (game.telegramStars < 5) {
+                showMessage('Недостаточно Telegram Stars! Нужно 5 🌟', 'error');
+                showGetStarsModal();
+                return;
+            }
+
+            const newName = prompt('Введите новое имя для питомца:', game.name);
+            if (newName && newName.trim()) {
+                game.telegramStars -= 5;
+                game.name = newName.trim();
+                showMessage(`Имя изменено на ${game.name}! (-5 🌟)`, 'premium');
+                showNotification('🏷️', `Имя изменено: ${game.name}`);
+                addMemory('🏷️', `Новое имя: ${game.name}`);
+                updateUI();
+            }
+        }
+
+        // ==================== МАГАЗИН ====================
+        function buyItem(idx) {
+            const item = game.shopItems[idx];
+            if (item.owned) return showMessage('Уже куплено!', 'info');
+
+            if (item.currency === 'bones' && game.bones < item.price) {
+                return showMessage(`Недостаточно костей! Нужно ${item.price} 🦴`, 'error');
+            }
+
+            if (item.currency === 'gems' && game.gems < item.price) {
+                return showMessage(`Недостаточно кристаллов! Нужно ${item.price} 💎`, 'error');
+            }
+
+            if (item.currency === 'bones') {
+                game.bones -= item.price;
+            } else {
+                game.gems -= item.price;
+            }
+
+            item.owned = true;
+
+            // Применить эффект
+            if (item.effect === 'all') {
+                game.hunger = Math.min(100, game.hunger + item.value);
+                game.happiness = Math.min(100, game.happiness + item.value);
+                game.energy = Math.min(100, game.energy + item.value);
+                game.health = Math.min(100, game.health + item.value);
+                game.clean = Math.min(100, game.clean + item.value);
+            } else if (item.effect === 'max_all') {
+                game.hunger = 100;
+                game.happiness = 100;
+                game.energy = 100;
+                game.health = 100;
+                game.clean = 100;
+            } else {
+                game[item.effect] = Math.min(100, game[item.effect] + item.value);
+            }
+
+            showMessage(`Куплено: ${item.name}!`, 'success');
+            showNotification('🛒', `${item.name} куплен`);
+            addMemory('🛒', item.name);
+            updateUI();
+        }
+
+        // ==================== PREMIUM МАГАЗИН ====================
+        function buyPremiumItem(idx) {
+            const item = game.premiumItems[idx];
+            if (item.purchased) return showMessage('Уже куплено!', 'info');
+
+            if (game.telegramStars < item.price) {
+                showMessage(`Недостаточно Stars! Нужно ${item.price} 🌟`, 'error');
+                showGetStarsModal();
+                return;
+            }
+
+            game.telegramStars -= item.price;
+            item.purchased = true;
+
+            // Применить эффект
+            switch (item.id) {
+                case 'instant_evolve':
+                    game.level += 5;
+                    game.xpToNext = Math.floor(game.xpToNext * Math.pow(1.2, 5));
+                    checkDogStage();
+                    showMessage('Мгновенная эволюция! +5 уровней 🧬', 'premium');
+                    break;
+                case 'max_stats':
+                    game.hunger = 100;
+                    game.happiness = 100;
+                    game.energy = 100;
+                    game.health = 100;
+                    game.clean = 100;
+                    showMessage('Все показатели на максимуме! 💯', 'premium');
+                    break;
+                case 'double_xp':
+                    game.doubleXPActive = true;
+                    game.doubleXPExpiry = Date.now() + 86400000;
+                    showMessage('Двойной XP активирован на 24 часа! ⭐⭐', 'premium');
+                    break;
+                case 'auto_feed':
+                    game.autoFeedActive = true;
+                    showMessage('Авто-кормление активировано! 🤖', 'premium');
+                    break;
+                case 'golden_skin':
+                    game.goldenSkin = true;
+                    game.rainbowSkin = false;
+                    showMessage('Золотая кожа активирована! 🏆', 'premium');
+                    break;
+                case 'rainbow_skin':
+                    game.rainbowSkin = true;
+                    game.goldenSkin = false;
+                    showMessage('Радужная кожа активирована! 🌈', 'premium');
+                    break;
+                case 'unlimited_energy':
+                    game.unlimitedEnergyActive = true;
+                    game.unlimitedEnergyExpiry = Date.now() + 86400000;
+                    showMessage('Бесконечная энергия на 24 часа! ⚡', 'premium');
+                    break;
+            }
+
+            checkAchievement('premium_user', true);
+            showNotification('🌟', `${item.name} активирован`);
+            addMemory('🌟', item.name);
+            updateUI();
+        }
+
+        function showGetStarsModal() {
+            document.getElementById('stars-modal-overlay').classList.add('active');
+        }
+
+        function buyStars(amount) {
+            game.telegramStars += amount;
+            showNotification('🌟', `+${amount} Telegram Stars`);
+            showMessage(`Получено ${amount} Stars! Спасибо за покупку!`, 'premium');
+            addMemory('🌟', `Куплено ${amount} Stars`);
+            closeModal();
+            updateUI();
+        }
+
+        // ==================== МИНИ-ИГРА ====================
+        function startMiniGame() {
+            if (game.miniGameActive) return;
+
+            game.miniGameActive = true;
+            game.miniGameScore = 0;
+            miniGameTime = 30;
+
+            document.getElementById('mini-game-score').textContent = 'Счёт: 0';
+            document.getElementById('mini-game-timer').textContent = 'Время: 30с';
+            document.getElementById('mini-game-target').style.display = 'block';
+
+            moveMiniGameTarget();
+
+            miniGameInterval = setInterval(() => {
+                miniGameTime--;
+                document.getElementById('mini-game-timer').textContent = `Время: ${miniGameTime}с`;
+
+                if (miniGameTime <= 0) {
+                    endMiniGame();
+                }
+            }, 1000);
+        }
+
+        function moveMiniGameTarget() {
+            const target = document.getElementById('mini-game-target');
+            const area = document.getElementById('mini-game-area');
+
+            const maxX = area.clientWidth - 60;
+            const maxY = area.clientHeight - 60;
+
+            target.style.position = 'absolute';
+            target.style.left = `${Math.random() * maxX}px`;
+            target.style.top = `${80 + Math.random() * maxY}px`;
+        }
+
+        function miniGameClick() {
+            if (!game.miniGameActive) return;
+
+            game.miniGameScore++;
+            document.getElementById('mini-game-score').textContent = `Счёт: ${game.miniGameScore}`;
+
+            if (game.effectsEnabled) createParticles(3);
+            moveMiniGameTarget();
+        }
+
+        function endMiniGame() {
+            clearInterval(miniGameInterval);
+            game.miniGameActive = false;
+
+            const reward = Math.floor(game.miniGameScore * 5);
+            game.bones += reward;
+
+            showModal('🎮', 'Игра окончена!', `Ваш счёт: ${game.miniGameScore}\nНаграда: ${reward} 🦴`);
+            showNotification('🎯', `Мини-игра: ${game.miniGameScore} очков`);
+
+            if (game.miniGameScore >= 20) {
+                checkAchievement('game_master', true);
+            }
+
+            addMemory('🎮', `Счёт: ${game.miniGameScore}`);
+            updateUI();
+        }
+
+        // ==================== ЕЖЕДНЕВНЫЙ БОНУС ====================
+        function checkDailyBonus() {
+            const now = Date.now();
+            const hoursSinceBonus = (now - game.lastDailyBonus) / 3600000;
+
+            const btn = document.getElementById('daily-bonus-btn');
+            const timer = document.getElementById('daily-bonus-timer');
+
+            if (hoursSinceBonus >= 24) {
+                btn.disabled = false;
+                btn.innerHTML = '<span class="icon">🎁</span><span class="label">Получить бонус</span>';
+                timer.textContent = 'Доступен!';
+            } else {
+                btn.disabled = true;
+                const hoursLeft = Math.ceil(24 - hoursSinceBonus);
+                timer.textContent = `Следующий бонус через: ${hoursLeft}ч`;
+            }
+        }
+
+        function claimDailyBonus() {
+            const streakBonus = Math.min(7, game.streak);
+            const bonesReward = 100 + (streakBonus * 20);
+            const xpReward = 50 + (streakBonus * 10);
+            const gemsReward = game.streak >= 7 ? 5 : 0;
+            const starsReward = game.streak >= 3 ? 1 : 0;
+
+            game.bones += bonesReward;
+            game.gems += gemsReward;
+            game.telegramStars += starsReward;
+            game.lastDailyBonus = Date.now();
+
+            addXP(xpReward);
+
+            showModal('🎁', 'Ежедневный бонус!',
+                `🦴 Кости: +${bonesReward}\n⭐ XP: +${xpReward}${gemsReward > 0 ? `\n💎 Кристаллы: +${gemsReward}` : ''}${starsReward > 0 ? `\n🌟 Stars: +${starsReward}` : ''}\n\n🔥 Стрик: ${game.streak} дней`);
+
+            showNotification('🎁', `Бонус получен: ${bonesReward} 🦴, ${xpReward} ⭐${starsReward > 0 ? `, ${starsReward} 🌟` : ''}`);
+            checkDailyBonus();
+            updateUI();
+        }
+
+        // ==================== СЛУЧАЙНЫЕ СОБЫТИЯ ====================
+        function triggerRandomEvent() {
+            if (Math.random() > 0.3) return;
+
+            const event = RANDOM_EVENTS[Math.floor(Math.random() * RANDOM_EVENTS.length)];
+            event.effect();
+
+            showNotification('🎲', event.text);
+            showMessage(event.text, 'info');
+            updateUI();
+
+            setTimeout(() => triggerRandomEvent(), 60000 + Math.random() * 120000);
+        }
+
+        // ==================== ЭФФЕКТЫ ====================
+        function createParticles(count) {
+            const container = document.getElementById('particles');
+            const emojis = ['✨', '⭐', '💖', '🌟', '💫', '🦴', '🐾', '🎾'];
+
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                particle.style.left = `${30 + Math.random() * 40}%`;
+                particle.style.top = `${40 + Math.random() * 20}%`;
+                particle.style.animationDelay = `${Math.random() * 0.5}s`;
+                container.appendChild(particle);
+
+                setTimeout(() => particle.remove(), 1500);
+            }
+        }
+
+        function createHeartParticle() {
+            const container = document.getElementById('particles');
+            const heart = document.createElement('div');
+            heart.className = 'heart-particle';
+            heart.textContent = '💖';
+            heart.style.left = `${45 + Math.random() * 10}%`;
+            heart.style.top = `${45 + Math.random() * 10}%`;
+            container.appendChild(heart);
+
+            setTimeout(() => heart.remove(), 1200);
+        }
+
+        function showLevelUpEffect() {
+            const effect = document.getElementById('level-up-effect');
+            effect.innerHTML = '';
+            effect.classList.add('active');
+
+            const colors = ['#667eea', '#764ba2', '#fbbf24', '#4ade80', '#ef4444', '#ec4899'];
+
+            for (let i = 0; i < 60; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = `${Math.random() * 0.5}s`;
+                confetti.style.animationDuration = `${2.5 + Math.random() * 2}s`;
+                effect.appendChild(confetti);
+            }
+
+            setTimeout(() => {
+                effect.classList.remove('active');
+                effect.innerHTML = '';
+            }, 3500);
+        }
+
+        function showStarsRain() {
+            const container = document.getElementById('stars-rain');
+            container.innerHTML = '';
+            container.classList.add('active');
+
+            for (let i = 0; i < 30; i++) {
+                const star = document.createElement('div');
+                star.className = 'star-fall';
+                star.textContent = '🌟';
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 2}s`;
+                container.appendChild(star);
+            }
+
+            setTimeout(() => {
+                container.classList.remove('active');
+                container.innerHTML = '';
+            }, 2500);
+        }
+
+        // ==================== МОДАЛЬНОЕ ОКНО ====================
+        function showModal(icon, title, text) {
+            document.getElementById('modal-icon').textContent = icon;
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-text').textContent = text;
+            document.getElementById('modal-overlay').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+            document.getElementById('stars-modal-overlay').classList.remove('active');
+        }
+
+        function showAchievementDetail(id) {
+            const ach = ACHIEVEMENTS.find(a => a.id === id);
+            if (ach) {
+                showModal(ach.icon, ach.name, ach.desc);
+            }
+        }
+
+        // ==================== НАСТРОЙКИ ====================
+        function toggleSound() {
+            game.soundEnabled = !game.soundEnabled;
+            document.getElementById('sound-toggle').classList.toggle('active', game.soundEnabled);
+            showMessage(game.soundEnabled ? 'Звуки включены 🔊' : 'Звуки выключены 🔇', 'info');
+            saveGame();
+        }
+
+        function toggleEffects() {
+            game.effectsEnabled = !game.effectsEnabled;
+            document.getElementById('effects-toggle').classList.toggle('active', game.effectsEnabled);
+            showMessage(game.effectsEnabled ? 'Эффекты включены ✨' : 'Эффекты выключены', 'info');
+            saveGame();
+        }
+
+        // ==================== ИГРОВОЙ ЦИКЛ ====================
+        function gameLoop() {
+            if (!game.isSleeping) {
+                game.hunger = Math.max(0, game.hunger - 0.12);
+                game.happiness = Math.max(0, game.happiness - 0.08);
+                if (!game.unlimitedEnergyActive) game.energy = Math.max(0, game.energy - 0.08);
+                game.clean = Math.max(0, game.clean - 0.06);
+
+                if (game.hunger < 20 || game.happiness < 20 || game.clean < 30) {
+                    game.health = Math.max(0, game.health - 0.15);
+                } else if (game.hunger > 70 && game.happiness > 70 && game.clean > 70) {
+                    game.health = Math.min(100, game.health + 0.04);
+                }
+
+                if (game.health <= 0) {
+                    game.health = 0;
+                    document.getElementById('pet').textContent = '💔';
+                    showMessage('О нет... Щенок нуждается в помощи! Начните заново 💔', 'error');
+                    document.querySelectorAll('.action-btn').forEach(btn => btn.disabled = true);
+                    return;
+                }
+
+                if (game.hunger > 95 && game.happiness > 95 && game.energy > 95 &&
+                    game.health > 95 && game.clean > 95) {
+                    checkAchievement('perfect_day', true);
+                }
+            }
+
+            checkAchievement('rich', game.bones >= 1000);
+
+            const daysPlayed = Math.floor((Date.now() - game.createdAt) / 86400000);
+            checkAchievement('days_7', daysPlayed >= 7);
+            checkAchievement('days_30', daysPlayed >= 30);
+
+            checkAchievement('actions_100', game.totalActions >= 100);
+            checkAchievement('actions_500', game.totalActions >= 500);
+
+            updateUI();
+        }
+
+        // ==================== СБРОС ИГРЫ ====================
+        function resetGame() {
+            if (confirm('Начать новую игру? Весь прогресс будет удалён.')) {
+                localStorage.removeItem('tamagotchi_premium_save');
+                game = { ...defaultState };
+                game.dailyQuests = generateDailyQuests();
+                game.shopItems = SHOP_ITEMS.map(item => ({ ...item, owned: false }));
+                game.premiumItems = PREMIUM_ITEMS.map(item => ({ ...item, purchased: false }));
+                document.querySelectorAll('.action-btn').forEach(btn => btn.disabled = false);
+                showModal('🐶', 'Новая игра!', 'Начните новый путь к легенде!');
+                showBreedSelection();
+                updateUI();
+            }
+        }
+
+        // ==================== ЗАПУСК ====================
+        init();
+    </script>
+</body>
+</html>
