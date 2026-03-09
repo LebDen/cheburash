@@ -11,6 +11,8 @@
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
         :root {
@@ -24,6 +26,7 @@
             --purple: #a855f7;
             --pink: #ec4899;
             --dogcoin: #f59e0b;
+            --telegram: #0088cc;
             --bg-gradient: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
             --card-bg: rgba(255, 255, 255, 0.97);
             --card-shadow: 0 20px 60px rgba(0,0,0,0.5);
@@ -1197,6 +1200,7 @@
             width: 100%;
             text-align: center;
             animation: modalPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border-left: 4px solid var(--primary);
         }
 
         @keyframes modalPop {
@@ -1814,7 +1818,7 @@
             </div>
 
             <div class="footer">
-                Virtual DOG by LEBEDEV • v4.0 • Прогресс сохраняется
+                Virtual DOG by LEBEDEV • v4.1 • Прогресс сохраняется
             </div>
         </div>
 
@@ -1913,6 +1917,22 @@
     <div class="level-up-effect" id="level-up-effect"></div>
 
     <script>
+        // === TELEGRAM MINI APP SETUP ===
+        const tg = window.Telegram.WebApp;
+        tg.setHeaderColor('#1a1a2e');
+        tg.setBackgroundColor('#0f0c29');
+        tg.enableClosingConfirmation();
+        tg.ready();
+        tg.expand();
+
+        console.log('Telegram WebApp:', {
+            platform: tg.platform,
+            colorScheme: tg.colorScheme,
+            initData: !!tg.initData,
+            startParam: tg.initDataUnsafe?.start_param
+        });
+        // ===============================
+
         // ==================== КОНФИГУРАЦИЯ ====================
         const DOG_BREEDS = [
             { id: 'labrador', name: 'Лабрадор', emoji: '🐕', bonus: 'Счастье +10%' },
@@ -1973,7 +1993,6 @@
             { id: 'clean_2', text: 'Помыть 2 раза', target: 2, reward: 40, type: 'clean' }
         ];
 
-        // Награда за ежедневный вход (DOGKOIN)
         const DAILY_REWARDS = [1, 2, 2, 2, 2, 5, 5];
 
         const RANDOM_EVENTS = [
@@ -1999,7 +2018,7 @@
             questCounters: { feed: 0, play: 0, sleep: 0, train: 0, clean: 0 },
             soundEnabled: false, effectsEnabled: true,
             miniGameScore: 0, miniGameActive: false,
-            invitedFriends: 0, referralCode: ''
+            invitedFriends: 0, referralCode: '', referralBonusClaimed: false
         };
 
         let game = loadGame();
@@ -2007,12 +2026,6 @@
         let selectedBreed = 0;
         let miniGameInterval;
         let miniGameTime = 30;
-        let sleepInterval;
-
-        // ==================== TELEGRAM WEB APP ====================
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
 
         // ==================== ЗАГРУЗКА/СОХРАНЕНИЕ ====================
         function loadGame() {
@@ -2041,19 +2054,17 @@
                         parsed.questCounters = { feed: 0, play: 0, sleep: 0, train: 0, clean: 0 };
                     }
 
-                    // Проверка стрика и сброс если пропустил день
                     const daysSinceLogin = Math.floor((Date.now() - parsed.lastLogin) / 86400000);
                     if (daysSinceLogin === 1) {
                         parsed.streak = Math.min(7, parsed.streak + 1);
                     } else if (daysSinceLogin > 1) {
-                        parsed.streak = 1; // Сброс стрика
+                        parsed.streak = 1;
                     }
                     parsed.lastLogin = Date.now();
 
-                    // Проверка сна
                     if (parsed.isSleeping && parsed.sleepStartTime) {
                         const sleepMinutes = Math.floor((Date.now() - parsed.sleepStartTime) / 60000);
-                        const energyRecovered = sleepMinutes * 10; // 1 мин = 10%
+                        const energyRecovered = sleepMinutes * 10;
                         parsed.energy = Math.min(100, parsed.energy + energyRecovered);
                         if (parsed.energy >= 100) {
                             parsed.isSleeping = false;
@@ -2094,15 +2105,17 @@
         function init() {
             createBgParticles();
 
-            // Проверка реферальной ссылки
-            const urlParams = new URLSearchParams(window.location.search);
-            const refCode = urlParams.get('ref');
-            if (refCode && !game.referralBonusClaimed) {
+            // === ПРОВЕРКА РЕФЕРАЛЬНОЙ ССЫЛКИ ===
+            const startParam = tg.initDataUnsafe?.start_param || '';
+            const refMatch = startParam.match(/ref_([A-Z0-9]+)/i);
+            if (refMatch && !game.referralBonusClaimed) {
                 game.dogcoins += 25;
                 game.referralBonusClaimed = true;
                 showNotification('🎁', '+25 DOGKOIN за друга!');
                 addMemory('🎁', 'Бонус за друга +25🪙');
+                saveGame();
             }
+            // ====================================
 
             if (!game.breed) {
                 showBreedSelection();
@@ -2568,7 +2581,6 @@
 
         function sleep() {
             if (game.isSleeping) {
-                // Разбудить
                 game.isSleeping = false;
                 game.sleepStartTime = 0;
                 showMessage('Доброе утро! ☀️', 'success');
@@ -2576,12 +2588,10 @@
                 if (game.effectsEnabled) createParticles(12);
                 addMemory('☀️', 'Проснулся');
             } else {
-                // Уложить спать
                 game.isSleeping = true;
                 game.sleepStartTime = Date.now();
                 showMessage('Сладких снов... 💤 1 мин = 10% энергии', 'info');
             }
-
             updateUI();
         }
 
@@ -2709,30 +2719,54 @@
             updateUI();
         }
 
-        // ==================== ПРИГЛАШЕНИЕ ДРУГА ====================
+        // ==================== ПРИГЛАШЕНИЕ ДРУГА (ИСПРАВЛЕННАЯ ВЕРСИЯ) ====================
         function inviteFriend() {
-            const tg = window.Telegram.WebApp;
-            const inviteLink = `https://t.me/${tg.initDataUnsafe?.user?.username || 'VirtualDogBot'}?startapp=ref_${game.referralCode}`;
+            const botUsername = 'minibrogame_bot';
+            const appShortName = 'mini';
+            const refCode = game.referralCode || 'DOG123';
 
-            const shareText = `🐕 Я уже завёл своего питомца в игре Virtual DOG by LEBEDEV!
+            const inviteLink = `https://t.me/${botUsername}/${appShortName}?startapp=ref_${refCode}`;
 
-Заведи и ты своего щенка, ухаживай за ним, играй и получай DOGKOIN!
+            const inviteText = `🐕 Я уже завёл своего питомца в игре *Virtual DOG by LEBEDEV*!
 
-🎁 По моей ссылке ты получишь 25 DOGKOIN на старте!
+Заведи и ты своего щенка 🐶
+Ухаживай, играй, развивай и получай *DOGKOIN* 🪙
 
-👉 ${inviteLink}`;
+🎁 *Бонус*: по моей ссылке ты получишь *25 DOGKOIN* на старте!
 
-            if (tg.shareUrl) {
-                tg.shareUrl(shareText);
+👉 Нажми, чтобы начать:`;
+
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(inviteLink).then(() => {
+                    showNotification('📋', 'Ссылка скопирована!');
+                    showModal('📤 Пригласи друга',
+                        `✅ Ссылка скопирована!\n\n` +
+                        `📌 *Инструкция*:\n` +
+                        `1. Открой чат с другом в Telegram\n` +
+                        `2. Вставь ссылку (долгий тап → Вставить)\n` +
+                        `3. Отправь сообщение!\n\n` +
+                        `🎁 Друг получит +25 🪙, ты — когда он начнёт играть.`,
+                        'premium'
+                    );
+                    addMemory('📤', 'Пригласил друга');
+                    updateUI();
+                }).catch(() => {
+                    fallbackInvite(inviteLink);
+                });
             } else {
-                // Fallback для браузера
-                const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(shareText)}`;
-                window.open(telegramUrl, '_blank');
+                fallbackInvite(inviteLink);
             }
-
-            showNotification('📤', 'Ссылка скопирована! Отправь друзьям');
-            addMemory('📤', 'Пригласил друга');
         }
+
+        function fallbackInvite(link) {
+            showModal('📤 Скопируй ссылку',
+                `Нажми и удерживай, чтобы выделить:\n\n` +
+                `<code style="background:#f0f0f0;padding:8px;border-radius:6px;display:block;margin:10px 0;font-size:0.8rem">${link}</code>\n\n` +
+                `Затем отправь другу в Telegram! 🚀`,
+                'info'
+            );
+        }
+        // ============================================================================
 
         // ==================== МИНИ-ИГРА ====================
         function startMiniGame() {
@@ -2800,7 +2834,6 @@
             const hoursSinceBonus = (now - game.lastDailyBonus) / 3600000;
 
             const btn = document.getElementById('daily-bonus-btn');
-            const timer = document.getElementById('daily-bonus-timer');
 
             if (hoursSinceBonus >= 24) {
                 game.dailyBonusClaimed = false;
@@ -2808,7 +2841,6 @@
                 btn.innerHTML = '<span class="icon">🪙</span><span class="label">Получить</span>';
             } else {
                 btn.disabled = true;
-                const hoursLeft = Math.ceil(24 - hoursSinceBonus);
             }
         }
 
@@ -2832,7 +2864,7 @@
             addMemory('🪙', `Ежедневно +${reward}`);
 
             if (game.streak >= 7) {
-                game.streak = 7; // Максимум
+                game.streak = 7;
             } else {
                 game.streak++;
             }
@@ -2909,10 +2941,20 @@
         }
 
         // ==================== МОДАЛЬНОЕ ОКНО ====================
-        function showModal(icon, title, text) {
+        function showModal(icon, title, text, type = '') {
             document.getElementById('modal-icon').textContent = icon;
             document.getElementById('modal-title').textContent = title;
-            document.getElementById('modal-text').textContent = text;
+            document.getElementById('modal-text').innerHTML = text.replace(/\n/g, '<br>').replace(/\*(.*?)\*/g, '<b>$1</b>');
+
+            const modal = document.querySelector('.modal');
+            if (type === 'premium') {
+                modal.style.borderLeft = '4px solid var(--dogcoin)';
+            } else if (type === 'info') {
+                modal.style.borderLeft = '4px solid var(--info)';
+            } else {
+                modal.style.borderLeft = '4px solid var(--primary)';
+            }
+
             document.getElementById('modal-overlay').classList.add('active');
         }
 
