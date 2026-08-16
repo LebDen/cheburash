@@ -103,9 +103,6 @@ header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px
 .row-s .tt span{display:block;color:var(--mut);font-size:11.5px;margin-top:1px}
 .row-s .go{color:#3a4552;font-size:14px;flex:none}
 .suggest .empty{color:var(--mut);font-size:13px;padding:18px;text-align:center}
-.suggest .spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.15);
-  border-top-color:var(--amber);border-radius:50%;animation:spin 0.8s linear infinite;vertical-align:-2px}
-@keyframes spin{to{transform:rotate(360deg)}}
 .chips-block{margin-top:18px}
 .chips-title{font-family:var(--disp);font-size:9px;letter-spacing:.22em;color:var(--mut);
   text-transform:uppercase;margin-bottom:9px}
@@ -130,10 +127,9 @@ header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px
   transition:transform .15s,opacity .2s}
 .primary:active{transform:scale(.975)}
 .primary:disabled{opacity:.35;box-shadow:none}
-.api-banner{margin-top:18px;padding:14px;border-radius:14px;border:1px dashed rgba(90,176,255,.35);
-  background:rgba(90,176,255,.05);font-size:13px;color:var(--txt);line-height:1.5}
-.api-banner b{color:var(--blue)}
-.api-banner a{color:var(--blue);text-decoration:underline}
+.src-note{margin-top:14px;text-align:center;color:#5b6673;font-size:11.5px;display:flex;
+  gap:6px;justify-content:center;align-items:center}
+.src-note i{width:6px;height:6px;border-radius:50%;background:var(--green);flex:none}
 .demowarn{margin-top:14px;padding:12px 14px;border-radius:12px;font-size:13px;line-height:1.45;
   background:rgba(90,176,255,.07);border:1px dashed rgba(90,176,255,.4);color:var(--txt)}
 .demowarn b{color:var(--blue)}
@@ -201,9 +197,6 @@ header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px
 .ios-note{font-size:12px;color:var(--mut);margin-bottom:14px;line-height:1.5;
   padding:11px 13px;border:1px dashed rgba(90,176,255,.35);border-radius:12px}
 .ios-note b{color:var(--blue);font-weight:600}
-.api-key-input{width:100%;padding:13px;border-radius:12px;background:var(--bg);
-  border:1px solid var(--line);color:var(--txt);font-family:var(--mono);font-size:13px;margin:8px 0}
-.api-key-input:focus{outline:none;border-color:var(--amber)}
 .status-chip{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.08em;
   padding:5px 11px;border-radius:100px;text-transform:uppercase}
 .status-chip.wait{color:var(--amber);border:1px solid rgba(255,176,32,.4)}
@@ -331,7 +324,7 @@ header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px
     <div class="sticky-cta">
       <button class="primary" id="searchBtn" disabled>Найти электрички</button>
     </div>
-    <div id="apiBanner" class="api-banner" hidden></div>
+    <div class="src-note"><i></i>источники: свой сервер → API (с расширением) → сайт Яндекса</div>
   </section>
 
   <section id="scr-results" hidden>
@@ -383,21 +376,21 @@ header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px
 
 <script>
 'use strict';
-/* ================= КОНФИГУРАЦИЯ ================= */
-const DEFAULT_API_KEY='09282991-acfd-4c79-a43c-93ea02c3414a';
+/* ================= ДАННЫЕ: 4 уровня =================
+   1) /rasp — свой сервер-прокси (Glitch), ключ живёт там
+   2) прямой API — работает, если стоит CORS-расширение
+   3) сайт t.rasp.yandex.ru через прокси
+   4) демо */
+const API_KEY='09282991-acfd-4c79-a43c-93ea02c3414a';
 const API_BASE='https://api.rasp.yandex.ru/v3.0/';
 const SITE_BASE='https://t.rasp.yandex.ru/';
 const PROXIES=[
-  u=>u,
   u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u),
   u=>'https://corsproxy.io/?url='+encodeURIComponent(u),
   u=>'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(u)
 ];
 const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-function getApiKey(){return store.get('el_apikey',DEFAULT_API_KEY)}
-function setApiKey(k){if(k&&k!==DEFAULT_API_KEY)store.set('el_apikey',k);else try{localStorage.removeItem('el_apikey')}catch(e){}}
-let API_KEY=getApiKey(), apiMode='none', lastApiError=null;
-let goodProxy=store.get('el_proxy',1)||1;
+let apiMode='none', hasServer=null;
 
 /* ================= УТИЛИТЫ ================= */
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -409,68 +402,63 @@ const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent);
 function escapeHtml(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 const norm=s=>(s||'').toLowerCase().replace(/ё/g,'е');
 function shortName(t){const m=(t||'').match(/\(([^)]+)\)/);if(m)return m[1];return (t||'').split(' ')[0]||t}
-function fetchT(url,ms=9000){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);
+function fetchT(url,ms=8000){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);
   return fetch(url,{signal:c.signal}).finally(()=>clearTimeout(t))}
 addEventListener('error',e=>{try{toast('⚠️ '+(e.message||'ошибка').slice(0,90))}catch(x){}});
 
-/* ================= API ЧЕРЕЗ ПРОКСИ ================= */
-async function apiFetch(params){
-  const base=`${API_BASE}${params}&apikey=${encodeURIComponent(API_KEY)}&format=json&lang=ru_RU`;
-  const order=[goodProxy,...PROXIES.map((_,i)=>i)].filter((v,i,a)=>a.indexOf(v)===i);
-  let lastErr=new Error('NETWORK');
-  for(const i of order){
-    try{
-      const res=await fetchT(PROXIES[i](base),8000);
-      if(res.status===403){
-        let isKey=false;
-        try{const body=await res.text();
-          try{isKey=/key|auth|forbidden|access|denied|invalid/i.test(JSON.stringify(JSON.parse(body)))}catch(_){isKey=false}
-        }catch(_){}
-        if(isKey){lastErr=new Error('BAD_KEY');break}
-        lastErr=new Error('HTTP_403');continue;
-      }
-      if(res.status===429){lastErr=new Error('LIMIT');break}
-      if(!res.ok){lastErr=new Error('HTTP_'+res.status);continue}
-      const data=JSON.parse(await res.text());
-      if(data&&typeof data==='object'&&data.error){
-        if(/key|auth|forbidden|access|denied|invalid/i.test(String(data.error))){lastErr=new Error('BAD_KEY');break}
-        lastErr=new Error('API_'+data.error);continue;
-      }
-      goodProxy=i;store.set('el_proxy',i);
-      return data;
-    }catch(e){
-      if(e.message==='BAD_KEY'||e.message==='LIMIT'){lastErr=e;break}
-      lastErr=e;
-    }
-  }
-  throw lastErr;
+/* ================= УРОВЕНЬ 1+2: API (сервер или напрямую) ================= */
+async function serverFetch(path,qs){
+  const res=await fetchT(`/rasp?p=${encodeURIComponent(path)}&q=${encodeURIComponent(qs)}`,6000);
+  if(!res.ok)throw new Error('SRV_'+res.status);
+  return res.json();
 }
-async function yandexSuggest(q){
-  const d=await apiFetch('suggest/?settlement=1&part='+encodeURIComponent(q));
-  const out=[];
-  (d.segments||[]).forEach(seg=>{
-    (seg.settlements||[]).forEach(s=>out.push({title:s.title,uid:s.code,type:s.station_type||'settlement',region:s.region||''}));
-    if(seg.station)out.push({title:seg.title,uid:seg.station.code,type:'station',region:seg.station.region||'',lat:seg.station.lat,lon:seg.station.lon});
+async function probeServer(){
+  if(hasServer!==null)return hasServer;
+  try{await serverFetch('suggest/','part=Москва');hasServer=true}
+  catch(e){hasServer=false}
+  return hasServer;
+}
+async function directFetch(path,qs){
+  const res=await fetchT(`${API_BASE}${path}?${qs}&apikey=${encodeURIComponent(API_KEY)}&format=json&lang=ru_RU`,7000);
+  if(!res.ok)throw new Error('API_'+res.status);
+  return res.json();
+}
+async function apiJson(path,qs){
+  if(await probeServer())return serverFetch(path,qs);
+  return directFetch(path,qs);
+}
+async function apiUid(title){
+  const d=await apiJson('suggest/','settlement=1&part='+encodeURIComponent(title));
+  const list=[];
+  (d.segments||[]).forEach(sg=>{
+    if(sg.station)list.push({t:sg.title,u:sg.station.code});
+    (sg.settlements||[]).forEach(x=>list.push({t:x.title,u:x.code}));
   });
-  return out;
+  const ex=list.find(x=>norm(x.t)===norm(title))||list[0];
+  if(!ex||!ex.u)throw new Error('NO_UID');
+  return ex.u;
 }
-async function yandexSearch(fromUid,toUid){
-  const d=await apiFetch(`search/?transport_types=suburban&limit=10&date=today&from=${encodeURIComponent(fromUid)}&to=${encodeURIComponent(toUid)}`);
+function mapSearch(d){
   const stations=d.stations||{};const now=Date.now();
   return (d.segments||[]).filter(s=>+new Date(s.departure)>now-60000).map(s=>{
     const dep=+new Date(s.departure),arr=+new Date(s.arrival);
     const mins=Math.round((s.duration||0)/60);
     const from=stations[s.from]||{},to=stations[s.to]||{};
     return{dep,arr,mins,fromTitle:from.title||'',toTitle:to.title||'',
-      fromLat:from.lat,fromLon:from.lon,toLat:to.lat,toLon:to.lon,
-      num:(s.thread&&s.thread.number)||'',title:(s.thread&&s.thread.title)||'Электричка',
+      num:(s.thread&&s.thread.number)||'',
       carrier:(s.thread&&s.thread.carrier&&s.thread.carrier.title)||'',
       express:/экспресс|ласточка/i.test((s.thread&&s.thread.title)||''),
-      stops:s.stops??0,platform:(s.platforms&&s.platforms.from&&s.platforms.from.title)||'',uid:s.thread&&s.thread.uid};
+      stops:s.stops??0,platform:(s.platforms&&s.platforms.from&&s.platforms.from.title)||''};
   });
 }
+async function apiSearch(A,B){
+  const fu=await apiUid(A.title), tu=await apiUid(B.title);
+  const d=await apiJson('search/',`transport_types=suburban&limit=10&date=today&from=${encodeURIComponent(fu)}&to=${encodeURIComponent(tu)}`);
+  apiMode='live';updateLiveIndicator();
+  return mapSearch(d);
+}
 
-/* ================= САЙТ + ЧИТАЛКА ================= */
+/* ================= УРОВЕНЬ 3: САЙТ ================= */
 function pairTimes(times,now){
   const today=new Date();today.setHours(0,0,0,0);const base=today.getTime();
   const toMin=t=>{const[h,m]=t.split(':').map(Number);return h*60+m};
@@ -489,10 +477,10 @@ function pairTimes(times,now){
   }
   return out;
 }
-async function fetchViaProxies(url){
-  for(const i of [1,2,3]){
+async function fetchSite(url){
+  for(const p of PROXIES){
     try{
-      const res=await fetchT(PROXIES[i](url),9000);
+      const res=await fetchT(p(url),9000);
       if(!res.ok)continue;
       const t=await res.text();
       if(t&&t.length>500)return t;
@@ -503,7 +491,7 @@ async function fetchViaProxies(url){
 async function siteSearch(A,B){
   const url=`${SITE_BASE}search/suburban/?from=${encodeURIComponent(A.title)}&to=${encodeURIComponent(B.title)}&when=%D1%81%D0%B5%D0%B3%D0%BE%D0%B4%D0%BD%D1%8F`;
   let times=[];
-  const html=await fetchViaProxies(url);
+  const html=await fetchSite(url);
   if(html){
     const doc=new DOMParser().parseFromString(html,'text/html');
     doc.querySelectorAll('script,style,noscript,svg,header,footer').forEach(n=>n.remove());
@@ -519,19 +507,37 @@ async function siteSearch(A,B){
   if(times.length<2)throw new Error('SITE_EMPTY');
   const pairs=pairTimes(times,Date.now());
   if(!pairs.length)throw new Error('SITE_EMPTY');
+  apiMode='site';updateLiveIndicator();
   return pairs.map(p=>({...p,fromTitle:A.title,toTitle:B.title,num:'',carrier:'',
-    express:false,stops:0,platform:'',uid:'site_'+p.dep,site:true}));
+    express:false,stops:0,platform:'',site:true}));
 }
-async function resolveReal(st){
-  if(!st)return null;
-  const u=String(st.uid||'');
-  if(u&&!u.startsWith('loc:')&&!u.startsWith('demo_')&&!u.startsWith('site_'))return st;
-  try{
-    const list=await yandexSuggest(st.title);
-    const exact=list.find(x=>norm(x.title)===norm(st.title))||list[0];
-    if(exact&&exact.uid)return{...st,...exact};
-  }catch(e){}
-  return st;
+
+/* ================= УРОВЕНЬ 4: ДЕМО ================= */
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function demoSearch(A,B){
+  const now=Date.now();
+  const rnd=mulberry(hash(A.title+'|'+B.title+'|'+new Date().toDateString()));
+  const la1=A.lat??55.75,lo1=A.lon??37.62,la2=B.lat??55.9,lo2=B.lon??37.75;
+  const dist=Math.max(3,Math.hypot((la1-la2)*111,(lo1-lo2)*65));
+  let t=now+(4+rnd()*14)*60000;const out=[];
+  while(out.length<7&&t<now+16*3600e3){
+    const express=rnd()<.22;
+    const mins=Math.max(15,Math.round(dist/(express?72:50)*60*(0.9+rnd()*0.2)));
+    const stops=express?2+Math.floor(rnd()*4):Math.min(18,Math.max(6,Math.round(dist/5)));
+    const num=express?7100+Math.floor(rnd()*399):6100+Math.floor(rnd()*899);
+    const platform=String(1+Math.floor(rnd()*10));
+    out.push({dep:t,arr:t+mins*60000,mins,fromTitle:A.title,toTitle:B.title,num:String(num),
+      carrier:'',express,stops,platform});
+    t+=(14+rnd()*34)*60000;
+  }
+  apiMode='demo';updateLiveIndicator();
+  return out;
+}
+async function searchTrains(A,B){
+  try{return await apiSearch(A,B)}catch(e){}
+  try{return await siteSearch(A,B)}catch(e){}
+  return demoSearch(A,B);
 }
 
 /* ================= КАТАЛОГ СТАНЦИЙ ================= */
@@ -550,7 +556,7 @@ const RAW=[
 ];
 const LINE_COLORS={Лен:'#4FC3F7',Яр:'#FF8A65',Кур:'#EF5350',Бел:'#9575CD',Каз:'#4DB6AC',Кие:'#7986CB',Пав:'#AED581',Риж:'#FFD54F',Сав:'#4DD0E1',Гор:'#F06292',СПб:'#90A4AE'};
 const lineName=k=>k==='СПб'?'Санкт-Петербург':k+' направление';
-const STATIONS=RAW.map(a=>({title:a[0],line:a[1],lat:a[2],lon:a[3],pop:a[4],uid:'loc:'+a[0]}));
+const STATIONS=RAW.map(a=>({title:a[0],line:a[1],lat:a[2],lon:a[3],pop:a[4]}));
 const POPULAR=['Москва (Ленинградский вокзал)','Москва (Ярославский вокзал)','Москва (Курский вокзал)','Москва (Казанский вокзал)','Москва (Белорусский вокзал)','Москва (Киевский вокзал)','Москва (Павелецкий вокзал)','Мытищи','Одинцово','Подольск','Люберцы I','Домодедово']
   .map(t=>STATIONS.find(s=>s.title===t)).filter(Boolean);
 
@@ -564,7 +570,7 @@ function localSuggest(q,limit=12){
     else if(norm(lineName(s.line)).includes(q))sc=10+(s.pop||0)/2;
     return sc<0?null:{s,sc};
   }).filter(Boolean).sort((a,b)=>b.sc-a.sc).slice(0,limit).map(x=>({
-    title:x.s.title,uid:x.s.uid,line:x.s.line,lat:x.s.lat,lon:x.s.lon,region:lineName(x.s.line)}));
+    title:x.s.title,line:x.s.line,lat:x.s.lat,lon:x.s.lon,region:lineName(x.s.line)}));
 }
 function resolveLocal(v){return localSuggest(v,1)[0]||null}
 function hi(title,q){
@@ -577,7 +583,7 @@ function hi(title,q){
 let selFrom=null, selTo=null, results=[], trip=store.get('el_trip',null);
 let recents=store.get('el_recents',[]), favs=store.get('el_favs',[]);
 let settings=Object.assign({sound:true,remind30:true,wakelock:true},store.get('el_set',{}));
-let wakeLock=null, lastMinStr='', cancelArmed=false, suggestTimers={};
+let wakeLock=null, lastMinStr='', cancelArmed=false;
 
 /* ================= ИКОНКА + МАНИФЕСТ ================= */
 (function(){
@@ -632,62 +638,9 @@ $('#clock').textContent=hhmm(Date.now());
 function updateLiveIndicator(){
   const ind=$('#liveInd'),txt=$('#liveText');
   if(apiMode==='live'){ind.hidden=false;ind.className='live-ind';txt.textContent='LIVE'}
-  else if(apiMode==='site'){ind.hidden=false;ind.className='live-ind demo';txt.textContent='САЙТ'}
+  else if(apiMode==='site'){ind.hidden=false;ind.className='live-ind demo';txt.textContent='LIVE · САЙТ'}
   else if(apiMode==='demo'){ind.hidden=false;ind.className='live-ind demo';txt.textContent='ДЕМО'}
   else{ind.hidden=true}
-}
-
-/* ================= ПОДСКАЗКИ ================= */
-async function suggest(q){
-  const local=localSuggest(q,12);
-  try{
-    const r=await yandexSuggest(q);
-    apiMode='live';lastApiError=null;updateLiveIndicator();
-    const seen=new Set(r.map(x=>norm(x.title)));
-    return [...r,...local.filter(s=>!seen.has(norm(s.title)))].slice(0,12);
-  }catch(e){
-    lastApiError=e.message;
-    apiMode=(e.message==='BAD_KEY'||e.message==='LIMIT')?'none':'demo';
-    updateLiveIndicator();
-    return local;
-  }
-}
-/* ================= ПОИСК: API → САЙТ → ДЕМО ================= */
-async function searchTrains(A,B){
-  try{
-    const r=await yandexSearch(A.uid,B.uid);
-    apiMode='live';lastApiError=null;updateLiveIndicator();return r;
-  }catch(e){
-    lastApiError=e.message;
-    try{
-      const r=await siteSearch(A,B);
-      apiMode='site';updateLiveIndicator();return r;
-    }catch(e2){
-      if(e.message==='BAD_KEY'||e.message==='LIMIT'){apiMode='none';updateLiveIndicator();throw e}
-      apiMode='demo';updateLiveIndicator();return demoSearch(A,B);
-    }
-  }
-}
-function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
-function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-function demoSearch(A,B){
-  const now=Date.now();
-  const rnd=mulberry(hash(A.title+'|'+B.title+'|'+new Date().toDateString()));
-  const la1=A.lat??55.75,lo1=A.lon??37.62,la2=B.lat??55.9,lo2=B.lon??37.75;
-  const dist=Math.max(3,Math.hypot((la1-la2)*111,(lo1-lo2)*65));
-  let t=now+(4+rnd()*14)*60000;const out=[];
-  while(out.length<7&&t<now+16*3600e3){
-    const express=rnd()<.22;
-    const mins=Math.max(15,Math.round(dist/(express?72:50)*60*(0.9+rnd()*0.2)));
-    const stops=express?2+Math.floor(rnd()*4):Math.min(18,Math.max(6,Math.round(dist/5)));
-    const num=express?7100+Math.floor(rnd()*399):6100+Math.floor(rnd()*899);
-    const platform=String(1+Math.floor(rnd()*10));
-    out.push({dep:t,arr:t+mins*60000,mins,fromTitle:A.title,toTitle:B.title,
-      fromLat:la1,fromLon:lo1,toLat:la2,toLon:lo2,num:String(num),
-      title:express?'Экспресс':'Электричка',carrier:'',express,stops,platform,uid:'demo_'+num});
-    t+=(14+rnd()*34)*60000;
-  }
-  return out;
 }
 
 /* ================= ДРОПДАУН ================= */
@@ -711,15 +664,7 @@ function bindSuggest(input,sug,select){
     q=(q||'').trim();
     if(!q){sug.hidden=false;paint(POPULAR,'','Популярные станции');return}
     sug.hidden=false;
-    sug.innerHTML='<div class="sg-h"><span>Ищем…</span><span class="spin"></span></div>';
-    clearTimeout(suggestTimers[input.id]);
-    suggestTimers[input.id]=setTimeout(async()=>{
-      try{
-        const r=await suggest(q);
-        if(input.value.trim()!==q)return;
-        paint(r,q,'Станции');
-      }catch(e){paint(localSuggest(q),'','Станции')}
-    },250);
+    paint(localSuggest(q),'','Станции');
   };
   input.addEventListener('input',()=>{field.classList.toggle('has-value',!!input.value);select(null);render(input.value);updateSearchBtn()});
   input.addEventListener('change',()=>updateSearchBtn());
@@ -748,13 +693,9 @@ setInterval(updateSearchBtn,1000);
 $('#geoBtn').onclick=()=>{
   if(!navigator.geolocation)return toast('Геолокация недоступна — выбери станцию вручную');
   toast('Определяем местоположение…');
-  navigator.geolocation.getCurrentPosition(async pos=>{
-    const{latitude:la,longitude:lo}=pos.coords;let best=null;
-    try{
-      const d=await apiFetch(`nearest_settlement/?lat=${la}&lon=${lo}&distance=15`);
-      if(d.station)best={title:d.station.title,uid:d.station.code,line:'',region:d.station.region||'',lat:d.station.lat,lon:d.station.lon};
-    }catch(e){}
-    if(!best){let bd=1e9;STATIONS.forEach(s=>{const d=(s.lat-la)**2+(s.lon-lo)**2;if(d<bd){bd=d;best={...s,region:lineName(s.line)}}})}
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const{latitude:la,longitude:lo}=pos.coords;let best=null,bd=1e9;
+    STATIONS.forEach(s=>{const d=(s.lat-la)**2+(s.lon-lo)**2;if(d<bd){bd=d;best={...s,region:lineName(s.line)}}});
     if(best){selectFrom(best);$('#fieldFrom').classList.add('has-value');updateSearchBtn();toast('Ближайшая: '+best.title)}
     else toast('Не нашли станций рядом');
   },()=>toast('Геолокация запрещена — выбери станцию вручную'),{timeout:8000});
@@ -768,11 +709,8 @@ async function doSearch(){
   try{
     let A=selFrom||resolveLocal($('#inFrom').value);
     let B=selTo||resolveLocal($('#inTo').value);
-    if(!A)A=(await suggest($('#inFrom').value))[0]||null;
-    if(!B)B=(await suggest($('#inTo').value))[0]||null;
     if(!A||!B){toast('Не распознали станцию — начни вводить и выбери из подсказок');return}
     if(A.title===B.title){toast('Станции совпадают');return}
-    A=await resolveReal(A);B=await resolveReal(B);
     selFrom=A;selTo=B;
     $('#inFrom').value=A.title;$('#inTo').value=B.title;
     $('#fieldFrom').classList.add('has-value');$('#fieldTo').classList.add('has-value');
@@ -780,17 +718,11 @@ async function doSearch(){
     show('scr-results');
     $('#resTitle').innerHTML=`${escapeHtml(A.title)} → ${escapeHtml(B.title)}<small>${escapeHtml(A.region||lineName(A.line)||'')}</small>`;
     $('#trainsList').innerHTML='<div class="skeleton"></div>'.repeat(3);
-    try{
-      results=await searchTrains(A,B);
-      renderResults();updateApiBanner();
-    }catch(e){
-      if(e.message==='BAD_KEY')$('#trainsList').innerHTML='<div class="empty"><b>Ключ и сайт недоступны</b>Попробуй ещё раз через минуту или вставь свой ключ в ⚙️.</div>';
-      else if(e.message==='LIMIT')$('#trainsList').innerHTML='<div class="empty"><b>Лимит запросов исчерпан</b>Бесплатный тариф — 500/сутки, попробуй завтра</div>';
-      else $('#trainsList').innerHTML='<div class="empty"><b>Не удалось загрузить</b>Проверь соединение</div>';
-      updateApiBanner();
-    }
-  }catch(e){toast('⚠️ '+(e.message||'ошибка'))}
-  finally{btn.textContent=oldText;updateSearchBtn()}
+    results=await searchTrains(A,B);
+    renderResults();
+  }catch(e){
+    $('#trainsList').innerHTML='<div class="empty"><b>Не удалось загрузить</b>Проверь соединение и попробуй ещё раз</div>';
+  }finally{btn.textContent=oldText;updateSearchBtn()}
 }
 $('#searchBtn').onclick=doSearch;
 $('#backFromResults').onclick=()=>show('scr-main');
@@ -800,8 +732,9 @@ function renderResults(){
   if(!results.length){$('#trainsList').innerHTML='<div class="empty"><b>Рейсы не найдены</b>На сегодня по этому направлению больше нет электричек</div>';return}
   const now=Date.now();
   let warn='';
-  if(apiMode==='site')warn='<div class="demowarn"><b>Источник: rasp.yandex.ru (сайт).</b> Время отправления и прибытия — настоящее, с сайта Яндекса. Номера поездов и пути доступны в режиме LIVE со своим ключом (⚙️).</div>';
-  if(apiMode==='demo')warn='<div class="demowarn fake"><b>⚠️ API и сайт недоступны.</b> Показаны примерные данные — время и номера не настоящие.</div>';
+  if(apiMode==='live')warn='<div class="demowarn"><b>Источник: API Яндекс.Расписаний.</b> Точные данные: номера, пути, остановки.</div>';
+  if(apiMode==='site')warn='<div class="demowarn"><b>Источник: rasp.yandex.ru.</b> Время настоящее, с сайта Яндекса.</div>';
+  if(apiMode==='demo')warn='<div class="demowarn fake"><b>⚠️ API и сайт недоступны.</b> Показаны примерные данные — время не настоящее.</div>';
   $('#trainsList').innerHTML=warn+results.slice(0,7).map((r,i)=>{
     const inMin=Math.max(0,Math.round((r.dep-now)/60000));
     const tomorrow=new Date(r.dep).getDate()!==new Date().getDate();
@@ -955,30 +888,12 @@ function renderChips(){
     updateSearchBtn()});
 }
 
-/* ================= БАННЕР (спокойный) ================= */
-function updateApiBanner(){
-  const b=$('#apiBanner');
-  if(lastApiError==='BAD_KEY'){b.hidden=false;
-    b.innerHTML=`<b>Работаем через сайт Яндекса</b> — расписание настоящее, ключ не нужен. Встроенный ключ отключён Яндексом; свой ключ (для номеров и путей) можно вставить в ⚙️: <a href="https://api.tech.yandex.ru/" target="_blank" rel="noopener">api.tech.yandex.ru</a> → «Яндекс.Расписания».`}
-  else if(lastApiError==='LIMIT'){b.hidden=false;
-    b.innerHTML=`<b>Лимит запросов исчерпан.</b> Данные придут с сайта.`}
-  else b.hidden=true;
-}
-
 /* ================= НАСТРОЙКИ ================= */
 $('#gearBtn').onclick=()=>{
   const s=$('#sheet'),o=$('#overlay');
   const p='Notification' in window?Notification.permission:'none';
-  const src=apiMode==='live'?'API (LIVE)':apiMode==='site'?'сайт rasp.yandex.ru':lastApiError==='BAD_KEY'?'сайт (ключ отключён)':'ожидание/демо';
   s.innerHTML=`<div class="grab"></div><h3>НАСТРОЙКИ</h3>
-    <div style="margin:16px 0 20px">
-      <div style="font-size:11px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase;margin-bottom:8px">API-ключ Яндекс.Расписаний</div>
-      <input class="api-key-input" id="apiKeyInput" type="text" placeholder="Вставьте ключ" value="${escapeHtml(getApiKey())}" spellcheck="false" autocomplete="off">
-      <div style="font-size:12px;color:var(--mut);line-height:1.5;margin-top:8px">
-        Источник сейчас: <b style="color:${apiMode==='live'?'var(--green)':apiMode==='site'?'var(--blue)':'var(--mut)'}">${src}</b><br>
-        Без ключа приложение берёт расписание с сайта. <a href="https://api.tech.yandex.ru/" target="_blank" rel="noopener" style="color:var(--blue)">получить ключ →</a>
-      </div>
-    </div>
+    <div class="ios-note" style="margin-top:16px"><b>Откуда данные:</b> 1) свой сервер /rasp (Glitch) — точный API; 2) прямой API, если в браузере стоит CORS-расширение; 3) сайт Яндекса; 4) демо. Приложение выбирает лучшее автоматически.</div>
     <label class="check-row"><div class="txt">Звук уведомлений</div>
       <span class="switch"><input type="checkbox" id="setSound" ${settings.sound?'checked':''}><i></i></span></label>
     <label class="check-row"><div class="txt">Экран не гаснет в поездке<small>пока приложение открыто</small></div>
@@ -988,10 +903,7 @@ $('#gearBtn').onclick=()=>{
     <button class="ghost-btn" style="width:100%;margin-bottom:10px" id="clearHist">Очистить историю и избранное</button>
     <button class="primary" id="closeSet">Готово</button>`;
   o.hidden=false;s.hidden=false;
-  o.onclick=$('#closeSet').onclick=()=>{
-    const nk=$('#apiKeyInput').value.trim();
-    if(nk!==getApiKey()){setApiKey(nk);API_KEY=getApiKey();apiMode='none';lastApiError=null;updateLiveIndicator();updateApiBanner();toast('Ключ обновлён')}
-    o.hidden=true;s.hidden=true};
+  o.onclick=$('#closeSet').onclick=()=>{o.hidden=true;s.hidden=true};
   $('#setSound').onchange=e=>{settings.sound=e.target.checked;store.set('el_set',settings)};
   $('#setWake').onchange=e=>{settings.wakelock=e.target.checked;store.set('el_set',settings);if(!settings.wakelock)releaseWake()};
   if(p==='default')$('#permBtn').onclick=async()=>{try{await Notification.requestPermission()}catch(e){}o.hidden=true;s.hidden=true;toast('Готово')};
@@ -1010,22 +922,13 @@ document.addEventListener('visibilitychange',()=>{
 
 /* ================= РОУТЕР + ЦИКЛ ================= */
 function show(id){['scr-main','scr-results','scr-trip','scr-arrive'].forEach(s=>document.getElementById(s).hidden=s!==id);
-  if(id!=='scr-trip')releaseWake();window.scrollTo(0,0);if(id==='scr-main')updateApiBanner()}
+  if(id!=='scr-trip')releaseWake();window.scrollTo(0,0)}
 setInterval(()=>{if(trip&&!$('#scr-trip').hidden)tripTick()},1000);
 setInterval(()=>{if(trip&&!trip.flags.done&&Date.now()>trip.arr)showArrive()},5000);
 
-/* СТАРТ */
-renderChips();updateApiBanner();updateSearchBtn();
-(async()=>{
-  try{
-    await apiFetch('suggest/?part=Москва');
-    apiMode='live';lastApiError=null;
-  }catch(e){
-    lastApiError=e.message;
-    apiMode='none';
-  }
-  updateLiveIndicator();updateApiBanner();
-})();
+/* СТАРТ: проверяем, есть ли свой сервер */
+renderChips();updateSearchBtn();
+probeServer().then(ok=>{if(ok){apiMode='live';updateLiveIndicator();toast('Сервер найден — данные LIVE')}});
 if(trip){
   if(Date.now()>trip.arr+2*60000&&!trip.flags.done){trip.flags.done=1;store.set('el_trip',trip);showArrive()}
   else if(trip.flags.done&&Date.now()>trip.arr)showArrive();
